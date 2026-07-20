@@ -78,6 +78,13 @@ input[type=range]{width:100%;-webkit-appearance:none;height:8px;background:var(-
 input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:26px;height:26px;border-radius:50%;background:var(--grn);border:3px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.35);}
 
 .checks{display:flex;flex-direction:column;gap:6px;}
+.origin-row{display:flex;gap:7px;}
+.origin-pf{flex:0 0 108px;height:44px;border:2px solid var(--line);border-radius:10px;font-size:14px;font-weight:700;padding:0 8px;background:#fff;}
+.origin-ct{flex:1;min-width:0;height:44px;border:2px solid var(--line);border-radius:10px;font-size:14px;font-weight:700;padding:0 10px;}
+.origin-pf.set,.origin-ct.set{background:var(--grn-bg);border-color:#10b981;color:var(--grn);}
+.hint.err{color:var(--red);font-weight:800;}
+.co-search{width:100%;height:40px;border:2px solid var(--line);border-radius:9px;font-size:13.5px;font-weight:700;padding:0 11px;margin-bottom:8px;}
+.co-list{max-height:260px;overflow-y:auto;padding-right:2px;}
 .chk{display:flex;align-items:center;justify-content:space-between;min-height:44px;padding:0 12px;border:2px solid var(--line);border-radius:10px;background:#fff;font-size:14px;font-weight:800;color:#374151;}
 .chk.on{background:var(--pri);border-color:var(--pri);color:#fff;}
 .chk.on .chk-lab::before{content:"✓ ";}
@@ -161,6 +168,7 @@ select.btn{padding:0 10px;}
 .pill.free{background:var(--or);color:#fff;}
 .pill.bx{background:var(--or-bg);color:var(--or);border:1px solid #fdba74;}
 .pill.sf,.pill.emp{background:var(--gry-bg);color:#374151;}
+.pill.near{background:#ecfeff;color:#0e7490;border:1px solid #a5f3fc;}
 
 .c-meta{font-size:12px;color:#6b7280;margin-top:7px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .c-foot{display:flex;gap:8px;padding:0 15px 13px;}
@@ -329,16 +337,13 @@ mark.hit{background:#fef08a;color:inherit;padding:0 1px;border-radius:2px;font-w
 
   <aside class="side" id="side" aria-label="絞り込み条件">
 
-    <div class="panel dorm">
-      <div class="panel-t"><span class="step">1</span>寮・社宅で絞る</div>
-      <div class="tiles">
-        <button class="tile" id="t-dorm" onclick="toggleQuick('dorm')" aria-pressed="false">
-          <div class="t-l">寮完備</div><div class="t-c" id="c-dorm">-</div>
-        </button>
-        <button class="tile" id="t-free" onclick="toggleQuick('free')" aria-pressed="false">
-          <div class="t-l">寮費無料</div><div class="t-c" id="c-free">-</div>
-        </button>
+    <div class="panel">
+      <div class="panel-t"><span class="step">1</span>求職者の性別<button class="lnk" onclick="setGender('')">クリア</button></div>
+      <div class="tabs" role="group" aria-label="求職者の性別">
+        <button class="tab gender-sync" data-g="男性" onclick="setGender('男性')" aria-pressed="false">男性</button>
+        <button class="tab gender-sync" data-g="女性" onclick="setGender('女性')" aria-pressed="false">女性</button>
       </div>
+      <div class="hint">「不問」の求人は、どちらを選んでも表示されます</div>
     </div>
 
     <div class="panel">
@@ -352,16 +357,7 @@ mark.hit{background:#fef08a;color:inherit;padding:0 1px;border-radius:2px;font-w
     </div>
 
     <div class="panel">
-      <div class="panel-t"><span class="step">3</span>求職者の性別<button class="lnk" onclick="setGender('')">クリア</button></div>
-      <div class="tabs" role="group" aria-label="求職者の性別">
-        <button class="tab" data-g="男性" onclick="setGender('男性')" aria-pressed="false">男性</button>
-        <button class="tab" data-g="女性" onclick="setGender('女性')" aria-pressed="false">女性</button>
-      </div>
-      <div class="hint">「不問」の求人は、どちらを選んでも表示されます</div>
-    </div>
-
-    <div class="panel">
-      <div class="panel-t"><span class="step">4</span>希望の月収<button class="lnk" onclick="setSal(0)">クリア</button></div>
+      <div class="panel-t"><span class="step">3</span>希望の月収<button class="lnk" onclick="setSal(0)">クリア</button></div>
       <div class="sal-row">
         <input class="sal-in sal-sync" id="sal" type="number" inputmode="numeric" value="0" min="0" max="50" aria-label="月収の下限（万円）" oninput="setSal(this.value)">
         <span class="sal-u">万円以上</span>
@@ -371,7 +367,31 @@ mark.hit{background:#fef08a;color:inherit;padding:0 1px;border-radius:2px;font-w
     </div>
 
     <div class="panel">
-      <div class="panel-t"><span class="step">5</span>こだわり条件</div>
+      <div class="panel-t"><span class="step">4</span>求職者の住所<button class="lnk" onclick="clearOrigin()">クリア</button></div>
+      <div class="origin-row">
+        <select class="origin-pf" id="originPf" aria-label="都道府県" onchange="onOriginPfChange()">
+          <option value="">都道府県</option>
+        </select>
+        <input class="origin-ct" id="originCt" list="originCtList" type="text" placeholder="市区町村（例：大阪市）" aria-label="市区町村" oninput="onOriginCtInput()">
+        <datalist id="originCtList"></datalist>
+      </div>
+      <div class="hint" id="originHint">入力すると、住所に近い順で並べられます（並び順を「近い順」に）</div>
+    </div>
+
+    <div class="panel dorm">
+      <div class="panel-t"><span class="step">5</span>寮・社宅で絞る</div>
+      <div class="tiles">
+        <button class="tile" id="t-dorm" onclick="toggleQuick('dorm')" aria-pressed="false">
+          <div class="t-l">寮完備</div><div class="t-c" id="c-dorm">-</div>
+        </button>
+        <button class="tile" id="t-free" onclick="toggleQuick('free')" aria-pressed="false">
+          <div class="t-l">寮費無料</div><div class="t-c" id="c-free">-</div>
+        </button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-t"><span class="step">6</span>こだわり条件</div>
       <div class="checks">
         <button class="chk" id="q-bonus" onclick="toggleQuick('bonus')" aria-pressed="false"><span class="chk-lab">祝い金あり</span><span class="chk-c" id="c-bonus">-</span></button>
         <button class="chk" id="q-day" onclick="toggleQuick('day')" aria-pressed="false"><span class="chk-lab">日勤だけ</span><span class="chk-c" id="c-day">-</span></button>
@@ -381,12 +401,18 @@ mark.hit{background:#fef08a;color:inherit;padding:0 1px;border-radius:2px;font-w
     </div>
 
     <div class="panel">
-      <div class="panel-t"><span class="step">6</span>雇用形態</div>
+      <div class="panel-t"><span class="step">7</span>求人会社<button class="lnk" onclick="clearCos()">クリア</button></div>
+      <input class="co-search" id="coSearch" type="text" placeholder="会社名で絞り込み" aria-label="求人会社を検索" oninput="renderCoList()">
+      <div class="checks co-list" id="cos"></div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-t"><span class="step">8</span>雇用形態</div>
       <div class="checks" id="emps"></div>
     </div>
 
     <div class="panel">
-      <div class="panel-t"><span class="step">7</span>優先順位</div>
+      <div class="panel-t"><span class="step">9</span>優先順位</div>
       <div class="tabs" id="pris"></div>
     </div>
 
@@ -409,6 +435,7 @@ mark.hit{background:#fef08a;color:inherit;padding:0 1px;border-radius:2px;font-w
       <select class="btn" id="sort" aria-label="並び順" onchange="setSort(this.value)">
         <option value="pri">並び順：優先順位</option>
         <option value="match">マッチ度</option>
+        <option value="near">住所から近い順</option>
         <option value="sal_h">月収 高い順</option>
         <option value="sal_l">月収 低い順</option>
         <option value="bonus">祝い金 多い順</option>
@@ -476,9 +503,10 @@ const MAP_LIST_LIMIT = 30;
 const state = {
   view:"list",
   kw:"", age:null, gender:"", salMin:0,
-  prefs:new Set(), pris:new Set(), quicks:new Set(), emps:new Set(),
+  prefs:new Set(), pris:new Set(), quicks:new Set(), emps:new Set(), cos:new Set(),
   sort:"pri", top3:false, region:"",
-  mapPref:"", mapCity:"", vb:null
+  mapPref:"", mapCity:"", vb:null,
+  origin:{pf:"", ct:"", pos:null}
 };
 let filtered = [];
 
@@ -521,6 +549,7 @@ function baseFilter(){
   }
   if(state.pris.size)  r=r.filter(j=>state.pris.has(j.pr));
   if(state.emps.size)  r=r.filter(j=>state.emps.has(j.emp));
+  if(state.cos.size)   r=r.filter(j=>state.cos.has(j.co));
   if(state.age!==null) r=r.filter(j=>j.ag>=state.age);
   if(state.gender)     r=r.filter(j=>j.gn==="不問"||j.gn===state.gender);
   if(state.salMin>0)   r=r.filter(j=>j.sl>=state.salMin);
@@ -559,6 +588,19 @@ function apply(){
   } else if(mode==="sal_h") filtered.sort((a,b)=>(b.sl||0)-(a.sl||0));
   else if(mode==="sal_l") filtered.sort((a,b)=>(a.sl||0)-(b.sl||0));
   else if(mode==="bonus") filtered.sort((a,b)=>(b.bx||0)-(a.bx||0));
+  else if(mode==="near"){
+    if(state.origin.pos){
+      filtered = filtered.map(j=>({j,d:jobDist(j)}))
+        .sort((a,b)=>{
+          if(a.d===null && b.d===null) return (+a.j.pr||9)-(+b.j.pr||9);
+          if(a.d===null) return 1;
+          if(b.d===null) return -1;
+          return a.d-b.d;
+        }).map(o=>o.j);
+    } else {
+      filtered.sort((a,b)=>(+a.pr||9)-(+b.pr||9));   // 住所未入力ならいつも通りの並び
+    }
+  }
 
   render();
   updateCounts();
@@ -604,7 +646,100 @@ function pillsHtml(j){
   if(j.bx>0) p+='<span class="pill bx">祝い金'+j.bx+'万</span>';
   if(j.sf) p+='<span class="pill sf">'+esc(j.sf)+'</span>';
   if(j.emp) p+='<span class="pill emp">'+esc(j.emp)+'</span>';
+  if(state.sort==="near" && state.origin.pos){
+    const d=jobDist(j);
+    if(d!==null) p+='<span class="pill near">住所から約'+fmtKm(d)+'</span>';
+  }
   return p;
+}
+
+/* ====== 求職者の住所 → 近い順ソート ====== */
+function unitToKm(u){ return u * (146.2-122.5) / 760 * 91;  } // 投影単位→おおよそのkm換算（東西幅換算、目安値）
+function fmtKm(u){
+  const km=unitToKm(u);
+  return km<10 ? km.toFixed(1)+"km" : Math.round(km)+"km";
+}
+function jobDist(j){
+  const pos=GEO.city[j.pf+"|"+(j.ct||"")];
+  if(!pos || !state.origin.pos) return null;
+  const LATK=1.23;   // 地図投影のY軸(南北)伸長率。実距離に戻してから測る
+  const dx=pos[0]-state.origin.pos[0];
+  const dy=(pos[1]-state.origin.pos[1])/LATK;
+  return Math.hypot(dx, dy);
+}
+function originPrefList(){
+  return [...new Set(ALL_JOBS.map(j=>j.pf).filter(Boolean))].sort();
+}
+function originCityList(pf){
+  return [...new Set(ALL_JOBS.filter(j=>j.pf===pf).map(j=>j.ct).filter(Boolean))]
+    .filter(ct=>GEO.city[pf+"|"+ct])
+    .sort();
+}
+function onOriginPfChange(){
+  const pf=$("#originPf").value;
+  state.origin.pf=pf; state.origin.ct=""; state.origin.pos=null;
+  $("#originCt").value="";
+  $("#originCtList").innerHTML = originCityList(pf).map(ct=>'<option value="'+esc(ct)+'">').join("");
+  syncOriginUI();
+  apply();
+}
+function onOriginCtInput(){
+  const ct=$("#originCt").value.trim();
+  state.origin.ct=ct;
+  const pos = state.origin.pf ? GEO.city[state.origin.pf+"|"+ct] : null;
+  state.origin.pos = pos || null;
+  syncOriginUI();
+  apply();
+}
+function syncOriginUI(){
+  const ok = !!state.origin.pos;
+  $("#originPf").classList.toggle("set", !!state.origin.pf);
+  $("#originCt").classList.toggle("set", ok);
+  const hint=$("#originHint");
+  if(!state.origin.pf){
+    hint.textContent="入力すると、住所に近い順で並べられます（並び順を「近い順」に）";
+    hint.classList.remove("err");
+  } else if(!state.origin.ct){
+    hint.textContent="市区町村も入力してください（候補から選べます）";
+    hint.classList.remove("err");
+  } else if(!ok){
+    hint.textContent="その市区町村の求人が無いか、表記が違う可能性があります（候補から選んでください）";
+    hint.classList.add("err");
+  } else {
+    hint.textContent="設定できました。上の並び順を「住所から近い順」にすると反映されます";
+    hint.classList.remove("err");
+  }
+}
+function clearOrigin(){
+  state.origin={pf:"",ct:"",pos:null};
+  $("#originPf").value=""; $("#originCt").value="";
+  syncOriginUI();
+  apply();
+}
+
+/* ====== 求人会社で絞る ====== */
+function coCounts(){
+  const m={};
+  ALL_JOBS.forEach(j=>{ if(j.co) m[j.co]=(m[j.co]||0)+1; });
+  return Object.entries(m).sort((a,b)=>b[1]-a[1]);
+}
+function renderCoList(){
+  const q=($("#coSearch").value||"").trim().toLowerCase();
+  const list = coCounts().filter(([co])=>!q || co.toLowerCase().includes(q));
+  $("#cos").innerHTML = list.map(([co,n])=>
+    '<button class="chk'+(state.cos.has(co)?" on":"")+'" data-co="'+esc(co)+'" onclick="toggleCo(\''+esc(co)+'\')" aria-pressed="'+state.cos.has(co)+'"><span class="chk-lab">'+esc(co)+'</span><span class="chk-c">'+n+'</span></button>'
+  ).join("") || '<div class="hint">一致する会社がありません</div>';
+}
+function toggleCo(co){
+  state.cos.has(co) ? state.cos.delete(co) : state.cos.add(co);
+  renderCoList();
+  apply();
+}
+function clearCos(){
+  state.cos.clear();
+  $("#coSearch").value="";
+  renderCoList();
+  apply();
 }
 
 function render(){
@@ -674,7 +809,9 @@ function updateActive(){
   if(state.salMin>0) a.push(["月収"+state.salMin+"万〜",()=>setSal(0)]);
   state.prefs.forEach(p=>a.push([p,()=>togglePref(p)]));
   state.emps.forEach(e=>a.push([e,()=>toggleEmp(e)]));
+  state.cos.forEach(co=>a.push([co,()=>toggleCo(co)]));
   state.pris.forEach(p=>a.push(["優先"+p+"位",()=>togglePri(p)]));
+  if(state.origin.pos) a.push(["住所: "+state.origin.pf+state.origin.ct,()=>clearOrigin()]);
   const QL={dorm:"寮完備",free:"寮費無料",bonus:"祝い金あり",day:"日勤だけ",night:"夜勤だけ","2shift":"2交代"};
   state.quicks.forEach(q=>a.push([QL[q],()=>toggleQuick(q)]));
   const box=$("#active");
@@ -832,15 +969,19 @@ function toggleSide(){ $("#side").classList.toggle("hide"); }
 
 function resetAll(){
   state.kw=""; state.age=null; state.gender=""; state.salMin=0;
-  state.prefs.clear(); state.pris.clear(); state.quicks.clear(); state.emps.clear();
+  state.prefs.clear(); state.pris.clear(); state.quicks.clear(); state.emps.clear(); state.cos.clear();
   state.sort="pri"; state.top3=false; state.region="";
   state.mapPref=""; state.mapCity=""; state.vb=null;
+  state.origin={pf:"",ct:"",pos:null};
   $("#kw").value=""; $("#salr").value=0; $("#sort").value="pri";
+  $("#originPf").value=""; $("#originCt").value=""; $("#coSearch").value="";
   document.querySelectorAll(".age-sync").forEach(el=>el.value="");
   document.querySelectorAll(".sal-sync").forEach(el=>{el.value=0; el.classList.remove("set");});
   $("#top3btn").classList.remove("on");
   document.querySelectorAll(".tile,.chk,.tab,.gender-sync").forEach(e=>{e.classList.remove("on");e.setAttribute("aria-pressed","false");});
   syncAge();
+  syncOriginUI();
+  renderCoList();
   renderRegions(); renderPrefs();
   apply();
 }
@@ -1348,7 +1489,7 @@ function renderMapSide(){
 }
 
 /* ====== 初期化 ====== */
-const APP_VERSION = "20260720_063841";
+const APP_VERSION = "20260720_075803";
 let _vcTimer=null, _vcReloading=false;   // init()より先に宣言（TDZ回避）
 
 function init(){
@@ -1361,6 +1502,9 @@ function init(){
   $("#pris").innerHTML = pris.map(p=>
     '<button class="tab" data-p="'+esc(p)+'" onclick="togglePri(\''+esc(p)+'\')" aria-pressed="false">'+esc(p)+'位</button>'
   ).join("");
+  $("#originPf").innerHTML = '<option value="">都道府県</option>'
+    + originPrefList().map(pf=>'<option value="'+esc(pf)+'">'+esc(pf)+'</option>').join("");
+  renderCoList();
   renderRegions();
   renderPrefs();
   apply();
