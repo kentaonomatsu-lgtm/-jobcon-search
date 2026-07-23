@@ -516,6 +516,7 @@ mark.hit{background:#fef08a;color:inherit;padding:0 1px;border-radius:2px;font-w
 <script>
 /* ====== データ ====== */
 let ALL_JOBS = [];
+let LAST_UPDATED_AT = null; // GAS APIが返す取得時刻（更新日時表示に使う）
 const JOBCON_API_URL = "https://script.google.com/macros/s/AKfycbyDO5dsR1BlXNIIOHTWR21NeVtD91sq-1HREiL9aVQmZZGc-9oK8rbLixZ6PmJAVyY7hw/exec";
 async function loadJobsFromAPI(){
   try{
@@ -523,6 +524,7 @@ async function loadJobsFromAPI(){
     const data = await res.json();
     if (data && Array.isArray(data.jobs)) {
       ALL_JOBS = data.jobs;
+      LAST_UPDATED_AT = data.updatedAt || null;
     } else {
       console.error("求人データの形式が不正です", data);
       ALL_JOBS = [];
@@ -1556,11 +1558,11 @@ function renderMapSide(){
 }
 
 /* ====== 初期化 ====== */
-const APP_VERSION = "20260723_110447";
-let _vcTimer=null, _vcReloading=false;   // init()より先に宣言（TDZ回避）
+let _dataRefreshTimer = null, _dataRefreshing = false; // init()より先に宣言（TDZ回避）
 
-async function init(){
-  await loadJobsFromAPI();
+/* ALL_JOBSの内容をもとに、フィルタUI・一覧を丸ごと作り直す。
+   初回表示だけでなく、自動更新のたびにも呼ばれる。 */
+function renderAll(){
   const emps={};
   ALL_JOBS.forEach(j=>{ if(j.emp) emps[j.emp]=(emps[j.emp]||0)+1; });
   $("#emps").innerHTML = Object.entries(emps).sort((a,b)=>b[1]-a[1]).map(([e,c])=>
@@ -1576,79 +1578,69 @@ async function init(){
   renderRegions();
   renderPrefs();
   apply();
-  initVersionCheck();
+}
+
+async function init(){
+  await loadJobsFromAPI();
+  renderAll();
   showUpdatedDate();
+  startAutoRefresh();
 }
 function showUpdatedDate(){
-  const m=(APP_VERSION||"").match(/^(\d{4})(\d{2})(\d{2})_(\d{2})(\d{2})/);
-  if(m) $("#hdUpdated").textContent="更新日時："+(+m[2])+"月"+(+m[3])+"日 "+m[4]+":"+m[5];
+  // GAS APIが返す updatedAt（求人データを取得した時刻）をもとに表示する。
+  // 以前はビルド時刻(APP_VERSION)を表示していたが、データが動的取得になったため廃止。
+  if(!LAST_UPDATED_AT) return;
+  const d = new Date(LAST_UPDATED_AT);
+  if(isNaN(d.getTime())) return;
+  const jst = new Date(d.getTime() + 9*60*60*1000); // UTC→JST簡易変換（表示専用）
+  const hh = String(jst.getUTCHours()).padStart(2,"0");
+  const mm = String(jst.getUTCMinutes()).padStart(2,"0");
+  $("#hdUpdated").textContent = "更新日時："+(jst.getUTCMonth()+1)+"月"+jst.getUTCDate()+"日 "+hh+":"+mm;
 }
 init();
 
-/* ====== 新データ自動検知・即リロード ======
-   同じフォルダの version.json を定期的に確認し、公開中のバージョンと
-   埋め込みバージョンが違えば「新データがあります」の告知を一瞬出してから
-   自動でページを再読み込みする（架電者が明示的にリロードし忘れる事故を防ぐ）。
+/* ====== 求人データの自動更新（2分おき） ======
+   GASのAPIを2分おきに再フェッチし、ページ全体をリロードせずに
+   一覧・フィルタだけを差し替える（架電者が明示的に更新し忘れる事故を防ぐ）。
 */
-function initVersionCheck(){
-  if(!APP_VERSION || APP_VERSION.indexOf("__")===0) return;   // 未生成のプレースホルダなら何もしない
-  setTimeout(checkVersion, 5000);                              // 初回は起動直後の負荷を避けて5秒後
-  _vcTimer = setInterval(checkVersion, 120000);                // 以後2分おき
+function startAutoRefresh(){
+  setTimeout(refreshJobsData, 120000);                          // 初回は起動から2分後
+  _dataRefreshTimer = setInterval(refreshJobsData, 120000);     // 以後2分おき
   document.addEventListener("visibilitychange", ()=>{
-    if(document.visibilityState==="visible") checkVersion();   // タブに戻ってきた瞬間にも確認
+    if(document.visibilityState==="visible") refreshJobsData(); // タブに戻ってきた瞬間にも確認
   });
 }
-function checkVersion(){
-  if(_vcReloading) return;
-  fetch("version.json?t="+Date.now(), {cache:"no-store"})
-    .then(r=> r.ok ? r.json() : null)
-    .then(d=>{
-      if(!d || !d.version) return;
-      if(d.version !== APP_VERSION) doAutoReload();
-    })
-    .catch(()=>{ /* オフライン・404等は無視して次回に回す */ });
-}
-function doAutoReload(){
-  if(_vcReloading) return;
-  _vcReloading = true;
-  if(_vcTimer) clearInterval(_vcTimer);
-  const t=document.createElement("div");
-  t.setAttribute("role","status");
-  t.style.cssText="position:fixed;left:0;right:0;top:0;z-index:200;background:#1A1A1A;color:#fff;text-align:center;padding:11px;font-weight:800;font-size:14px;box-shadow:0 2px 8px rgba(0,0,0,.25);";
-  t.textContent="新しい求人データが見つかりました。更新します…";
-  document.body.appendChild(t);
-  setTimeout(()=>{ location.reload(); }, 900);
+async function refreshJobsData(){
+  if(_dataRefreshing) return;
+  _dataRefreshing = true;
+  try{
+    await loadJobsFromAPI();
+    renderAll();
+    showUpdatedDate();
+  } finally {
+    _dataRefreshing = false;
+  }
 }
 
-/* 手動で「今すぐ最新か確認する」ボタン */
-function manualCheckVersion(){
-  if(_vcReloading) return;
+/* 手動で「今すぐ最新の求人データを取得する」ボタン */
+async function manualCheckVersion(){
+  if(_dataRefreshing) return;
   const btn=$("#hdRefreshBtn");
   const label=$("#hdRefreshLabel");
   btn.classList.add("checking");
   btn.classList.remove("latest");
   btn.disabled=true;
-  fetch("version.json?t="+Date.now(), {cache:"no-store"})
-    .then(r=> r.ok ? r.json() : null)
-    .then(d=>{
-      btn.classList.remove("checking");
-      btn.disabled=false;
-      if(!d || !d.version){
-        label.textContent="確認できません";
-        setTimeout(()=>{ label.textContent="最新に更新"; },2500);
-        return;
-      }
-      if(d.version !== APP_VERSION){ doAutoReload(); return; }
-      btn.classList.add("latest");
-      label.textContent="最新です";
-      setTimeout(()=>{ btn.classList.remove("latest"); label.textContent="最新に更新"; },2500);
-    })
-    .catch(()=>{
-      btn.classList.remove("checking");
-      btn.disabled=false;
-      label.textContent="確認できません";
-      setTimeout(()=>{ label.textContent="最新に更新"; },2500);
-    });
+  try{
+    await refreshJobsData();
+    btn.classList.add("latest");
+    label.textContent="最新です";
+  }catch(e){
+    label.textContent="確認できません";
+  }finally{
+    btn.classList.remove("checking");
+    btn.disabled=false;
+    setTimeout(()=>{ btn.classList.remove("latest"); label.textContent="最新に更新"; },2500);
+  }
 }
 
 </script>
