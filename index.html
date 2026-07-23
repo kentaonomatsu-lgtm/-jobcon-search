@@ -189,6 +189,8 @@ select.btn{padding:0 10px;}
 .pill.bx{background:var(--or-bg);color:var(--or);border:1px solid #fdba74;}
 .pill.sf,.pill.emp{background:var(--gry-bg);color:#374151;}
 .pill.near{background:#ecfeff;color:#0e7490;border:1px solid #a5f3fc;}
+.pill.quota{background:var(--gry-bg);color:#374151;border:1px solid #d1d5db;}
+.pill.quota.ng{background:var(--red-bg);color:var(--red);border:2px solid #fca5a5;}
 
 .c-meta{font-size:12px;color:#6b7280;margin-top:7px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .c-foot{display:flex;gap:8px;padding:0 15px 13px;}
@@ -695,6 +697,12 @@ function pillsHtml(j){
   if(j.pf) p+='<span class="pill loc">'+rubyP(j.pf)+(j.ct?" "+rubyC(j.pf,j.ct):"")+'</span>';
   if(j.ag) p+='<span class="pill age'+(ageNG?" ng":"")+'">〜'+j.ag+'歳'+(ageNG?"（対象外）":"")+'</span>';
   if(j.gn) p+='<span class="pill gen">'+esc(j.gn)+'</span>';
+  if(j.budget!==null && j.budget!==undefined){
+    const hasRemain = j.remain!==null && j.remain!==undefined;
+    const zeroLeft = hasRemain && Number(j.remain)<=0;
+    const remainText = hasRemain ? j.remain : "-";
+    p+='<span class="pill quota'+(zeroLeft?" ng":"")+'">予算枠'+j.budget+'／残'+remainText+(zeroLeft?"（枠切れ）":"")+'</span>';
+  }
   if(j.free===1) p+='<span class="pill free">寮費無料</span>';
   else if(j.sub===1) p+='<span class="pill sub">寮費補助あり</span>';
   else if(j.dorm==="1") p+='<span class="pill dorm">寮完備</span>';
