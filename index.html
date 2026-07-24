@@ -212,6 +212,21 @@ select.btn{padding:0 10px;}
 .ms-quota .qb-num{font-size:14px;}
 .ms-quota .qb-num b{font-size:17px;}
 
+/* ====== 給与 看板（月収・時給） ====== */
+.sal-banner{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  padding:9px 14px;margin:0 0 10px;border-radius:10px;font-weight:900;
+}
+.sal-banner .sb-label{font-size:12.5px;opacity:.85;letter-spacing:.02em;}
+.sal-banner .sb-num{font-size:20px;line-height:1;}
+.sal-banner .sb-num b{font-size:26px;margin:0 2px;}
+.sal-banner .sb-sub{font-size:12.5px;opacity:.85;}
+.sb-m{background:var(--grn-bg);color:var(--grn);border:2px solid #6ee7b7;}
+.sb-h{background:#e0f2fe;color:#0e7490;border:2px solid #7dd3fc;}
+.ms-sal-banner{padding:5px 10px;margin:0 0 6px;font-size:11.5px;}
+.ms-sal-banner .sb-num{font-size:14px;}
+.ms-sal-banner .sb-num b{font-size:17px;}
+
 .c-meta{font-size:12px;color:#6b7280;margin-top:7px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .c-foot{display:flex;gap:8px;padding:0 15px 13px;}
 .c-btn{min-height:42px;padding:0 15px;border:2px solid var(--line);background:#fff;border-radius:9px;font-size:13.5px;font-weight:800;color:#374151;display:inline-flex;align-items:center;text-decoration:none;}
@@ -739,6 +754,22 @@ function quotaBannerHtml(j, small){
   +'</div>';
 }
 
+/* ====== 給与 看板（月収・時給） ====== */
+function salBannerHtml(j, small){
+  const cls = small ? "sal-banner ms-sal-banner" : "sal-banner";
+  if(j.wt==="h" && j.hr>0){
+    return '<div class="'+cls+' sb-h"><span class="sb-label">時給</span>'
+      +'<span class="sb-num"><b>'+j.hr.toLocaleString()+'</b>円</span>'
+      +'<span class="sb-sub">月収にすると約'+j.sl.toFixed(1).replace(/\.0$/,"")+'万円</span></div>';
+  }
+  if(j.sl>0){
+    return '<div class="'+cls+' sb-m"><span class="sb-label">月収</span>'
+      +'<span class="sb-num"><b>'+j.sl.toFixed(1).replace(/\.0$/,"")+'</b>万円</span>'
+      +'<span class="sb-sub">時給にすると約'+toHourly(j.sl).toLocaleString()+'円</span></div>';
+  }
+  return "";
+}
+
 function pillsHtml(j){
   const ageNG = state.age!==null && j.ag < state.age;
   let p="";
@@ -873,6 +904,7 @@ function render(){
     return '<div class="card '+g+(isOsusume?" osusume":"")+'">'
       +osusumeTag
       +quotaBannerHtml(j)
+      +salBannerHtml(j)
       +'<div class="c-top">'
         +'<div class="c-l">'
           +'<div class="c-h">'+badge+'<span class="badge pri">優先'+esc(j.pr||"-")+'位</span></div>'
@@ -1563,6 +1595,7 @@ function renderMapSide(){
         return '<div class="ms-card '+g+'" data-idx="'+i+'">'
           +'<div class="ms-co"><span class="ms-num">'+(i+1)+'</span>'+esc(j.co)+'</div>'
           +quotaBannerHtml(j, true)
+          +salBannerHtml(j, true)
           +'<div class="ms-pills">'+pillsHtml(j)+'</div>'
           +'<div class="ms-row">'+salBlock(j,true)
           +'<button class="ms-id" onclick="copyId(this,\''+esc(j.id)+'\')" aria-label="案件ID '+esc(j.id)+' をコピー">#'+esc(j.id)+'</button></div>'
@@ -1599,6 +1632,7 @@ function renderMapSide(){
       return '<div class="ms-card '+g+'">'
         +'<div class="ms-co">'+esc(j.co)+'</div>'
         +quotaBannerHtml(j, true)
+        +salBannerHtml(j, true)
         +'<div class="ms-pills">'+pillsHtml(j)+'</div>'
         +'<div class="ms-row">'+salBlock(j,true)
         +'<button class="ms-id" onclick="copyId(this,\''+esc(j.id)+'\')" aria-label="案件ID '+esc(j.id)+' をコピー">#'+esc(j.id)+'</button></div>'
