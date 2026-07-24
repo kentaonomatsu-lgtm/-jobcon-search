@@ -194,11 +194,26 @@ select.btn{padding:0 10px;}
    remain(残枠)の値で色分け：
    0以下=枠切れ(赤) / 1〜3=残りわずか(オレンジ) / 4〜10=普通(黄)
    11以上=余裕あり(緑) / 残枠未入力=グレー
+   utGroupが付いている（＝UTグループ設定による共有残枠）場合は、
+   複数の求人で同じ枠を共有していることが分かるよう、上にタグを出す。
 */
 .quota-banner{
   display:flex;align-items:center;justify-content:space-between;gap:10px;
   padding:9px 14px;margin:0 0 10px;border-radius:10px;font-weight:900;
 }
+.quota-banner.qb-group{
+  display:block; /* グループ表示はタグ行＋数値行の2段構成にする */
+  border:2px dashed rgba(255,255,255,.7);
+}
+.quota-banner.qb-group.qb-mid,.quota-banner.qb-group.qb-none{border-color:rgba(0,0,0,.25);}
+.qb-group-row{margin:0 0 4px;}
+.qb-group-tag{
+  display:inline-block;font-size:11px;font-weight:800;letter-spacing:.02em;
+  padding:2px 9px;border-radius:999px;background:rgba(255,255,255,.28);
+}
+.quota-banner.qb-group.qb-mid .qb-group-tag,
+.quota-banner.qb-group.qb-none .qb-group-tag{background:rgba(0,0,0,.08);}
+.qb-main-row{display:flex;align-items:center;justify-content:space-between;gap:10px;}
 .quota-banner .qb-label{font-size:12.5px;opacity:.85;letter-spacing:.02em;}
 .quota-banner .qb-num{font-size:20px;line-height:1;}
 .quota-banner .qb-num b{font-size:26px;margin:0 2px;}
@@ -211,6 +226,7 @@ select.btn{padding:0 10px;}
 .ms-quota{padding:5px 10px;margin:0 0 6px;font-size:11.5px;}
 .ms-quota .qb-num{font-size:14px;}
 .ms-quota .qb-num b{font-size:17px;}
+.ms-quota .qb-group-tag{font-size:9.5px;padding:1px 7px;}
 
 /* ====== 給与 看板（月収・時給） ====== */
 .sal-banner{
@@ -733,25 +749,36 @@ function quotaBannerHtml(j, small){
   if(!hasBudget && !hasRemain) return ""; // 両方未入力なら何も出さない
 
   const cls = small ? "quota-banner ms-quota" : "quota-banner";
+  const isGroup = !!j.utGroup; // UTグループ設定で上書きされた共有残枠かどうか
+  const groupTag = isGroup
+    ? '<span class="qb-group-tag">グループ共有：'+esc(j.utGroup)+'</span>'
+    : '';
 
   if(!hasRemain){
     // 予算枠はあるが残枠が未入力
-    return '<div class="'+cls+' qb-none"><span class="qb-label">送客枠</span>'
+    return '<div class="'+cls+' qb-none'+(isGroup?' qb-group':'')+'">'
+      +(isGroup?'<div class="qb-group-row">'+groupTag+'</div>':'')
+      +'<div class="qb-main-row"><span class="qb-label">送客枠</span>'
       +'<span class="qb-num">残 <b>未入力</b></span>'
-      +'<span class="qb-total">予算'+j.budget+'</span></div>';
+      +'<span class="qb-total">予算'+j.budget+'</span></div></div>';
   }
 
   const remain = Number(j.remain);
   let level, label;
-  if(remain<=0){ level="qb-out"; label="枠切れ"; }
-  else if(remain<=3){ level="qb-low"; label="残りわずか"; }
-  else if(remain<=10){ level="qb-mid"; label="送客枠"; }
-  else{ level="qb-full"; label="余裕あり"; }
+  if(remain<=0){ level="qb-out"; label = isGroup ? "グループ枠切れ" : "枠切れ"; }
+  else if(remain<=3){ level="qb-low"; label = isGroup ? "グループ残りわずか" : "残りわずか"; }
+  else if(remain<=10){ level="qb-mid"; label = isGroup ? "グループ共有枠" : "送客枠"; }
+  else{ level="qb-full"; label = isGroup ? "グループ共有枠" : "余裕あり"; }
 
-  return '<div class="'+cls+' '+level+'"><span class="qb-label">'+label+'</span>'
+  const usedText = (isGroup && j.utUsed!==undefined && j.utUsed!==null)
+    ? '（使用'+j.utUsed+'）' : '';
+
+  return '<div class="'+cls+' '+level+(isGroup?' qb-group':'')+'">'
+    +(isGroup?'<div class="qb-group-row">'+groupTag+'</div>':'')
+    +'<div class="qb-main-row"><span class="qb-label">'+label+'</span>'
     +'<span class="qb-num">残 <b>'+remain+'</b></span>'
-    +(hasBudget?'<span class="qb-total">／予算'+j.budget+'</span>':'')
-  +'</div>';
+    +(hasBudget?'<span class="qb-total">／予算'+j.budget+usedText+'</span>':'')
+    +'</div></div>';
 }
 
 /* ====== 給与 看板（月収・時給） ====== */
