@@ -735,8 +735,8 @@ function salBlock(j,mini){
       +'<div class="sal-sub">月収にすると 約'+j.sl.toFixed(1).replace(/\.0$/,"")+'万円</div></div>';
   }
   if(j.sl>0){
-    if(mini) return '<span class="ms-sal">月給'+j.sl.toFixed(1).replace(/\.0$/,"")+'万円 <small>（時給 約'+toHourly(j.sl).toLocaleString()+'円）</small></span>';
-    return '<div class="sal"><span class="sal-tag m">月給</span>'
+    if(mini) return '<span class="ms-sal">月給例'+j.sl.toFixed(1).replace(/\.0$/,"")+'万円 <small>（時給 約'+toHourly(j.sl).toLocaleString()+'円）</small></span>';
+    return '<div class="sal"><span class="sal-tag m">月給例</span>'
       +'<div class="sal-main"><span class="sal-n">'+j.sl.toFixed(1).replace(/\.0$/,"")+'</span><span class="sal-un">万円</span></div>'
       +'<div class="sal-sub">時給にすると 約'+toHourly(j.sl).toLocaleString()+'円</div></div>';
   }
@@ -1119,7 +1119,7 @@ function callMemoText(j){
   const lines=[];
   lines.push(j.co);
   if(j.wt==="h" && j.hr>0) lines.push("時給"+j.hr.toLocaleString()+"円（月収 約"+j.sl.toFixed(1).replace(/\.0$/,"")+"万円）");
-  else if(j.sl>0) lines.push("月給"+j.sl.toFixed(1).replace(/\.0$/,"")+"万円（時給 約"+toHourly(j.sl).toLocaleString()+"円）");
+  else if(j.sl>0) lines.push("月給例"+j.sl.toFixed(1).replace(/\.0$/,"")+"万円（時給 約"+toHourly(j.sl).toLocaleString()+"円）");
   lines.push(j.pf+(j.ct?" "+j.ct:""));
   const cond=[];
   if(j.ag) cond.push("〜"+j.ag+"歳");
