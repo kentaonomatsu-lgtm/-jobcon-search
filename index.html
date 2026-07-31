@@ -405,7 +405,7 @@ mark.hit{background:#fef08a;color:inherit;padding:0 1px;border-radius:2px;font-w
     <button class="qb-gbtn gender-sync" data-g="女性" onclick="setGender('女性')" aria-pressed="false">女性</button>
   </div>
   <div class="qb-grp">
-    <span class="qb-lab">月収</span>
+    <span class="qb-lab">月収例</span>
     <input class="qb-sal sal-sync" type="number" inputmode="numeric" value="0" min="0" max="50" aria-label="希望月収（万円）" oninput="setSal(this.value)">
     <span class="qb-lab">万〜</span>
   </div>
@@ -447,7 +447,7 @@ mark.hit{background:#fef08a;color:inherit;padding:0 1px;border-radius:2px;font-w
         <span class="sal-u">万円以上</span>
       </div>
       <input type="range" id="salr" min="0" max="46" step="1" value="0" aria-label="月収の下限スライダー" oninput="setSal(this.value)">
-      <div class="hint">時給の求人も月収に直して比べます（時給×173時間）</div>
+      <div class="hint">時給の求人も月収に直して比べます（時給×173時間）（時給×173時間／残業・手当を含まない基本給ベースの参考値）</div>
     </div>
 
     <div class="panel">
@@ -524,8 +524,8 @@ mark.hit{background:#fef08a;color:inherit;padding:0 1px;border-radius:2px;font-w
         <option value="pri">並び順：優先順位</option>
         <option value="match">マッチ度</option>
         <option value="near">住所から近い順</option>
-        <option value="sal_h">月収 高い順</option>
-        <option value="sal_l">月収 低い順</option>
+        <option value="sal_h">月収例 高い順</option>
+        <option value="sal_l">月収例 低い順</option>
         <option value="bonus">祝い金 多い順</option>
       </select>
     </div>
