@@ -1,28 +1,28 @@
 /**
- * ジョブコン求人サーチ - Service Worker
- * data.json をキャッシュして2回目以降の表示を即時化
+ * ジョブコン求人サーチ - Service Worker v2
+ * data.json は5分キャッシュ。更新があればページに通知して自動リロード。
  */
-const CACHE_NAME = "jcsearch-v1";
-const STATIC_ASSETS = [
-  "./",
-  "./index.html",
-  "./data.json"
-];
-const DATA_JSON = "./data.json";
-// data.jsonのキャッシュ有効期間（1時間）
-const DATA_MAX_AGE_MS = 60 * 60 * 1000;
+const CACHE_NAME = "jcsearch-v2";
+const DATA_JSON_PATH = "./data.json";
+const DATA_MAX_AGE_MS = 5 * 60 * 1000; // 5分
 
+// インストール：静的アセットをキャッシュ
 self.addEventListener("install", e => {
   e.waitUntil(
-    caches.open(CACHE_NAME).then(c => c.addAll(STATIC_ASSETS)).then(() => self.skipWaiting())
+    caches.open(CACHE_NAME)
+      .then(c => c.addAll(["./", "./index.html", "./data.json"]))
+      .then(() => self.skipWaiting())
   );
 });
 
+// 古いキャッシュを削除
 self.addEventListener("activate", e => {
   e.waitUntil(
-    caches.keys().then(keys =>
-      Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k)))
-    ).then(() => self.clients.claim())
+    caches.keys()
+      .then(keys => Promise.all(
+        keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k))
+      ))
+      .then(() => self.clients.claim())
   );
 });
 
@@ -31,39 +31,56 @@ self.addEventListener("fetch", e => {
   const isDataJson = url.pathname.endsWith("/data.json");
   const isGAS = url.hostname.includes("script.google.com");
 
-  // GASリクエストはキャッシュしない（常にネットワーク）
-  if(isGAS){
+  // GASはキャッシュしない
+  if (isGAS) {
     e.respondWith(fetch(e.request));
     return;
   }
 
-  // data.json: キャッシュ優先、バックグラウンドで更新
-  if(isDataJson){
+  // data.json：キャッシュ優先 + バックグラウンド更新
+  if (isDataJson) {
     e.respondWith(
       caches.open(CACHE_NAME).then(async cache => {
         const cached = await cache.match(e.request);
-        if(cached){
-          const dateHeader = cached.headers.get("date");
-          const age = dateHeader ? Date.now() - new Date(dateHeader).getTime() : Infinity;
-          // キャッシュが新鮮なら即返す
-          if(age < DATA_MAX_AGE_MS) return cached;
-          // 古ければネットワークから更新してキャッシュを返す
-          fetch(e.request).then(res => {
-            if(res.ok) cache.put(e.request, res.clone());
-          }).catch(()=>{});
-          return cached; // 古くても表示を止めない
-        }
-        // キャッシュなしならネットワーク
-        const res = await fetch(e.request);
-        if(res.ok) cache.put(e.request, res.clone());
-        return res;
+        const dateHeader = cached && cached.headers.get("date");
+        const age = dateHeader ? Date.now() - new Date(dateHeader).getTime() : Infinity;
+        const isFresh = cached && age < DATA_MAX_AGE_MS;
+
+        if (isFresh) return cached;
+
+        // キャッシュが古い or なし → ネットワークから取得
+        try {
+          const res = await fetch(e.request.url + "?t=" + Date.now(), { cache: "no-store" });
+          if (res.ok) {
+            // 古いキャッシュと中身を比較して変化があればページに通知
+            if (cached) {
+              const oldText = await cached.clone().text();
+              const newText = await res.clone().text();
+              if (oldText !== newText) {
+                notifyClients("DATA_UPDATED");
+              }
+            }
+            cache.put(e.request, res.clone());
+            return res;
+          }
+        } catch (err) {}
+
+        // ネットワーク失敗 → 古いキャッシュをそのまま返す
+        return cached || new Response('{"error":"offline"}', { headers: { "Content-Type": "application/json" } });
       })
     );
     return;
   }
 
-  // その他の静的アセット: キャッシュ優先
+  // その他：キャッシュ優先
   e.respondWith(
     caches.match(e.request).then(cached => cached || fetch(e.request))
   );
 });
+
+// 全クライアントにメッセージを送る
+function notifyClients(type) {
+  self.clients.matchAll({ includeUncontrolled: true }).then(clients => {
+    clients.forEach(client => client.postMessage({ type }));
+  });
+}
