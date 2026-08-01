@@ -211,10 +211,18 @@ select.btn{padding:0 10px;}
 .sb-m{background:var(--grn-bg);color:var(--grn);border:2px solid #6ee7b7;}
 .sb-h{background:#e0f2fe;color:#0e7490;border:2px solid #7dd3fc;}
 
-/* ===== ローディング ===== */
-.loading{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 20px;gap:16px;color:var(--sub);}
-.spinner{width:44px;height:44px;border:4px solid var(--line);border-top-color:var(--pri);border-radius:50%;animation:spin .8s linear infinite;}
-.loading-txt{font-size:14px;font-weight:700;}
+/* ===== スケルトン（初期表示） ===== */
+@keyframes shimmer{0%{background-position:-800px 0}100%{background-position:800px 0}}
+.skel{background:linear-gradient(90deg,#e8f5ea 25%,#f0f9f1 50%,#e8f5ea 75%);background-size:800px 100%;animation:shimmer 1.4s infinite;border-radius:8px;}
+.skel-card{background:var(--card);border:1px solid var(--line);border-left:6px solid #cbd5e1;border-radius:var(--r);padding:16px;box-shadow:var(--sh);}
+.skel-line{height:14px;margin-bottom:8px;}
+.skel-line.w80{width:80%;}
+.skel-line.w60{width:60%;}
+.skel-line.w40{width:40%;}
+
+/* ===== ローディングバー（上部） ===== */
+#loadbar{position:fixed;top:0;left:0;height:3px;background:var(--pri);z-index:9999;transition:width .3s ease,opacity .5s ease;width:0;opacity:1;}
+#loadbar.done{width:100%;opacity:0;}
 
 /* ===== モバイル ===== */
 @media(max-width:900px){
@@ -240,13 +248,15 @@ ruby rt{font-size:58%;opacity:.85;font-weight:700;letter-spacing:0;}
 </head>
 <body>
 
+<div id="loadbar"></div>
+
 <header>
   <div class="brand">
     <div class="brand-icon">🔍</div>
     <div>
       <div class="logo">ジョブコン<span>サーチ</span></div>
       <div class="hd-meta-row">
-        <span class="hd-meta" id="hdUpdated">更新日時：-</span>
+        <span class="hd-meta" id="hdUpdated">読み込み中…</span>
         <button class="hd-refresh" id="hdRefreshBtn" onclick="manualRefresh()" aria-label="最新求人を確認する">
           <span class="hd-refresh-ic">⟳</span><span id="hdRefreshLabel">最新に更新</span>
         </button>
@@ -257,7 +267,7 @@ ruby rt{font-size:58%;opacity:.85;font-weight:700;letter-spacing:0;}
     <input class="search" id="kw" type="search" placeholder="社名・地域・職種・案件IDで検索" aria-label="キーワード検索" oninput="setKw(this.value)">
     <button class="search-x" id="kwx" aria-label="検索をクリア" onclick="setKw('');document.getElementById('kw').value='';" hidden>&times;</button>
   </div>
-  <div class="hd-cnt" aria-live="polite"><b id="hc">0</b> / <span id="ht">0</span>件</div>
+  <div class="hd-cnt" aria-live="polite"><b id="hc">-</b> / <span id="ht">-</span>件</div>
   <button class="hd-reset" id="hr" onclick="resetAll()" hidden>すべてクリア</button>
 </header>
 
@@ -276,16 +286,13 @@ ruby rt{font-size:58%;opacity:.85;font-weight:700;letter-spacing:0;}
     <input class="qb-sal sal-sync" type="number" inputmode="numeric" value="0" min="0" max="50" aria-label="希望月収（万円）" oninput="setSal(this.value)">
     <span class="qb-lab">万円以上</span>
   </div>
-  <span class="qb-result"><b id="qbc">0</b> / <span id="qbt">0</span>件 該当</span>
+  <span class="qb-result"><b id="qbc">-</b> / <span id="qbt">-</span>件 該当</span>
   <button class="qb-clear" id="qbclear" onclick="resetAll()" hidden>クリア</button>
 </div>
 
 <div class="wrap">
-  <!-- サイドパネル -->
   <button class="side-toggle" onclick="this.nextElementSibling.classList.toggle('hide')">▼ 絞り込みを開く／閉じる</button>
   <aside class="side hide" aria-label="絞り込みパネル">
-
-    <!-- 寮・条件タイル -->
     <div class="panel dorm">
       <div class="panel-t">🏠 寮・社宅で絞る <button class="lnk" onclick="clearTiles()">クリア</button></div>
       <div class="tiles tiles3">
@@ -300,8 +307,6 @@ ruby rt{font-size:58%;opacity:.85;font-weight:700;letter-spacing:0;}
         </button>
       </div>
     </div>
-
-    <!-- 年齢 -->
     <div class="panel">
       <div class="panel-t">求職者の年齢 <button class="lnk" onclick="setAge(null)">クリア</button></div>
       <div class="age-row">
@@ -311,8 +316,6 @@ ruby rt{font-size:58%;opacity:.85;font-weight:700;letter-spacing:0;}
       </div>
       <div class="hint">年齢を入れると、対象外の求人が自動で下がります</div>
     </div>
-
-    <!-- 性別 -->
     <div class="panel">
       <div class="panel-t">求職者の性別 <button class="lnk" onclick="setGender('')">クリア</button></div>
       <div class="tabs" role="group">
@@ -320,8 +323,6 @@ ruby rt{font-size:58%;opacity:.85;font-weight:700;letter-spacing:0;}
         <button class="tab gender-sync" data-g="女性" onclick="setGender('女性')" aria-pressed="false">女性</button>
       </div>
     </div>
-
-    <!-- 月収 -->
     <div class="panel">
       <div class="panel-t">希望の月収 <button class="lnk" onclick="setSal(0)">クリア</button></div>
       <div class="sal-row">
@@ -331,8 +332,6 @@ ruby rt{font-size:58%;opacity:.85;font-weight:700;letter-spacing:0;}
       <input type="range" id="salr" min="0" max="46" step="1" value="0" oninput="setSal(this.value)" aria-label="月収スライダー">
       <div class="hint">時給の求人も月収に換算して比べます（時給×173時間）</div>
     </div>
-
-    <!-- クイック条件 -->
     <div class="panel">
       <div class="panel-t">こだわり条件 <button class="lnk" onclick="clearQuicks()">クリア</button></div>
       <div class="checks">
@@ -350,44 +349,30 @@ ruby rt{font-size:58%;opacity:.85;font-weight:700;letter-spacing:0;}
         </button>
       </div>
     </div>
-
-    <!-- 優先順位 -->
     <div class="panel">
       <div class="panel-t">優先順位 <button class="lnk" onclick="clearPris()">クリア</button></div>
       <div class="tabs" id="pris" role="group"></div>
     </div>
-
-    <!-- 雇用形態 -->
     <div class="panel">
       <div class="panel-t">雇用形態 <button class="lnk" onclick="clearEmps()">クリア</button></div>
       <div class="checks" id="emps"></div>
     </div>
-
-    <!-- 会社で絞る -->
     <div class="panel">
       <div class="panel-t">求人会社で絞る <button class="lnk" onclick="clearCos()">クリア</button></div>
       <input class="co-search" id="coSearch" type="search" placeholder="会社名を検索…" oninput="renderCoList()">
       <div class="co-list" id="cos"></div>
     </div>
-
   </aside>
 
-  <!-- メインコンテンツ -->
   <main class="main" aria-label="求人一覧">
-
-    <!-- エリア絞り込み -->
     <div class="area">
       <div class="regions" id="regs" role="group" aria-label="地方で絞り込み"></div>
       <div class="prefs" id="prefs" role="group" aria-label="都道府県で絞り込み"></div>
       <div class="area-hint" id="areahint"></div>
     </div>
-
-    <!-- アクティブフィルタ -->
     <div class="active" id="active" aria-label="適用中の条件" aria-live="polite"></div>
-
-    <!-- ツールバー -->
     <div class="bar">
-      <span class="bar-cnt"><b id="bc">0</b> / <span id="bt">0</span>件</span>
+      <span class="bar-cnt"><b id="bc">-</b> / <span id="bt">-</span>件</span>
       <span class="bar-sp"></span>
       <select class="btn" id="sort" aria-label="並び順" onchange="setSort(this.value)">
         <option value="pri">並び順：優先順位</option>
@@ -396,24 +381,31 @@ ruby rt{font-size:58%;opacity:.85;font-weight:700;letter-spacing:0;}
         <option value="bonus">祝い金 多い順</option>
       </select>
     </div>
-
-    <!-- カード一覧 -->
     <div class="cards" id="cards">
-      <div class="loading"><div class="spinner"></div><div class="loading-txt">求人データを読み込み中…</div></div>
+      <!-- スケルトン: 即時表示 -->
+      <div class="skel-card"><div class="skel skel-line w80"></div><div class="skel skel-line w60"></div><div class="skel skel-line w40"></div></div>
+      <div class="skel-card"><div class="skel skel-line w80"></div><div class="skel skel-line w60"></div><div class="skel skel-line w40"></div></div>
+      <div class="skel-card"><div class="skel skel-line w80"></div><div class="skel skel-line w60"></div><div class="skel skel-line w40"></div></div>
+      <div class="skel-card"><div class="skel skel-line w80"></div><div class="skel skel-line w60"></div><div class="skel skel-line w40"></div></div>
+      <div class="skel-card"><div class="skel skel-line w80"></div><div class="skel skel-line w60"></div><div class="skel skel-line w40"></div></div>
     </div>
     <div class="more" id="more"></div>
     <div style="text-align:center;padding:10px 0 6px;">
       <button id="loadMoreBtn" class="btn" onclick="loadMore()" hidden>さらに読み込む</button>
     </div>
-
   </main>
 </div>
 
 <script>
-/* ====== 定数 ====== */
-const JOBCON_API_URL = "https://script.google.com/macros/s/AKfycbyDO5dsR1BlXNIIOHTWR21NeVtD91sq-1HREiL9aVQmZZGc-9oK8rbLixZ6PmJAVyY7hw/exec";
+/* ====== 設定 ====== */
+// data.json は同じリポジトリのルートに置く（GitHub Pages用）
+const DATA_JSON_URL = "./data.json";
+// GAS API は「最新に更新」ボタン押下時のみ使用（通常表示には不使用）
+const GAS_API_URL = "https://script.google.com/macros/s/AKfycbyDO5dsR1BlXNIIOHTWR21NeVtD91sq-1HREiL9aVQmZZGc-9oK8rbLixZ6PmJAVyY7hw/exec";
 const HOURS = 173;
-const PAGE_SIZE = 50; // 一度に表示する件数
+const PAGE_SIZE = 50;
+// Service Worker キャッシュ名（更新時はバージョンを上げる）
+const SW_CACHE = "jcsearch-v1";
 
 const REGIONS = {
   "北海道・東北":["北海道","青森県","岩手県","宮城県","秋田県","山形県","福島県"],
@@ -434,7 +426,6 @@ let LAST_UPDATED_AT = null;
 let filtered = [];
 let displayCount = PAGE_SIZE;
 let _refreshing = false;
-let _refreshTimer = null;
 
 const state = {
   kw:"", age:null, gender:"", salMin:0,
@@ -456,21 +447,84 @@ function toHourly(sl){ return Math.round(sl*10000/HOURS); }
 function kanaPref(pf){ return KANA_PREF[pf]||""; }
 function rubyP(pf){ const k=kanaPref(pf); return k?'<ruby>'+esc(pf)+'<rt>'+esc(k)+'</rt></ruby>':esc(pf); }
 
-/* ====== データ取得 ====== */
-async function loadJobsFromAPI(){
+/* ====== ローディングバー ====== */
+let _lbTimer = null;
+function lbStart(){
+  const b = $("loadbar");
+  b.style.width="0"; b.style.opacity="1";
+  b.style.transition="width 2s ease";
+  requestAnimationFrame(()=>{ b.style.width="80%"; });
+}
+function lbDone(){
+  const b = $("loadbar");
+  b.style.transition="width .2s ease,opacity .5s ease .2s";
+  b.style.width="100%";
+  setTimeout(()=>{ b.style.opacity="0"; }, 300);
+}
+
+/* ====== Service Worker 登録 ====== */
+function registerSW(){
+  if(!('serviceWorker' in navigator)) return;
+  navigator.serviceWorker.register('./sw.js').catch(()=>{});
+}
+
+/* ====== データ取得（2段階：静的JSON → GAS差分更新） ====== */
+async function loadInitialData(){
+  lbStart();
   try{
-    const res = await fetch(JOBCON_API_URL+"?t="+Date.now(),{cache:"no-store"});
+    // Step1: 静的JSONを即時取得（GitHub PagesのCDNから高速配信）
+    const res = await fetch(DATA_JSON_URL, {cache:"force-cache"});
+    if(!res.ok) throw new Error("data.json fetch failed");
     const data = await res.json();
     if(data && Array.isArray(data.jobs)){
       ALL_JOBS = data.jobs;
-      LAST_UPDATED_AT = data.updatedAt||null;
-    } else {
-      console.error("求人データの形式が不正です",data);
-      ALL_JOBS=[];
+      LAST_UPDATED_AT = data.updatedAt || null;
+      renderAll();
+      showUpdatedDate();
+      lbDone();
+      // Step2: バックグラウンドでGAS APIから最新差分を確認（非ブロッキング）
+      setTimeout(checkGasUpdate, 100);
     }
   }catch(e){
-    console.error("求人データの取得に失敗しました",e);
-    ALL_JOBS=[];
+    console.warn("data.json 読み込み失敗、GAS APIにフォールバック:", e);
+    await loadFromGAS();
+    lbDone();
+  }
+}
+
+async function checkGasUpdate(){
+  // GASキャッシュが10分以内なら再取得しない（サーバー負荷軽減）
+  const lastCheck = sessionStorage.getItem("jc_last_check");
+  if(lastCheck && Date.now() - Number(lastCheck) < 10 * 60 * 1000) return;
+  try{
+    const res = await fetch(GAS_API_URL, {cache:"no-store"});
+    const data = await res.json();
+    if(data && Array.isArray(data.jobs) && data.jobs.length > 0){
+      // データが新しければ更新
+      if(!LAST_UPDATED_AT || data.updatedAt > LAST_UPDATED_AT){
+        ALL_JOBS = data.jobs;
+        LAST_UPDATED_AT = data.updatedAt || null;
+        renderAll();
+        showUpdatedDate(true); // 「最新」表示
+      }
+    }
+    sessionStorage.setItem("jc_last_check", String(Date.now()));
+  }catch(e){
+    // バックグラウンド更新失敗はサイレント
+  }
+}
+
+async function loadFromGAS(){
+  try{
+    const res = await fetch(GAS_API_URL+"?t="+Date.now(), {cache:"no-store"});
+    const data = await res.json();
+    if(data && Array.isArray(data.jobs)){
+      ALL_JOBS = data.jobs;
+      LAST_UPDATED_AT = data.updatedAt || null;
+    }
+  }catch(e){
+    console.error("GAS API 取得失敗:", e);
+    ALL_JOBS = [];
   }
 }
 
@@ -567,11 +621,11 @@ function quotaBannerHtml(j){
   const isGroup = !!j.utGroup;
   const groupTag = isGroup?'<span class="qb-group-tag">グループ共有：'+esc(j.utGroup)+'</span>':"";
   if(!hasRemain){
-    return '<div class="quota-banner qb-none'+(isGroup?" qb-group":"")+'">'+
-      (isGroup?'<div class="qb-group-row">'+groupTag+'</div>':"")+
-      '<div class="qb-main-row"><span class="qb-label">送客枠</span>'+
-      '<span class="qb-num">残 <b>未入力</b></span>'+
-      '<span class="qb-total">予算'+j.budget+'</span></div></div>';
+    return '<div class="quota-banner qb-none'+(isGroup?" qb-group":"")+'">'
+      +(isGroup?'<div class="qb-group-row">'+groupTag+'</div>':"")
+      +'<div class="qb-main-row"><span class="qb-label">送客枠</span>'
+      +'<span class="qb-num">残 <b>未入力</b></span>'
+      +'<span class="qb-total">予算'+j.budget+'</span></div></div>';
   }
   const remain = Number(j.remain);
   let level,label;
@@ -580,12 +634,12 @@ function quotaBannerHtml(j){
   else if(remain<=10){level="qb-mid";label=isGroup?"グループ共有枠":"送客枠";}
   else{level="qb-full";label=isGroup?"グループ共有枠":"余裕あり";}
   const usedText=(isGroup&&j.utUsed!==undefined&&j.utUsed!==null)?'（使用'+j.utUsed+'）':"";
-  return '<div class="quota-banner '+level+(isGroup?" qb-group":"")+'">'+
-    (isGroup?'<div class="qb-group-row">'+groupTag+'</div>':"")+
-    '<div class="qb-main-row"><span class="qb-label">'+label+'</span>'+
-    '<span class="qb-num">残 <b>'+remain+'</b></span>'+
-    (hasBudget?'<span class="qb-total">／予算'+j.budget+usedText+'</span>':"")+
-    '</div></div>';
+  return '<div class="quota-banner '+level+(isGroup?" qb-group":"")+'">'
+    +(isGroup?'<div class="qb-group-row">'+groupTag+'</div>':"")
+    +'<div class="qb-main-row"><span class="qb-label">'+label+'</span>'
+    +'<span class="qb-num">残 <b>'+remain+'</b></span>'
+    +(hasBudget?'<span class="qb-total">／予算'+j.budget+usedText+'</span>':"")
+    +'</div></div>';
 }
 
 function cardHtml(j){
@@ -618,7 +672,7 @@ function cardHtml(j){
   +'</div>';
 }
 
-/* ====== レンダリング（ページング付き） ====== */
+/* ====== レンダリング（ページング） ====== */
 function render(){
   const list = filtered.slice(0, displayCount);
   if(!list.length){
@@ -627,14 +681,8 @@ function render(){
     $("loadMoreBtn").hidden=true;
     return;
   }
-  // DocumentFragmentで一括DOM生成（個別appendChild不要・高速）
-  const frag = document.createDocumentFragment();
-  const wrapper = document.createElement("div");
-  wrapper.innerHTML = list.map(cardHtml).join("");
-  while(wrapper.firstChild) frag.appendChild(wrapper.firstChild);
-  $("cards").innerHTML="";
-  $("cards").appendChild(frag);
-
+  // innerHTML一括セット（DocumentFragment より高速なケースが多い）
+  $("cards").innerHTML = list.map(cardHtml).join("");
   const hasMore = filtered.length > displayCount;
   $("more").textContent = hasMore
     ? "上位 "+list.length+" 件を表示中（全 "+filtered.length.toLocaleString()+" 件）— 条件を絞るか「さらに読み込む」"
@@ -741,7 +789,7 @@ function apply(){
   _applyTimer=setTimeout(_applyNow, 30);
 }
 function _applyNow(){
-  displayCount=PAGE_SIZE; // フィルタ変更時はページをリセット
+  displayCount=PAGE_SIZE;
   filtered=sortJobs(filterJobs());
   render();
   updateCounts();
@@ -749,7 +797,7 @@ function _applyNow(){
   updateReset();
 }
 
-/* ====== 操作 ====== */
+/* ====== 操作系 ====== */
 function setKw(v){state.kw=v.trim();apply();}
 function onAge(v){
   const n=parseInt(v,10);
@@ -804,6 +852,10 @@ function toggleEmp(e){
   });
   apply();
 }
+function toggleCo(co){
+  state.cos.has(co)?state.cos.delete(co):state.cos.add(co);
+  renderCoList();apply();
+}
 function selectRegion(r){state.region=(state.region===r)?"":r;renderRegions();renderPrefs();apply();}
 function togglePref(p){state.prefs.has(p)?state.prefs.delete(p):state.prefs.add(p);renderRegions();renderPrefs();apply();}
 function setSort(v){state.sort=v;apply();}
@@ -841,13 +893,11 @@ function resetAll(){
 
 /* ====== renderAll（データ更新後に呼ぶ） ====== */
 function renderAll(){
-  // 雇用形態
   const emps={};
   ALL_JOBS.forEach(j=>{if(j.emp)emps[j.emp]=(emps[j.emp]||0)+1;});
   $("emps").innerHTML=Object.entries(emps).sort((a,b)=>b[1]-a[1]).map(([e,c])=>
     '<button class="chk" data-e="'+esc(e)+'" onclick="toggleEmp(\''+esc(e)+'\')" aria-pressed="false"><span class="chk-lab">'+esc(e)+'</span><span class="chk-c">'+c+'</span></button>'
   ).join("");
-  // 優先順位
   const pris=[...new Set(ALL_JOBS.map(j=>j.pr).filter(Boolean))].sort();
   $("pris").innerHTML=pris.map(p=>
     '<button class="tab" data-p="'+esc(p)+'" onclick="togglePri(\''+esc(p)+'\')" aria-pressed="false">'+esc(p)+'位</button>'
@@ -859,52 +909,50 @@ function renderAll(){
 }
 
 /* ====== 更新日時表示 ====== */
-function showUpdatedDate(){
-  if(!LAST_UPDATED_AT)return;
+function showUpdatedDate(isLive){
+  const label = isLive ? "✅ ライブ更新：" : "更新日時：";
+  if(!LAST_UPDATED_AT){$("hdUpdated").textContent=label+"不明";return;}
   const d=new Date(LAST_UPDATED_AT);
-  if(isNaN(d.getTime()))return;
+  if(isNaN(d.getTime())){$("hdUpdated").textContent=label+LAST_UPDATED_AT;return;}
   const jst=new Date(d.getTime()+9*60*60*1000);
   const hh=String(jst.getUTCHours()).padStart(2,"0");
   const mm=String(jst.getUTCMinutes()).padStart(2,"0");
-  $("hdUpdated").textContent="更新日時："+(jst.getUTCMonth()+1)+"月"+jst.getUTCDate()+"日 "+hh+":"+mm;
+  $("hdUpdated").textContent=label+(jst.getUTCMonth()+1)+"月"+jst.getUTCDate()+"日 "+hh+":"+mm;
 }
 
-/* ====== 自動更新（2分おき） ====== */
-function startAutoRefresh(){
-  _refreshTimer=setInterval(refreshData,120000);
-  document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")refreshData();});
-}
-async function refreshData(){
-  if(_refreshing)return;
-  _refreshing=true;
-  try{
-    await loadJobsFromAPI();
-    renderAll();
-    showUpdatedDate();
-  }finally{_refreshing=false;}
-}
+/* ====== 手動更新ボタン（GAS直接フェッチ） ====== */
 async function manualRefresh(){
-  if(_refreshing)return;
+  if(_refreshing) return;
+  _refreshing=true;
   const btn=$("hdRefreshBtn"),label=$("hdRefreshLabel");
   btn.classList.add("checking");btn.disabled=true;
+  lbStart();
   try{
-    await refreshData();
-    btn.classList.add("latest");label.textContent="最新です";
-  }catch{label.textContent="確認できません";}
-  finally{
+    const res=await fetch(GAS_API_URL+"?nocache=1&t="+Date.now(),{cache:"no-store"});
+    const data=await res.json();
+    if(data && Array.isArray(data.jobs) && data.jobs.length > 0){
+      ALL_JOBS=data.jobs;
+      LAST_UPDATED_AT=data.updatedAt||null;
+      renderAll();
+      showUpdatedDate(true);
+      btn.classList.add("latest");label.textContent="最新です";
+    }else{
+      label.textContent="確認できません";
+    }
+    sessionStorage.setItem("jc_last_check",String(Date.now()));
+  }catch{
+    label.textContent="確認できません";
+  }finally{
     btn.classList.remove("checking");btn.disabled=false;
+    _refreshing=false;
+    lbDone();
     setTimeout(()=>{btn.classList.remove("latest");label.textContent="最新に更新";},2500);
   }
 }
 
 /* ====== 初期化 ====== */
-async function init(){
-  await loadJobsFromAPI();
-  renderAll();
-  showUpdatedDate();
-  startAutoRefresh();
-}
-init();
+registerSW();
+loadInitialData();
 </script>
 </body>
 </html>
