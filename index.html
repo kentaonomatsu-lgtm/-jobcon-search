@@ -521,7 +521,7 @@ function pillsHtml(j){
   const ageNG = state.age!==null && j.ag < state.age;
   let p="";
   if(j.pf) p+='<span class="pill loc">'+rubyP(j.pf)+(j.ct?" "+esc(j.ct):"")+'</span>';
-  if(j.ag) p+='<span class="pill age'+(ageNG?" ng":'")+"'>〜'+j.ag+'歳'+(ageNG?"（対象外）":"")+'</span>';
+  if(j.ag) p+='<span class="pill age'+(ageNG?' ng':'')+'">〜'+j.ag+'歳'+(ageNG?'（対象外）':'')+'</span>';
   if(j.gn) p+='<span class="pill gen">'+esc(j.gn)+'</span>';
   if(j.free===1) p+='<span class="pill free">寮費無料</span>';
   else if(j.sub===1) p+='<span class="pill sub">寮費補助あり</span>';
