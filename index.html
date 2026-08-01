@@ -247,6 +247,7 @@ select.btn{padding:0 10px;}
 .c-foot{display:flex;gap:8px;padding:0 15px 13px;}
 .c-btn{min-height:42px;padding:0 15px;border:2px solid var(--line);background:#fff;border-radius:9px;font-size:13.5px;font-weight:800;color:#374151;display:inline-flex;align-items:center;text-decoration:none;}
 .c-btn.go{background:var(--pri);border-color:var(--pri);color:#fff;}
+.c-maker{display:inline-flex;align-items:center;font-size:12.5px;font-weight:800;color:var(--sub);background:var(--gry-bg);border:1.5px solid var(--line);border-radius:9px;padding:0 12px;min-height:42px;white-space:nowrap;}
 
 .det{display:none;padding:13px 15px;background:var(--gry-bg);border-top:1px solid var(--line);font-size:13.5px;line-height:1.7;}
 .det.open{display:block;}
@@ -728,15 +729,15 @@ function escMark(text){
   }catch(e){ return t; }
 }
 function salBlock(j,mini){
-  if(j.wt==="h" && j.hr>0){
-    if(mini) return '<span class="ms-sal">時給'+j.hr.toLocaleString()+'円 <small>（月収 約'+j.sl.toFixed(1).replace(/\.0$/,"")+'万）</small></span>';
-    return '<div class="sal"><span class="sal-tag h">時給</span>'
+  if(j.wt==="時給例" && j.hr>0){
+    if(mini) return '<span class="ms-sal">時給例 '+j.hr.toLocaleString()+'円 <small>（月収 約'+j.sl.toFixed(1).replace(/\.0$/,"")+'万）</small></span>';
+    return '<div class="sal"><span class="sal-tag h">時給例</span>'
       +'<div class="sal-main"><span class="sal-n">'+j.hr.toLocaleString()+'</span><span class="sal-un">円</span></div>'
       +'<div class="sal-sub">月収にすると 約'+j.sl.toFixed(1).replace(/\.0$/,"")+'万円</div></div>';
   }
   if(j.sl>0){
-    if(mini) return '<span class="ms-sal">月給例'+j.sl.toFixed(1).replace(/\.0$/,"")+'万円 <small>（時給 約'+toHourly(j.sl).toLocaleString()+'円）</small></span>';
-    return '<div class="sal"><span class="sal-tag m">月給例</span>'
+    if(mini) return '<span class="ms-sal">月収例 '+j.sl.toFixed(1).replace(/\.0$/,"")+'万円 <small>（時給 約'+toHourly(j.sl).toLocaleString()+'円）</small></span>';
+    return '<div class="sal"><span class="sal-tag m">月収例</span>'
       +'<div class="sal-main"><span class="sal-n">'+j.sl.toFixed(1).replace(/\.0$/,"")+'</span><span class="sal-un">万円</span></div>'
       +'<div class="sal-sub">時給にすると 約'+toHourly(j.sl).toLocaleString()+'円</div></div>';
   }
@@ -784,13 +785,13 @@ function quotaBannerHtml(j, small){
 /* ====== 給与 看板（月収・時給） ====== */
 function salBannerHtml(j, small){
   const cls = small ? "sal-banner ms-sal-banner" : "sal-banner";
-  if(j.wt==="h" && j.hr>0){
-    return '<div class="'+cls+' sb-h"><span class="sb-label">時給</span>'
+  if(j.wt==="時給例" && j.hr>0){
+    return '<div class="'+cls+' sb-h"><span class="sb-label">時給例</span>'
       +'<span class="sb-num"><b>'+j.hr.toLocaleString()+'</b>円</span>'
       +'<span class="sb-sub">月収にすると約'+j.sl.toFixed(1).replace(/\.0$/,"")+'万円</span></div>';
   }
   if(j.sl>0){
-    return '<div class="'+cls+' sb-m"><span class="sb-label">月収</span>'
+    return '<div class="'+cls+' sb-m"><span class="sb-label">月収例</span>'
       +'<span class="sb-num"><b>'+j.sl.toFixed(1).replace(/\.0$/,"")+'</b>万円</span>'
       +'<span class="sb-sub">時給にすると約'+toHourly(j.sl).toLocaleString()+'円</span></div>';
   }
@@ -947,6 +948,7 @@ function render(){
       +'<div class="c-foot">'
         +'<button class="c-btn" onclick="toggleDet(this)" aria-expanded="false">詳細を見る</button>'
         +'<button class="c-copy" onclick="copyForCall(this,\''+esc(j.id)+'\')" aria-label="架電メモをコピー">架電メモをコピー</button>'
+        +(j.maker?'<span class="c-maker">勤務先：'+esc(j.maker)+'</span>':"")
         +(j.ur?'<a class="c-btn go" href="'+esc(j.ur)+'" target="_blank" rel="noopener">求人ページを開く</a>':"")
       +'</div>'
       +'<dl class="det">'
