@@ -713,11 +713,11 @@ ruby rt{font-size:58%;opacity:.85;font-weight:700;letter-spacing:0;}
   <button class="qb-chip gender-sync" data-g="男性" onclick="setGender('男性')" aria-pressed="false">男性</button>
   <button class="qb-chip gender-sync" data-g="女性" onclick="setGender('女性')" aria-pressed="false">女性</button>
   <div class="qb-sep"></div>
-  <!-- 月収 -->
+  <!-- 給与 -->
   <label class="qb-chip" id="qb-sal-chip">
-    <span>月収</span>
+    <span>給与</span>
     <input class="sal-sync" id="qb-sal-in" type="number" inputmode="numeric"
-      value="0" min="0" max="50" oninput="setSal(this.value)" aria-label="希望月収（万円）">
+      value="0" min="0" max="50" oninput="setSal(this.value)" aria-label="希望給与（万円換算）">
     <span>万〜</span>
   </label>
   <div class="qb-sep"></div>
@@ -726,8 +726,8 @@ ruby rt{font-size:58%;opacity:.85;font-weight:700;letter-spacing:0;}
     ↕
     <select id="sort" aria-label="並び順" onchange="setSort(this.value)">
       <option value="pri">優先順位</option>
-      <option value="sal_h">月収↑</option>
-      <option value="sal_l">月収↓</option>
+      <option value="sal_h">給与↑</option>
+      <option value="sal_l">給与↓</option>
       <option value="bonus">祝い金</option>
     </select>
   </div>
@@ -812,7 +812,7 @@ ruby rt{font-size:58%;opacity:.85;font-weight:700;letter-spacing:0;}
 /* ====== 設定 ====== */
 const DATA_JSON_URL = "./data.json";
 const GAS_API_URL = "https://script.google.com/macros/s/AKfycbyDO5dsR1BlXNIIOHTWR21NeVtD91sq-1HREiL9aVQmZZGc-9oK8rbLixZ6PmJAVyY7hw/exec";
-const HOURS = 173;
+/* HOURS/toHourly は v9 で廃止（時給←→月給換算表示を廃止） */
 const PAGE_SIZE = 50;
 const SW_CACHE = "jcsearch-v1";
 
@@ -853,7 +853,13 @@ function escMark(text){
   const re = new RegExp(kw.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),'gi');
   return t.replace(re, m=>'<mark class="hit">'+m+'</mark>');
 }
-function toHourly(sl){ return Math.round(sl*10000/HOURS); }
+/* toHourly は v9 で廃止 */
+/* salVal: フィルター・ソート用の統一万円換算値
+   時給(hr円) → hr×173÷10000 万円相当 / 月給(sl万円) → そのまま */
+function salVal(j){
+  if(j.wt==="時給"&&j.hr>0) return Math.round(j.hr*173/10000*10)/10;
+  return j.sl||0;
+}
 function kanaPref(pf){ return KANA_PREF[pf]||""; }
 function rubyP(pf){ const k=kanaPref(pf); return k?'<ruby>'+esc(pf)+'<rt>'+esc(k)+'</rt></ruby>':esc(pf); }
 
@@ -934,7 +940,7 @@ function baseFilter(){
   if(state.cos.size)   r=r.filter(j=>state.cos.has(j.co));
   if(state.age!==null) r=r.filter(j=>j.ag>=state.age);
   if(state.gender)     r=r.filter(j=>j.gn==="不問"||j.gn===state.gender);
-  if(state.salMin>0)   r=r.filter(j=>j.sl>=state.salMin);
+  if(state.salMin>0)   r=r.filter(j=>salVal(j)>=state.salMin);
   state.quicks.forEach(q=>{
     if(q==="dorm")       r=r.filter(j=>j.dorm==="1");
     else if(q==="free")  r=r.filter(j=>j.free===1);
@@ -952,8 +958,8 @@ function filterJobs(){ let r=baseFilter();if(state.prefs.size) r=r.filter(j=>sta
 function sortJobs(r){
   const m=state.sort;
   if(m==="pri") r.sort((a,b)=>(+a.pr||9)-(+b.pr||9));
-  else if(m==="sal_h") r.sort((a,b)=>(b.sl||0)-(a.sl||0));
-  else if(m==="sal_l") r.sort((a,b)=>(a.sl||0)-(b.sl||0));
+  else if(m==="sal_h") r.sort((a,b)=>salVal(b)-salVal(a));
+  else if(m==="sal_l") r.sort((a,b)=>salVal(a)-salVal(b));
   else if(m==="bonus") r.sort((a,b)=>(b.bx||0)-(a.bx||0));
   return r;
 }
@@ -974,28 +980,28 @@ function pillsHtml(j){
   return p;
 }
 function salBlock(j){
-  if(j.wt==="時給例"&&j.hr>0){
-    return '<div class="sal-block"><span class="sal-tag h">時給例</span>'
+  if(j.wt==="時給"&&j.hr>0){
+    return '<div class="sal-block"><span class="sal-tag h">時給</span>'
       +'<div class="sal-main"><span class="sal-n">'+j.hr.toLocaleString()+'</span><span class="sal-un">円</span></div>'
-      +'<div class="sal-sub">月収 約'+j.sl.toFixed(1).replace(/\.0$/,"")+'万</div></div>';
+      +'</div>';
   }
-  if(j.sl>0){
-    return '<div class="sal-block"><span class="sal-tag m">月収例</span>'
+  if(j.wt==="月給"&&j.sl>0){
+    return '<div class="sal-block"><span class="sal-tag m">月給</span>'
       +'<div class="sal-main"><span class="sal-n">'+j.sl.toFixed(1).replace(/\.0$/,"")+'</span><span class="sal-un">万円</span></div>'
-      +'<div class="sal-sub">時給 約'+toHourly(j.sl).toLocaleString()+'円</div></div>';
+      +'</div>';
   }
   return "";
 }
 function salBannerHtml(j){
-  if(j.wt==="時給例"&&j.hr>0){
-    return '<div class="sal-banner sb-h"><span class="sb-label">時給例</span>'
+  if(j.wt==="時給"&&j.hr>0){
+    return '<div class="sal-banner sb-h"><span class="sb-label">時給</span>'
       +'<span class="sb-num"><b>'+j.hr.toLocaleString()+'</b>円</span>'
-      +'<span class="sb-sub">月収にすると約'+j.sl.toFixed(1).replace(/\.0$/,"")+'万円</span></div>';
+      +'</div>';
   }
-  if(j.sl>0){
-    return '<div class="sal-banner sb-m"><span class="sb-label">月収例</span>'
+  if(j.wt==="月給"&&j.sl>0){
+    return '<div class="sal-banner sb-m"><span class="sb-label">月給</span>'
       +'<span class="sb-num"><b>'+j.sl.toFixed(1).replace(/\.0$/,"")+'</b>万円</span>'
-      +'<span class="sb-sub">時給にすると約'+toHourly(j.sl).toLocaleString()+'円</span></div>';
+      +'</div>';
   }
   return "";
 }
@@ -1104,7 +1110,7 @@ function updateActive(){
   if(state.kw) a.push(["検索: "+state.kw,()=>{setKw("");$("kw").value="";}]);
   if(state.age!==null) a.push([state.age+"歳",()=>setAge(null)]);
   if(state.gender) a.push([state.gender,()=>setGender("")]);
-  if(state.salMin>0) a.push(["月収"+state.salMin+"万〜",()=>setSal(0)]);
+  if(state.salMin>0) a.push(["給与"+state.salMin+"万〜",()=>setSal(0)]);
   state.prefs.forEach(p=>a.push([p,()=>togglePref(p)]));
   state.emps.forEach(e=>a.push([e,()=>toggleEmp(e)]));
   state.cos.forEach(co=>a.push([co,()=>toggleCo(co)]));
@@ -1204,17 +1210,17 @@ function buildFilterHTML(){
 
 <div class="panel">
   <div class="panel-hd">
-    <span class="panel-t">希望の月収</span>
+    <span class="panel-t">希望の給与</span>
     <button class="panel-clr" onclick="setSal(0)">クリア</button>
   </div>
   <div class="sal-row">
     <input class="sal-in sal-sync" type="number" inputmode="numeric" value="0"
-      min="0" max="50" oninput="setSal(this.value)" aria-label="月収下限（万円）">
+      min="0" max="50" oninput="setSal(this.value)" aria-label="給与下限（万円換算）">
     <span class="sal-u">万円以上</span>
   </div>
   <input type="range" id="salr" min="0" max="46" step="1" value="0"
-    oninput="setSal(this.value)" aria-label="月収スライダー">
-  <div class="hint">時給の求人も月収に換算して比べます（時給×173時間）</div>
+    oninput="setSal(this.value)" aria-label="給与スライダー">
+  <div class="hint">時給の求人は時給×173hで万円換算してフィルターします</div>
 </div>
 
 <div class="panel">
