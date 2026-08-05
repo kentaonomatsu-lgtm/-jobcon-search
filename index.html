@@ -981,12 +981,12 @@ function pillsHtml(j){
 }
 function salBlock(j){
   if(j.wt==="時給"&&j.hr>0){
-    return '<div class="sal-block"><span class="sal-tag h">時給</span>'
+    return '<div class="sal-block"><span class="sal-tag h">時給例</span>'
       +'<div class="sal-main"><span class="sal-n">'+j.hr.toLocaleString()+'</span><span class="sal-un">円</span></div>'
       +'</div>';
   }
   if(j.wt==="月給"&&j.sl>0){
-    return '<div class="sal-block"><span class="sal-tag m">月給</span>'
+    return '<div class="sal-block"><span class="sal-tag m">月収例</span>'
       +'<div class="sal-main"><span class="sal-n">'+j.sl.toFixed(1).replace(/\.0$/,"")+'</span><span class="sal-un">万円</span></div>'
       +'</div>';
   }
@@ -994,12 +994,12 @@ function salBlock(j){
 }
 function salBannerHtml(j){
   if(j.wt==="時給"&&j.hr>0){
-    return '<div class="sal-banner sb-h"><span class="sb-label">時給</span>'
+    return '<div class="sal-banner sb-h"><span class="sb-label">時給例</span>'
       +'<span class="sb-num"><b>'+j.hr.toLocaleString()+'</b>円</span>'
       +'</div>';
   }
   if(j.wt==="月給"&&j.sl>0){
-    return '<div class="sal-banner sb-m"><span class="sb-label">月給</span>'
+    return '<div class="sal-banner sb-m"><span class="sb-label">月収例</span>'
       +'<span class="sb-num"><b>'+j.sl.toFixed(1).replace(/\.0$/,"")+'</b>万円</span>'
       +'</div>';
   }
