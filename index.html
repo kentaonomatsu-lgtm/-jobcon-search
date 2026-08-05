@@ -165,36 +165,7 @@ header{
   display:flex;align-items:center;justify-content:center;
   border-radius:50%;flex:none;
 }
-/* NG/OK バナー */
-#telResultBanner{
-  display:none;
-  position:fixed;top:calc(var(--hd-h) + var(--qbar-h) + 8px);
-  left:50%;transform:translateX(-50%);
-  z-index:200;
-  background:#fff;
-  border-radius:12px;
-  box-shadow:var(--sh-md);
-  border:2px solid var(--line);
-  padding:14px 18px;
-  min-width:300px;max-width:90vw;
-  font-size:13px;
-}
-#telResultBanner.show{display:block;}
-.trb-head{font-size:20px;font-weight:800;margin-bottom:6px;}
-.trb-head.ng{color:#dc2626;}
-.trb-head.ok{color:#16803a;}
-.trb-list{list-style:none;margin-top:6px;display:flex;flex-direction:column;gap:4px;}
-.trb-list li{
-  padding:6px 10px;border-radius:8px;
-  font-size:12px;font-weight:700;
-}
-.trb-list li.ng{background:#fef2f2;color:#dc2626;border:1px solid #fecaca;}
-.trb-list li.ok{background:#edfdf3;color:#16803a;border:1px solid #86efac;}
-.trb-close{
-  display:block;margin-top:10px;width:100%;
-  text-align:center;font-size:13px;font-weight:800;
-  color:var(--sub);padding:4px;
-}
+
 @media(max-width:700px){
   .hd-tel-wrap input{width:110px;}
   .hd-tel-btn{padding:0 8px;}
@@ -988,29 +959,46 @@ async function checkTel(){
 }
 
 function showTelBanner(data){
-  let banner = $("telResultBanner");
-  if(!banner){
-    banner = document.createElement("div");
-    banner.id = "telResultBanner";
-    document.body.appendChild(banner);
-  }
   const ng = (data.applications||[]).filter(a=>a.period==="1month"||a.period==="3months");
-  const ok = (data.applications||[]).filter(a=>a.period==="over3months");
   const isNG = ng.length > 0;
 
-  const ngList = ng.map(a=>`<li class="ng">🚫 ${esc(a.companyName)}（${a.appliedAt}）</li>`).join("");
-  const okList = ok.length ? ok.map(a=>`<li class="ok">✅ ${esc(a.companyName)}（${a.appliedAt}）</li>`).join("") : "";
-  const noHistory = data.total === 0 ? '<p style="color:var(--sub);margin-top:6px">応募履歴なし → 全求人に送客可</p>' : "";
+  // ヘッダーのNG件数表示を更新
+  let badge = $("hdTelBadge");
+  if(!badge){
+    badge = document.createElement("span");
+    badge.id = "hdTelBadge";
+    badge.style.cssText = "font-size:12px;font-weight:800;white-space:nowrap;";
+    $("hdTelWrap").insertBefore(badge, $("hdTelClr"));
+  }
+  if(isNG){
+    badge.textContent = `NG ${ng.length}社`;
+    badge.style.color = "#dc2626";
+  } else {
+    badge.textContent = data.total === 0 ? "履歴なし" : "送客可";
+    badge.style.color = "#16803a";
+  }
 
-  banner.innerHTML = `
-    <div class="trb-head ${isNG?"ng":"ok"}">${isNG?"⚠️ 送客NG企業あり":"✅ 送客可"}</div>
-    <div style="font-size:12px;color:var(--sub)">電話番号：${esc(data.tel)}　/ 総応募${data.total}件</div>
-    ${noHistory}
-    ${ngList||okList ? `<ul class="trb-list">${ngList}${okList}</ul>` : ""}
-    <div style="font-size:11px;color:var(--sub);margin-top:8px">${isNG?"NG企業の求人を一覧から除外しました":"一覧にすべての求人を表示しています"}</div>
-    <button class="trb-close" onclick="document.getElementById('telResultBanner').classList.remove('show')">閉じる ✕</button>
-  `;
-  banner.classList.add("show");
+  // トースト（3秒で自動消滅）
+  let toast = $("telToast");
+  if(!toast){
+    toast = document.createElement("div");
+    toast.id = "telToast";
+    toast.style.cssText = `
+      position:fixed;bottom:80px;left:50%;transform:translateX(-50%);
+      background:#1a1a1a;color:#fff;
+      padding:10px 20px;border-radius:30px;
+      font-size:13px;font-weight:800;
+      z-index:300;opacity:0;transition:opacity .3s;
+      white-space:nowrap;
+    `;
+    document.body.appendChild(toast);
+  }
+  toast.textContent = isNG
+    ? `NG ${ng.length}社を除外 → ${data.total - ng.length}件表示`
+    : data.total === 0 ? "応募履歴なし → 全件表示" : "送客可 → 全件表示";
+  toast.style.opacity = "1";
+  clearTimeout(window._toastTimer);
+  window._toastTimer = setTimeout(()=>{ toast.style.opacity="0"; }, 3000);
 }
 
 function clearTelCheck(){
@@ -1019,8 +1007,8 @@ function clearTelCheck(){
   $("hdTelClr").hidden = true;
   const wrap = $("hdTelWrap");
   wrap.classList.remove("ng-active","ok-active");
-  const banner = $("telResultBanner");
-  if(banner) banner.classList.remove("show");
+  const badge = $("hdTelBadge");
+  if(badge) badge.textContent = "";
   renderAll();
 }
 
