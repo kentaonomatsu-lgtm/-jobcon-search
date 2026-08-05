@@ -814,7 +814,7 @@ const DATA_JSON_URL = "./data.json";
 const GAS_API_URL = "https://script.google.com/macros/s/AKfycbyDO5dsR1BlXNIIOHTWR21NeVtD91sq-1HREiL9aVQmZZGc-9oK8rbLixZ6PmJAVyY7hw/exec";
 /* HOURS/toHourly は v9 で廃止（時給←→月給換算表示を廃止） */
 const PAGE_SIZE = 50;
-const SW_CACHE = "jcsearch-v1";
+const SW_CACHE = "jcsearch-v2";
 
 const REGIONS = {
   "北海道・東北":["北海道","青森県","岩手県","宮城県","秋田県","山形県","福島県"],
@@ -895,7 +895,7 @@ function registerSW(){
 async function loadInitialData(){
   lbStart();
   try{
-    const res=await fetch(DATA_JSON_URL,{cache:"force-cache"});
+    const res=await fetch(DATA_JSON_URL,{cache:"no-cache"});
     if(!res.ok) throw new Error("data.json fetch failed");
     const data=await res.json();
     if(data&&Array.isArray(data.jobs)){
@@ -1220,7 +1220,7 @@ function buildFilterHTML(){
   </div>
   <input type="range" id="salr" min="0" max="46" step="1" value="0"
     oninput="setSal(this.value)" aria-label="給与スライダー">
-  <div class="hint">時給の求人は時給×173hで万円換算してフィルターします</div>
+  <div class="hint">時給の求人は月収換算でフィルターします</div>
 </div>
 
 <div class="panel">
