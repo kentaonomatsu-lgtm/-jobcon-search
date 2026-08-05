@@ -131,6 +131,75 @@ header{
 }
 .hd-cnt b{font-size:17px;}
 
+/* ===== 送客可否チェック（ヘッダー内） ===== */
+.hd-tel-wrap{
+  display:flex;align-items:center;gap:4px;flex:none;
+  background:var(--gry);
+  border:1.5px solid var(--line2);
+  border-radius:30px;
+  padding:0 4px 0 12px;
+  height:38px;
+}
+.hd-tel-wrap.ng-active{
+  border-color:#dc2626;background:#fef2f2;
+}
+.hd-tel-wrap.ok-active{
+  border-color:#16803a;background:#edfdf3;
+}
+.hd-tel-wrap input{
+  border:none;background:none;
+  width:190px;font-size:13px;
+  color:var(--ink);
+}
+.hd-tel-wrap input:focus{outline:none;}
+.hd-tel-btn{
+  height:30px;padding:0 10px;
+  background:var(--ink);color:#fff;
+  border-radius:20px;font-size:12px;font-weight:800;
+  white-space:nowrap;flex:none;
+}
+.hd-tel-btn:disabled{background:#aaa;cursor:not-allowed;}
+.hd-tel-clr{
+  height:30px;width:30px;
+  color:var(--sub);font-size:16px;
+  display:flex;align-items:center;justify-content:center;
+  border-radius:50%;flex:none;
+}
+/* NG/OK バナー */
+#telResultBanner{
+  display:none;
+  position:fixed;top:calc(var(--hd-h) + var(--qbar-h) + 8px);
+  left:50%;transform:translateX(-50%);
+  z-index:200;
+  background:#fff;
+  border-radius:12px;
+  box-shadow:var(--sh-md);
+  border:2px solid var(--line);
+  padding:14px 18px;
+  min-width:300px;max-width:90vw;
+  font-size:13px;
+}
+#telResultBanner.show{display:block;}
+.trb-head{font-size:20px;font-weight:800;margin-bottom:6px;}
+.trb-head.ng{color:#dc2626;}
+.trb-head.ok{color:#16803a;}
+.trb-list{list-style:none;margin-top:6px;display:flex;flex-direction:column;gap:4px;}
+.trb-list li{
+  padding:6px 10px;border-radius:8px;
+  font-size:12px;font-weight:700;
+}
+.trb-list li.ng{background:#fef2f2;color:#dc2626;border:1px solid #fecaca;}
+.trb-list li.ok{background:#edfdf3;color:#16803a;border:1px solid #86efac;}
+.trb-close{
+  display:block;margin-top:10px;width:100%;
+  text-align:center;font-size:13px;font-weight:800;
+  color:var(--sub);padding:4px;
+}
+@media(max-width:700px){
+  .hd-tel-wrap input{width:110px;}
+  .hd-tel-btn{padding:0 8px;}
+}
+
 /* ===== クイックバー ===== */
 .qbar{
   position:fixed;
@@ -693,6 +762,14 @@ ruby rt{font-size:58%;opacity:.85;font-weight:700;letter-spacing:0;}
       onclick="setKw('');document.getElementById('kw').value='';" hidden>×</button>
   </div>
   <div class="hd-cnt" aria-live="polite"><b id="hc">-</b> / <span id="ht">-</span>件</div>
+  <!-- 送客可否チェック -->
+  <div class="hd-tel-wrap" id="hdTelWrap">
+    <input id="hdTelInput" type="tel" inputmode="numeric" placeholder="電話番号で送客可否チェック"
+      aria-label="電話番号で送客可否チェック" autocomplete="tel"
+      onkeydown="if(event.key==='Enter')checkTel()">
+    <button class="hd-tel-btn" id="hdTelBtn" onclick="checkTel()">チェック</button>
+    <button class="hd-tel-clr" id="hdTelClr" onclick="clearTelCheck()" hidden aria-label="送客可否チェックをクリア">✕</button>
+  </div>
 </header>
 
 <!-- ===== クイックバー ===== -->
@@ -812,6 +889,8 @@ ruby rt{font-size:58%;opacity:.85;font-weight:700;letter-spacing:0;}
 /* ====== 設定 ====== */
 const DATA_JSON_URL = "./data.json";
 const GAS_API_URL = "https://script.google.com/macros/s/AKfycbyDO5dsR1BlXNIIOHTWR21NeVtD91sq-1HREiL9aVQmZZGc-9oK8rbLixZ6PmJAVyY7hw/exec";
+// ★ dpt-registration-system が動いているPCのIPアドレスに変更してください
+const CHECK_API_URL = "http://192.168.15.247:3000/api/check-application-history";
 /* HOURS/toHourly は v9 で廃止（時給←→月給換算表示を廃止） */
 const PAGE_SIZE = 50;
 const SW_CACHE = "jcsearch-v2";
@@ -836,6 +915,8 @@ let filtered = [];
 let displayCount = PAGE_SIZE;
 let _refreshing = false;
 let _currentView = "list"; // list | area
+let NG_COMPANIES = new Set(); // 送客NG企業名（電話番号チェックで取得）
+let _telChecking = false;
 
 const state = {
   kw:"", age:null, gender:"", salMin:0,
@@ -862,6 +943,86 @@ function salVal(j){
 }
 function kanaPref(pf){ return KANA_PREF[pf]||""; }
 function rubyP(pf){ const k=kanaPref(pf); return k?'<ruby>'+esc(pf)+'<rt>'+esc(k)+'</rt></ruby>':esc(pf); }
+
+/* ====== 送客可否チェック ====== */
+async function checkTel(){
+  const tel = ($("hdTelInput").value||"").trim().replace(/[－\-\s]/g,"");
+  if(!tel){ alert("電話番号を入力してください"); return; }
+  if(_telChecking) return;
+  _telChecking = true;
+  const btn = $("hdTelBtn");
+  btn.disabled = true; btn.textContent = "検索中…";
+
+  try{
+    const res = await fetch(CHECK_API_URL, {
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({tel})
+    });
+    const data = await res.json();
+    if(!data.success) throw new Error(data.error||"エラー");
+
+    // NG企業セットを更新
+    NG_COMPANIES = new Set(data.ngCompanies||[]);
+
+    // バナー表示
+    showTelBanner(data);
+
+    // フィルター再適用
+    renderAll();
+
+    // ヘッダーの色を変える
+    const wrap = $("hdTelWrap");
+    wrap.classList.remove("ng-active","ok-active");
+    if(NG_COMPANIES.size > 0) wrap.classList.add("ng-active");
+    else wrap.classList.add("ok-active");
+
+    $("hdTelClr").hidden = false;
+  }catch(e){
+    alert("取得エラー："+e.message);
+  }finally{
+    _telChecking = false;
+    btn.disabled = false;
+    btn.textContent = "チェック";
+  }
+}
+
+function showTelBanner(data){
+  let banner = $("telResultBanner");
+  if(!banner){
+    banner = document.createElement("div");
+    banner.id = "telResultBanner";
+    document.body.appendChild(banner);
+  }
+  const ng = (data.applications||[]).filter(a=>a.period==="1month"||a.period==="3months");
+  const ok = (data.applications||[]).filter(a=>a.period==="over3months");
+  const isNG = ng.length > 0;
+
+  const ngList = ng.map(a=>`<li class="ng">🚫 ${esc(a.companyName)}（${a.appliedAt}）</li>`).join("");
+  const okList = ok.length ? ok.map(a=>`<li class="ok">✅ ${esc(a.companyName)}（${a.appliedAt}）</li>`).join("") : "";
+  const noHistory = data.total === 0 ? '<p style="color:var(--sub);margin-top:6px">応募履歴なし → 全求人に送客可</p>' : "";
+
+  banner.innerHTML = `
+    <div class="trb-head ${isNG?"ng":"ok"}">${isNG?"⚠️ 送客NG企業あり":"✅ 送客可"}</div>
+    <div style="font-size:12px;color:var(--sub)">電話番号：${esc(data.tel)}　/ 総応募${data.total}件</div>
+    ${noHistory}
+    ${ngList||okList ? `<ul class="trb-list">${ngList}${okList}</ul>` : ""}
+    <div style="font-size:11px;color:var(--sub);margin-top:8px">${isNG?"NG企業の求人を一覧から除外しました":"一覧にすべての求人を表示しています"}</div>
+    <button class="trb-close" onclick="document.getElementById('telResultBanner').classList.remove('show')">閉じる ✕</button>
+  `;
+  banner.classList.add("show");
+}
+
+function clearTelCheck(){
+  NG_COMPANIES = new Set();
+  $("hdTelInput").value = "";
+  $("hdTelClr").hidden = true;
+  const wrap = $("hdTelWrap");
+  wrap.classList.remove("ng-active","ok-active");
+  const banner = $("telResultBanner");
+  if(banner) banner.classList.remove("show");
+  renderAll();
+}
 
 /* ====== ローディングバー ====== */
 let _lbTimer=null;
@@ -934,6 +1095,8 @@ async function loadFromGAS(){
 /* ====== フィルタ ====== */
 function baseFilter(){
   let r=ALL_JOBS;
+  // 送客NG企業を除外（電話番号チェック済みの場合のみ）
+  if(NG_COMPANIES.size>0) r=r.filter(j=>!NG_COMPANIES.has(j.co));
   if(state.kw){const k=state.kw.toLowerCase();r=r.filter(j=>(j.co||"").toLowerCase().includes(k)||(j.pf||"").includes(k)||(j.ct||"").includes(k)||(j.sk||"").includes(k)||(j.gy||"").includes(k)||(j.ti||"").includes(k)||(j.id||"").includes(k)||(j.maker||"").toLowerCase().includes(k));}
   if(state.pris.size)  r=r.filter(j=>state.pris.has(j.pr));
   if(state.emps.size)  r=r.filter(j=>state.emps.has(j.emp));
