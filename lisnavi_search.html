@@ -1,0 +1,1104 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>リスナビ 顧客検索ツール | アレグリア</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --red: #B11F35;
+    --red-dark: #8a1728;
+    --red-bg: #fdf0f2;
+    --red-border: #f0c0c8;
+    --charcoal: #1A1A1A;
+    --charcoal-2: #2A2A2A;
+    --gray-bg: #f5f5f3;
+    --gray-mid: #e0ddd8;
+    --gray-text: #6b6966;
+    --white: #ffffff;
+    --success: #1a7a4a;
+    --success-bg: #eaf5f0;
+    --warning: #b45309;
+    --warning-bg: #fef3c7;
+    --error: #b91c1c;
+    --error-bg: #fef2f2;
+    --font: -apple-system, 'Hiragino Sans', 'Meiryo', sans-serif;
+    --radius: 6px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
+  }
+
+  body {
+    font-family: var(--font);
+    background: var(--gray-bg);
+    color: var(--charcoal);
+    font-size: 14px;
+    min-height: 100vh;
+  }
+
+  header {
+    background: var(--charcoal);
+    padding: 0 24px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    height: 52px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .logo-mark {
+    width: 8px;
+    height: 28px;
+    background: var(--red);
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+  .logo-text {
+    color: var(--white);
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+  }
+  .logo-divider {
+    width: 1px;
+    height: 16px;
+    background: rgba(255,255,255,0.2);
+  }
+  .logo-sub {
+    color: rgba(255,255,255,0.5);
+    font-size: 12px;
+  }
+
+  .main {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 28px 20px 60px;
+  }
+
+  .page-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--charcoal);
+    margin-bottom: 4px;
+  }
+  .page-sub {
+    font-size: 12px;
+    color: var(--gray-text);
+    margin-bottom: 24px;
+  }
+
+  .card {
+    background: var(--white);
+    border: 1px solid var(--gray-mid);
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+    margin-bottom: 16px;
+    overflow: hidden;
+  }
+  .card-header {
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--gray-mid);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #fafaf8;
+  }
+  .card-header-icon {
+    width: 22px;
+    height: 22px;
+    background: var(--red-bg);
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .card-header-icon svg { width: 13px; height: 13px; fill: var(--red); }
+  .card-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--charcoal);
+  }
+  .card-body { padding: 20px; }
+
+  .step-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    background: var(--red);
+    color: var(--white);
+    border-radius: 50%;
+    font-size: 11px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+  .step-badge.done { background: var(--success); }
+  .step-badge.skip { background: var(--gray-mid); color: var(--gray-text); }
+
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-bottom: 14px;
+  }
+  .form-row.single { grid-template-columns: 1fr; }
+  .form-row.triple { grid-template-columns: 1fr 1fr 1fr; }
+
+  .form-group { display: flex; flex-direction: column; gap: 6px; }
+  label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--charcoal-2);
+    letter-spacing: 0.02em;
+  }
+  label .req {
+    color: var(--red);
+    margin-left: 2px;
+  }
+  label .opt {
+    color: var(--gray-text);
+    font-weight: 400;
+    margin-left: 4px;
+  }
+  input[type="text"], input[type="password"], select {
+    height: 36px;
+    padding: 0 10px;
+    border: 1px solid var(--gray-mid);
+    border-radius: var(--radius);
+    font-size: 13px;
+    font-family: var(--font);
+    color: var(--charcoal);
+    background: var(--white);
+    transition: border-color 0.15s;
+    outline: none;
+    width: 100%;
+  }
+  input[type="text"]:focus, input[type="password"]:focus, select:focus {
+    border-color: var(--red);
+    box-shadow: 0 0 0 2px rgba(177,31,53,0.1);
+  }
+  input::placeholder { color: #bbb; }
+
+  .hint {
+    font-size: 11px;
+    color: var(--gray-text);
+    line-height: 1.5;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    height: 36px;
+    padding: 0 16px;
+    border-radius: var(--radius);
+    font-size: 13px;
+    font-weight: 600;
+    font-family: var(--font);
+    cursor: pointer;
+    border: none;
+    transition: background 0.15s, opacity 0.15s;
+    text-decoration: none;
+  }
+  .btn-primary {
+    background: var(--red);
+    color: var(--white);
+  }
+  .btn-primary:hover { background: var(--red-dark); }
+  .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+  .btn-ghost {
+    background: transparent;
+    color: var(--gray-text);
+    border: 1px solid var(--gray-mid);
+  }
+  .btn-ghost:hover { background: var(--gray-bg); }
+  .btn-full { width: 100%; height: 40px; font-size: 14px; }
+  .btn-sm { height: 30px; padding: 0 12px; font-size: 12px; }
+
+  .status-bar {
+    padding: 10px 14px;
+    border-radius: var(--radius);
+    font-size: 12px;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+  .status-bar.info { background: #eff6ff; color: #1e40af; border: 1px solid #bfdbfe; }
+  .status-bar.success { background: var(--success-bg); color: var(--success); border: 1px solid #a7f3d0; }
+  .status-bar.warning { background: var(--warning-bg); color: var(--warning); border: 1px solid #fde68a; }
+  .status-bar.error { background: var(--error-bg); color: var(--error); border: 1px solid #fecaca; }
+  .status-bar svg { width: 14px; height: 14px; flex-shrink: 0; margin-top: 1px; }
+
+  .section-divider {
+    border: none;
+    border-top: 1px solid var(--gray-mid);
+    margin: 20px 0;
+  }
+
+  .filter-section-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--gray-text);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 14px;
+  }
+
+  .tag-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 4px;
+  }
+  .tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    border: 1px solid var(--gray-mid);
+    cursor: pointer;
+    background: var(--white);
+    color: var(--charcoal);
+    transition: all 0.1s;
+    user-select: none;
+  }
+  .tag:hover { border-color: var(--red); color: var(--red); }
+  .tag.active { background: var(--red-bg); border-color: var(--red); color: var(--red); font-weight: 600; }
+
+  .filter-conditions { display: flex; flex-direction: column; gap: 12px; margin-top: 12px; }
+  .filter-row {
+    display: grid;
+    grid-template-columns: 160px 1fr auto;
+    gap: 8px;
+    align-items: center;
+  }
+  .filter-add-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--red);
+    font-size: 12px;
+    font-weight: 600;
+    background: none;
+    border: 1px dashed var(--red-border);
+    border-radius: var(--radius);
+    padding: 8px 14px;
+    cursor: pointer;
+    width: 100%;
+    margin-top: 4px;
+    transition: background 0.1s;
+  }
+  .filter-add-btn:hover { background: var(--red-bg); }
+
+  .remove-btn {
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    background: none;
+    cursor: pointer;
+    color: var(--gray-text);
+    border-radius: 4px;
+    flex-shrink: 0;
+    transition: background 0.1s, color 0.1s;
+  }
+  .remove-btn:hover { background: var(--error-bg); color: var(--error); }
+  .remove-btn svg { width: 14px; height: 14px; }
+
+  #results-section { display: none; }
+  .results-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+    gap: 12px;
+  }
+  .results-count {
+    font-size: 13px;
+    color: var(--gray-text);
+  }
+  .results-count strong { color: var(--charcoal); font-size: 15px; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  thead th {
+    text-align: left;
+    padding: 8px 12px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--gray-text);
+    letter-spacing: 0.04em;
+    border-bottom: 1px solid var(--gray-mid);
+    white-space: nowrap;
+    background: #fafaf8;
+  }
+  tbody tr { border-bottom: 1px solid #f0ede8; }
+  tbody tr:hover { background: #fafaf8; }
+  tbody td { padding: 10px 12px; vertical-align: top; line-height: 1.5; }
+  .td-phone { font-family: monospace; font-size: 12px; white-space: nowrap; }
+  .td-pref {
+    font-size: 11px;
+    color: var(--charcoal-2);
+    white-space: nowrap;
+  }
+  .td-addr { font-size: 12px; color: var(--charcoal-2); max-width: 180px; }
+  .td-memo { font-size: 12px; color: var(--charcoal-2); max-width: 200px; }
+  .td-copy {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border: 1px solid var(--gray-mid);
+    border-radius: 4px;
+    background: var(--white);
+    cursor: pointer;
+    color: var(--gray-text);
+    transition: all 0.1s;
+    vertical-align: middle;
+    margin-left: 4px;
+  }
+  .td-copy:hover { border-color: var(--red); color: var(--red); }
+  .td-copy svg { width: 12px; height: 12px; }
+
+  .pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid var(--gray-mid);
+  }
+  .pg-btn {
+    height: 30px;
+    min-width: 30px;
+    padding: 0 8px;
+    border: 1px solid var(--gray-mid);
+    border-radius: 4px;
+    background: var(--white);
+    font-size: 12px;
+    cursor: pointer;
+    color: var(--charcoal);
+    transition: all 0.1s;
+  }
+  .pg-btn:hover { border-color: var(--red); color: var(--red); }
+  .pg-btn.active { background: var(--red); border-color: var(--red); color: var(--white); font-weight: 600; }
+  .pg-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+  .loading-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(255,255,255,0.75);
+    z-index: 999;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .loading-overlay.show { display: flex; }
+  .spinner {
+    width: 32px;
+    height: 32px;
+    border: 3px solid var(--gray-mid);
+    border-top-color: var(--red);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-text { font-size: 13px; color: var(--gray-text); }
+
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: var(--charcoal);
+    color: var(--white);
+    padding: 10px 16px;
+    border-radius: var(--radius);
+    font-size: 12px;
+    z-index: 9999;
+    opacity: 0;
+    transform: translateY(8px);
+    transition: all 0.2s;
+    pointer-events: none;
+  }
+  .toast.show { opacity: 1; transform: translateY(0); }
+
+  .conn-status {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--gray-text);
+  }
+  .conn-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--gray-mid);
+  }
+  .conn-dot.connected { background: var(--success); }
+  .conn-dot.connecting { background: var(--warning); animation: pulse 1s ease-in-out infinite; }
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+  .project-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    border: 1px solid var(--gray-mid);
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: all 0.1s;
+    background: var(--white);
+  }
+  .project-item:hover { border-color: var(--red); background: var(--red-bg); }
+  .project-item.selected { border-color: var(--red); background: var(--red-bg); }
+  .project-item input[type="radio"] { accent-color: var(--red); }
+  .project-grid { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; }
+
+  @media (max-width: 600px) {
+    .form-row { grid-template-columns: 1fr; }
+    .form-row.triple { grid-template-columns: 1fr; }
+    .filter-row { grid-template-columns: 1fr; }
+    .main { padding: 16px 12px 40px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="loading-overlay" id="loading">
+  <div class="spinner"></div>
+  <div class="loading-text" id="loading-text">処理中...</div>
+</div>
+<div class="toast" id="toast"></div>
+
+<header>
+  <div class="logo-mark"></div>
+  <span class="logo-text">ALEGRIA</span>
+  <div class="logo-divider"></div>
+  <span class="logo-sub">リスナビ 顧客検索</span>
+</header>
+
+<div class="main">
+  <div class="page-title">顧客名簿 絞り込み検索</div>
+  <div class="page-sub">リスナビAPIに接続し、JC/DPT案件の顧客をメモ・都道府県・住所で抽出します</div>
+
+  <!-- STEP 1: 認証情報 -->
+  <div class="card" id="card-auth">
+    <div class="card-header">
+      <span class="step-badge" id="step1-badge">1</span>
+      <div class="card-title">リスナビ 接続設定</div>
+      <div style="margin-left:auto;">
+        <div class="conn-status">
+          <div class="conn-dot" id="conn-dot"></div>
+          <span id="conn-label">未接続</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div id="auth-status-bar" class="status-bar info" style="display:none;"></div>
+      <div class="form-row triple">
+        <div class="form-group">
+          <label>管理者ログインID <span class="req">*</span></label>
+          <input type="text" id="loginId" placeholder="admin9" autocomplete="off">
+        </div>
+        <div class="form-group">
+          <label>パスワード <span class="req">*</span></label>
+          <input type="password" id="password" placeholder="••••••••">
+        </div>
+        <div class="form-group">
+          <label>dbName <span class="req">*</span></label>
+          <input type="text" id="dbName" placeholder="listnavi3" autocomplete="off">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>tenantUlId <span class="req">*</span></label>
+          <input type="text" id="tenantUlId" placeholder="03FVSHW3S537KKHBRMSA418ATD" autocomplete="off">
+          <span class="hint">ログインURL: https://lisnavi.com/[dbName]/[tenantUlId]/admin/login</span>
+        </div>
+      </div>
+      <button class="btn btn-primary" onclick="doLogin()">接続する</button>
+    </div>
+  </div>
+
+  <!-- STEP 2: プロジェクト選択 -->
+  <div class="card" id="card-project" style="display:none;">
+    <div class="card-header">
+      <span class="step-badge" id="step2-badge">2</span>
+      <div class="card-title">プロジェクト選択</div>
+    </div>
+    <div class="card-body">
+      <div id="project-status-bar" class="status-bar info" style="display:none;"></div>
+      <div class="hint" style="margin-bottom:10px;">DPT / ジョブコンプラス案件を選択してください</div>
+      <div class="project-grid" id="project-grid"></div>
+      <div style="margin-top:14px; display:flex; gap:8px; align-items:center;">
+        <button class="btn btn-primary" id="btn-select-project" onclick="selectProject()" disabled>このプロジェクトで進む</button>
+        <button class="btn btn-ghost btn-sm" onclick="reloadProjects()">更新</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 3: 検索条件 -->
+  <div class="card" id="card-search" style="display:none;">
+    <div class="card-header">
+      <span class="step-badge" id="step3-badge">3</span>
+      <div class="card-title">検索条件</div>
+    </div>
+    <div class="card-body">
+
+      <div class="filter-section-title">電話番号 / リストID</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>電話番号（部分一致）<span class="opt">任意</span></label>
+          <input type="text" id="f-phone" placeholder="090-1234 など">
+        </div>
+        <div class="form-group">
+          <label>リストID（完全一致）<span class="opt">任意</span></label>
+          <input type="text" id="f-listid" placeholder="12345">
+        </div>
+      </div>
+
+      <hr class="section-divider">
+
+      <div class="filter-section-title">都道府県</div>
+      <div class="tag-group" id="pref-tags"></div>
+
+      <hr class="section-divider">
+
+      <div class="filter-section-title">メモ・住所・テキスト項目</div>
+      <div class="hint" style="margin-bottom:12px;">ヒアリング項目（メモ欄・住所など）のIDと検索キーワードを指定します。<br>IDは「ヒアリング項目一覧」で確認してください。</div>
+      <div class="filter-conditions" id="text-filters"></div>
+      <button class="filter-add-btn" onclick="addTextFilter()">
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2"><line x1="7" y1="1" x2="7" y2="13"/><line x1="1" y1="7" x2="13" y2="7"/></svg>
+        検索条件を追加
+      </button>
+
+      <hr class="section-divider">
+
+      <div class="filter-section-title">ステータス絞り込み</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>含むステータスID（カンマ区切り）<span class="opt">任意</span></label>
+          <input type="text" id="f-status-in" placeholder="1,2,3">
+        </div>
+        <div class="form-group">
+          <label>除外するステータスID（カンマ区切り）<span class="opt">任意</span></label>
+          <input type="text" id="f-status-ex" placeholder="5,6">
+        </div>
+      </div>
+
+      <hr class="section-divider">
+
+      <div class="form-row triple">
+        <div class="form-group">
+          <label>発信数 以上<span class="opt">任意</span></label>
+          <input type="text" id="f-ob-min" placeholder="0">
+        </div>
+        <div class="form-group">
+          <label>発信数 以下<span class="opt">任意</span></label>
+          <input type="text" id="f-ob-max" placeholder="99">
+        </div>
+        <div class="form-group">
+          <label>1ページ表示件数</label>
+          <select id="f-per-page">
+            <option value="20">20件</option>
+            <option value="50">50件</option>
+            <option value="100">100件</option>
+          </select>
+        </div>
+      </div>
+
+      <div style="margin-top:6px; display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+        <button class="btn btn-primary btn-full" style="max-width:200px;" onclick="doSearch(1)">検索する</button>
+        <button class="btn btn-ghost btn-sm" onclick="clearFilters()">条件をリセット</button>
+        <button class="btn btn-ghost btn-sm" onclick="openHearingItems()">ヒアリング項目一覧を見る</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 4: 検索結果 -->
+  <div id="results-section">
+    <div class="card">
+      <div class="card-header">
+        <span class="step-badge done">✓</span>
+        <div class="card-title">検索結果</div>
+      </div>
+      <div class="card-body">
+        <div class="results-header">
+          <div class="results-count">
+            <strong id="results-total">0</strong> 件ヒット
+            <span id="results-page-info" style="color:var(--gray-text); font-size:12px;"></span>
+          </div>
+          <div style="display:flex; gap:6px;">
+            <button class="btn btn-ghost btn-sm" onclick="exportCsv()">CSVコピー</button>
+          </div>
+        </div>
+        <div style="overflow-x:auto;">
+          <table>
+            <thead>
+              <tr>
+                <th>電話番号</th>
+                <th>都道府県</th>
+                <th>住所</th>
+                <th>メモ</th>
+                <th>ステータス</th>
+                <th>発信数</th>
+                <th>登録日</th>
+              </tr>
+            </thead>
+            <tbody id="results-body"></tbody>
+          </table>
+        </div>
+        <div class="pagination" id="pagination"></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ヒアリング項目モーダル（フロー内表示） -->
+<div id="hearing-modal" class="card" style="display:none; position:fixed; inset:60px 20px auto; max-height:70vh; overflow-y:auto; z-index:200; max-width:700px; margin:0 auto; box-shadow: 0 8px 32px rgba(0,0,0,0.15);">
+  <div class="card-header" style="position:sticky; top:0; background:#fafaf8; z-index:1;">
+    <div class="card-title">ヒアリング項目一覧</div>
+    <button onclick="document.getElementById('hearing-modal').style.display='none'" style="margin-left:auto; background:none; border:none; cursor:pointer; color:var(--gray-text); font-size:18px;">&times;</button>
+  </div>
+  <div class="card-body">
+    <div class="hint" style="margin-bottom:12px;">以下のIDを検索条件の「ヒアリング項目ID」に入力してください</div>
+    <div id="hearing-list"></div>
+  </div>
+</div>
+
+<script>
+const API_BASE = 'https://lisnavi.com';
+let _token = '';
+let _dbName = '';
+let _projectId = null;
+let _currentPage = 1;
+let _selectedPrefs = new Set();
+let _hearingItemsCache = [];
+let _prefHearingItemId = null;
+let _addrHearingItemId = null;
+
+const PREFS = ['北海道','青森県','岩手県','宮城県','秋田県','山形県','福島県','茨城県','栃木県','群馬県','埼玉県','千葉県','東京都','神奈川県','新潟県','富山県','石川県','福井県','山梨県','長野県','岐阜県','静岡県','愛知県','三重県','滋賀県','京都府','大阪府','兵庫県','奈良県','和歌山県','鳥取県','島根県','岡山県','広島県','山口県','徳島県','香川県','愛媛県','高知県','福岡県','佐賀県','長崎県','熊本県','大分県','宮崎県','鹿児島県','沖縄県'];
+
+function showLoading(msg) {
+  document.getElementById('loading-text').textContent = msg || '処理中...';
+  document.getElementById('loading').classList.add('show');
+}
+function hideLoading() {
+  document.getElementById('loading').classList.remove('show');
+}
+function showToast(msg, dur=2200) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), dur);
+}
+function setStatusBar(id, type, msg) {
+  const el = document.getElementById(id);
+  el.className = 'status-bar ' + type;
+  el.innerHTML = msg;
+  el.style.display = 'flex';
+}
+function hideStatusBar(id) {
+  document.getElementById(id).style.display = 'none';
+}
+function setConn(state, label) {
+  document.getElementById('conn-dot').className = 'conn-dot ' + state;
+  document.getElementById('conn-label').textContent = label;
+}
+
+async function apiCall(path, method, body, headers) {
+  const url = API_BASE + path;
+  const opts = {
+    method: method || 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+      ...headers
+    }
+  };
+  if (body) opts.body = JSON.stringify(body);
+  const res = await fetch(url, opts);
+  const json = await res.json();
+  return json;
+}
+
+function authHeaders() {
+  return {
+    'Authorization': 'Bearer ' + _token,
+    'X-Tenant-Db-Name': _dbName
+  };
+}
+
+async function doLogin() {
+  const loginId = document.getElementById('loginId').value.trim();
+  const password = document.getElementById('password').value.trim();
+  const dbName = document.getElementById('dbName').value.trim();
+  const tenantUlId = document.getElementById('tenantUlId').value.trim();
+  if (!loginId || !password || !dbName || !tenantUlId) {
+    setStatusBar('auth-status-bar', 'error', '<svg viewBox="0 0 16 16" fill="currentColor"><circle cx="8" cy="8" r="7" stroke="currentColor" stroke-width="1.5" fill="none"/><rect x="7" y="6" width="1.5" height="5" rx="1"/><rect x="7" y="4" width="1.5" height="1.5" rx="0.75"/></svg>&nbsp;全項目を入力してください');
+    return;
+  }
+  showLoading('ログイン中...');
+  setConn('connecting', '接続中');
+  try {
+    const res = await apiCall('/api/admin/login', 'POST', { loginId, password, dbName, tenantUlId });
+    if (res.data?.token || res.token) {
+      _token = res.data?.token || res.token;
+      _dbName = dbName;
+      setConn('connected', '接続済み');
+      document.getElementById('step1-badge').className = 'step-badge done';
+      document.getElementById('step1-badge').textContent = '✓';
+      setStatusBar('auth-status-bar', 'success', '✓ 接続しました');
+      loadProjects();
+    } else {
+      const msg = res.data?.message || 'ログインに失敗しました';
+      setStatusBar('auth-status-bar', 'error', '✗ ' + msg);
+      setConn('', '未接続');
+    }
+  } catch(e) {
+    setStatusBar('auth-status-bar', 'error', '✗ 通信エラー: ' + e.message);
+    setConn('', '未接続');
+  }
+  hideLoading();
+}
+
+async function loadProjects() {
+  showLoading('プロジェクト一覧を取得中...');
+  document.getElementById('card-project').style.display = 'block';
+  try {
+    const res = await apiCall('/api/projects', 'GET', null, authHeaders());
+    const projects = res.data?.filter(d => d.id) || [];
+    const grid = document.getElementById('project-grid');
+    grid.innerHTML = '';
+    if (!projects.length) {
+      setStatusBar('project-status-bar', 'warning', 'プロジェクトが見つかりませんでした');
+      hideLoading();
+      return;
+    }
+    hideStatusBar('project-status-bar');
+    projects.forEach(p => {
+      const div = document.createElement('div');
+      div.className = 'project-item';
+      div.innerHTML = `<input type="radio" name="proj" value="${p.id}" id="proj-${p.id}">
+        <label for="proj-${p.id}" style="cursor:pointer; flex:1; font-size:13px;">
+          <strong>${escHtml(p.name)}</strong>
+          <span style="margin-left:8px; color:var(--gray-text); font-size:11px;">ID: ${p.id}</span>
+        </label>`;
+      div.addEventListener('click', () => {
+        div.querySelector('input').checked = true;
+        document.querySelectorAll('.project-item').forEach(el => el.classList.remove('selected'));
+        div.classList.add('selected');
+        document.getElementById('btn-select-project').disabled = false;
+      });
+      grid.appendChild(div);
+    });
+  } catch(e) {
+    setStatusBar('project-status-bar', 'error', '取得エラー: ' + e.message);
+  }
+  hideLoading();
+}
+
+async function reloadProjects() { await loadProjects(); }
+
+async function selectProject() {
+  const sel = document.querySelector('input[name="proj"]:checked');
+  if (!sel) return;
+  _projectId = parseInt(sel.value);
+  document.getElementById('step2-badge').className = 'step-badge done';
+  document.getElementById('step2-badge').textContent = '✓';
+  buildPrefTags();
+  await loadHearingItems();
+  document.getElementById('card-search').style.display = 'block';
+  document.getElementById('card-search').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function buildPrefTags() {
+  const container = document.getElementById('pref-tags');
+  container.innerHTML = '';
+  PREFS.forEach(p => {
+    const t = document.createElement('span');
+    t.className = 'tag';
+    t.textContent = p;
+    t.addEventListener('click', () => {
+      if (_selectedPrefs.has(p)) { _selectedPrefs.delete(p); t.classList.remove('active'); }
+      else { _selectedPrefs.add(p); t.classList.add('active'); }
+    });
+    container.appendChild(t);
+  });
+}
+
+async function loadHearingItems() {
+  try {
+    const res = await apiCall(`/api/admin/project/${_projectId}/hearing-items`, 'GET', null, authHeaders());
+    const items = res.data?.hearingItems || [];
+    _hearingItemsCache = items;
+    _prefHearingItemId = null;
+    _addrHearingItemId = null;
+    items.forEach(item => {
+      const lbl = (item.label || '').toLowerCase();
+      if (item.type === 'address' || lbl.includes('住所') || lbl.includes('address')) {
+        _addrHearingItemId = item.id;
+      }
+      if (lbl.includes('都道府県') || lbl.includes('prefecture') || lbl.includes('pref')) {
+        _prefHearingItemId = item.id;
+      }
+    });
+    renderHearingList();
+  } catch(e) {}
+}
+
+function renderHearingList() {
+  const el = document.getElementById('hearing-list');
+  if (!_hearingItemsCache.length) {
+    el.innerHTML = '<div style="color:var(--gray-text); font-size:12px;">項目が取得できませんでした</div>';
+    return;
+  }
+  let html = '<table style="width:100%; font-size:12px; border-collapse:collapse;">';
+  html += '<thead><tr><th style="text-align:left; padding:6px 8px; border-bottom:1px solid var(--gray-mid); color:var(--gray-text); font-size:11px;">ID</th><th style="text-align:left; padding:6px 8px; border-bottom:1px solid var(--gray-mid); color:var(--gray-text); font-size:11px;">ラベル名</th><th style="text-align:left; padding:6px 8px; border-bottom:1px solid var(--gray-mid); color:var(--gray-text); font-size:11px;">タイプ</th><th style="padding:6px 8px; border-bottom:1px solid var(--gray-mid);"></th></tr></thead><tbody>';
+  _hearingItemsCache.forEach(item => {
+    html += `<tr style="border-bottom:1px solid #f0ede8;">
+      <td style="padding:6px 8px; font-family:monospace;">${item.id}</td>
+      <td style="padding:6px 8px;">${escHtml(item.label || '-')}</td>
+      <td style="padding:6px 8px; color:var(--gray-text);">${escHtml(item.type || '-')}</td>
+      <td style="padding:6px 8px;">
+        <button class="btn btn-ghost btn-sm" onclick="addTextFilterWithId(${item.id}, '${escHtml(item.label || '')}'); document.getElementById('hearing-modal').style.display='none';">条件に追加</button>
+      </td>
+    </tr>`;
+  });
+  html += '</tbody></table>';
+  el.innerHTML = html;
+}
+
+function openHearingItems() {
+  const modal = document.getElementById('hearing-modal');
+  modal.style.display = modal.style.display === 'none' ? 'block' : 'none';
+}
+
+let _filterCount = 0;
+function addTextFilter() { _addTextFilterRow(null, ''); }
+function addTextFilterWithId(id, label) { _addTextFilterRow(id, ''); }
+function _addTextFilterRow(id, val) {
+  const c = _filterCount++;
+  const container = document.getElementById('text-filters');
+  const row = document.createElement('div');
+  row.className = 'filter-row';
+  row.id = 'frow-' + c;
+  row.innerHTML = `
+    <div>
+      <input type="text" id="fid-${c}" placeholder="ヒアリング項目ID" value="${id !== null ? id : ''}" style="height:32px; font-size:12px; width:100%;">
+    </div>
+    <div>
+      <input type="text" id="fval-${c}" placeholder="検索キーワード（部分一致）" value="${escHtml(val)}" style="height:32px; font-size:12px; width:100%;">
+    </div>
+    <button class="remove-btn" onclick="document.getElementById('frow-${c}').remove()">
+      <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2"><line x1="1" y1="1" x2="13" y2="13"/><line x1="13" y1="1" x2="1" y2="13"/></svg>
+    </button>`;
+  container.appendChild(row);
+}
+
+function clearFilters() {
+  document.getElementById('f-phone').value = '';
+  document.getElementById('f-listid').value = '';
+  document.getElementById('f-status-in').value = '';
+  document.getElementById('f-status-ex').value = '';
+  document.getElementById('f-ob-min').value = '';
+  document.getElementById('f-ob-max').value = '';
+  document.getElementById('text-filters').innerHTML = '';
+  _selectedPrefs.clear();
+  document.querySelectorAll('.tag').forEach(t => t.classList.remove('active'));
+  _filterCount = 0;
+}
+
+function buildFilterParam() {
+  const p = {};
+  const phone = document.getElementById('f-phone').value.trim();
+  const listid = document.getElementById('f-listid').value.trim();
+  const statusIn = document.getElementById('f-status-in').value.trim();
+  const statusEx = document.getElementById('f-status-ex').value.trim();
+  const obMin = document.getElementById('f-ob-min').value.trim();
+  const obMax = document.getElementById('f-ob-max').value.trim();
+
+  if (phone) p.partOfPhoneNumber = phone;
+  if (listid) p.listId = parseInt(listid);
+  if (statusIn) p.includeStatusIds = statusIn.split(',').map(s => parseInt(s.trim())).filter(Boolean);
+  if (statusEx) p.excludeStatusIds = statusEx.split(',').map(s => parseInt(s.trim())).filter(Boolean);
+  if (obMin) p.outboundCountStart = parseInt(obMin);
+  if (obMax) p.outboundCountEnd = parseInt(obMax);
+
+  const hearingTextValues = [];
+
+  // 都道府県タグ選択
+  if (_selectedPrefs.size > 0 && _prefHearingItemId) {
+    _selectedPrefs.forEach(pref => {
+      hearingTextValues.push({ hearingItemId: _prefHearingItemId, hearingTextValue: pref });
+    });
+  }
+
+  // テキストフィルタ行
+  document.querySelectorAll('[id^="frow-"]').forEach(row => {
+    const idEl = row.querySelector('[id^="fid-"]');
+    const valEl = row.querySelector('[id^="fval-"]');
+    if (idEl && valEl && idEl.value.trim() && valEl.value.trim()) {
+      hearingTextValues.push({
+        hearingItemId: parseInt(idEl.value.trim()),
+        hearingTextValue: valEl.value.trim()
+      });
+    }
+  });
+
+  if (hearingTextValues.length) p.hearingTextValues = hearingTextValues;
+  return p;
+}
+
+async function doSearch(page) {
+  _currentPage = page || 1;
+  const perPage = parseInt(document.getElementById('f-per-page').value);
+  showLoading('検索中...');
+
+  try {
+    const body = {
+      page: _currentPage,
+      displayCountPerPage: perPage,
+      isIncludeTotalListIds: false,
+      listFilterParam: buildFilterParam()
+    };
+    const res = await apiCall(`/api/project/${_projectId}/operation-target-lists/preview`, 'POST', body, authHeaders());
+
+    if (!res.data || res.data.message) {
+      showToast('エラー: ' + (res.data?.message || '不明なエラー'));
+      hideLoading(); return;
+    }
+
+    const total = res.data.totalCount || 0;
+    const totalPage = res.data.totalPage || 1;
+    const lists = res.data.lists || [];
+
+    document.getElementById('results-total').textContent = total.toLocaleString();
+    document.getElementById('results-page-info').textContent = ` ― ${_currentPage} / ${totalPage} ページ`;
+    document.getElementById('results-section').style.display = 'block';
+
+    renderResults(lists);
+    renderPagination(totalPage, perPage);
+    document.getElementById('results-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+  } catch(e) {
+    showToast('通信エラー: ' + e.message);
+  }
+  hideLoading();
+}
+
+function renderResults(lists) {
+  const tbody = document.getElementById('results-body');
+  tbody.innerHTML = '';
+  if (!lists.length) {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:24px; color:var(--gray-text); font-size:13px;">条件に一致する顧客が見つかりませんでした</td></tr>';
+    return;
+  }
+  lists.forEach(item => {
+    let pref = '', addr = '', memo = '';
+    (item.hearingItems || []).forEach(h => {
+      const lbl = (h.label || '').toLowerCase();
+      if (h.id === _prefHearingItemId || lbl.includes('都道府県') || lbl.includes('pref')) pref = h.value || '';
+      else if (h.id === _addrHearingItemId || h.type === 'address' || lbl.includes('住所')) addr = h.value || '';
+      else if (h.type === 'memo' || lbl.includes('メモ') || lbl.includes('備考')) memo = h.value || '';
+    });
+
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="td-phone">
+        ${escHtml(item.phoneNumber || '-')}
+        <button class="td-copy" onclick="copyText('${escHtml(item.phoneNumber || '')}')" title="コピー">
+          <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="4" y="4" width="8" height="8" rx="1"/><path d="M2 10V2h8"/></svg>
+        </button>
+      </td>
+      <td class="td-pref">${escHtml(pref) || '<span style="color:#ccc">-</span>'}</td>
+      <td class="td-addr">${escHtml(addr) || '<span style="color:#ccc">-</span>'}</td>
+      <td class="td-memo">${escHtml(memo) || '<span style="color:#ccc">-</span>'}</td>
+      <td style="font-size:11px; color:var(--gray-text); white-space:nowrap;">${escHtml(item.statusName || '-')}</td>
+      <td style="font-size:12px; text-align:center;">${item.outboundCount ?? '-'}</td>
+      <td style="font-size:11px; color:var(--gray-text); white-space:nowrap;">${escHtml(item.createdDate || '-')}</td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+function renderPagination(totalPage, perPage) {
+  const pg = document.getElementById('pagination');
+  pg.innerHTML = '';
+  if (totalPage <= 1) return;
+
+  const prev = document.createElement('button');
+  prev.className = 'pg-btn'; prev.textContent = '←前';
+  prev.disabled = _currentPage <= 1;
+  prev.addEventListener('click', () => doSearch(_currentPage - 1));
+  pg.appendChild(prev);
+
+  const start = Math.max(1, _currentPage - 2);
+  const end = Math.min(totalPage, _currentPage + 2);
+  for (let i = start; i <= end; i++) {
+    const b = document.createElement('button');
+    b.className = 'pg-btn' + (i === _currentPage ? ' active' : '');
+    b.textContent = i;
+    const p = i;
+    b.addEventListener('click', () => doSearch(p));
+    pg.appendChild(b);
+  }
+
+  const next = document.createElement('button');
+  next.className = 'pg-btn'; next.textContent = '次→';
+  next.disabled = _currentPage >= totalPage;
+  next.addEventListener('click', () => doSearch(_currentPage + 1));
+  pg.appendChild(next);
+
+  const info = document.createElement('span');
+  info.style.cssText = 'font-size:11px; color:var(--gray-text); margin-left:8px;';
+  info.textContent = `全${totalPage}ページ`;
+  pg.appendChild(info);
+}
+
+function copyText(text) {
+  navigator.clipboard.writeText(text).then(() => showToast('コピーしました：' + text));
+}
+
+function exportCsv() {
+  const rows = [];
+  rows.push(['電話番号','都道府県','住所','メモ','ステータス','発信数','登録日']);
+  document.querySelectorAll('#results-body tr').forEach(tr => {
+    const cells = tr.querySelectorAll('td');
+    if (cells.length >= 7) {
+      rows.push([
+        cells[0].textContent.replace(/\s+/g,' ').trim().replace(/コピー/,''),
+        cells[1].textContent.trim(),
+        cells[2].textContent.trim(),
+        cells[3].textContent.trim(),
+        cells[4].textContent.trim(),
+        cells[5].textContent.trim(),
+        cells[6].textContent.trim()
+      ]);
+    }
+  });
+  const csv = rows.map(r => r.map(c => '"' + c.replace(/"/g,'""') + '"').join(',')).join('\n');
+  navigator.clipboard.writeText(csv).then(() => showToast('CSVをクリップボードにコピーしました'));
+}
+
+function escHtml(s) {
+  if (!s) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+</script>
+</body>
+</html>
