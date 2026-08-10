@@ -643,7 +643,7 @@
             <span id="results-page-info" style="color:var(--gray-text); font-size:12px;"></span>
           </div>
           <div style="display:flex; gap:6px;">
-            <button class="btn btn-ghost btn-sm" onclick="exportCsv()">CSVコピー</button>
+            <button class="btn btn-primary btn-sm" id="btn-download-csv" onclick="downloadAllCsv()">全件CSVダウンロード</button>
           </div>
         </div>
         <div style="overflow-x:auto;">
@@ -1074,25 +1074,76 @@ function copyText(text) {
   navigator.clipboard.writeText(text).then(() => showToast('コピーしました：' + text));
 }
 
-function exportCsv() {
-  const rows = [];
-  rows.push(['電話番号','都道府県','住所','メモ','ステータス','発信数','登録日']);
-  document.querySelectorAll('#results-body tr').forEach(tr => {
-    const cells = tr.querySelectorAll('td');
-    if (cells.length >= 7) {
-      rows.push([
-        cells[0].textContent.replace(/\s+/g,' ').trim().replace(/コピー/,''),
-        cells[1].textContent.trim(),
-        cells[2].textContent.trim(),
-        cells[3].textContent.trim(),
-        cells[4].textContent.trim(),
-        cells[5].textContent.trim(),
-        cells[6].textContent.trim()
-      ]);
+async function downloadAllCsv() {
+  const total = parseInt(document.getElementById('results-total').textContent.replace(/,/g,'')) || 0;
+  if (total === 0) { showToast('検索結果がありません'); return; }
+
+  const btn = document.getElementById('btn-download-csv');
+  btn.disabled = true;
+  btn.textContent = '取得中...';
+
+  const PER_PAGE = 100;
+  const totalPages = Math.ceil(total / PER_PAGE);
+  const allRows = [];
+  const filterParam = buildFilterParam();
+
+  try {
+    for (let page = 1; page <= totalPages; page++) {
+      showLoading(`全件取得中... ${page} / ${totalPages} ページ`);
+      const body = {
+        page,
+        displayCountPerPage: PER_PAGE,
+        isIncludeTotalListIds: false,
+        listFilterParam: filterParam
+      };
+      const res = await apiCall(`/api/project/${_projectId}/operation-target-lists/preview`, 'POST', body, authHeaders());
+      if (!res.data || res.data.message) {
+        showToast('取得エラー: ' + (res.data?.message || '不明なエラー'));
+        break;
+      }
+      (res.data.lists || []).forEach(item => {
+        let pref = '', addr = '', memo = '';
+        (item.hearingItems || []).forEach(h => {
+          const lbl = (h.label || '').toLowerCase();
+          if (h.id === _prefHearingItemId || lbl.includes('都道府県') || lbl.includes('pref')) pref = h.value || '';
+          else if (h.id === _addrHearingItemId || h.type === 'address' || lbl.includes('住所')) addr = h.value || '';
+          else if (h.type === 'memo' || lbl.includes('メモ') || lbl.includes('備考')) memo = h.value || '';
+        });
+        allRows.push([
+          item.phoneNumber || '',
+          pref,
+          addr,
+          memo,
+          item.statusName || '',
+          item.outboundCount ?? '',
+          item.createdDate || ''
+        ]);
+      });
     }
-  });
-  const csv = rows.map(r => r.map(c => '"' + c.replace(/"/g,'""') + '"').join(',')).join('\n');
-  navigator.clipboard.writeText(csv).then(() => showToast('CSVをクリップボードにコピーしました'));
+
+    const header = ['電話番号','都道府県','住所','メモ','ステータス','発信数','登録日'];
+    const csvContent = '\uFEFF' + [header, ...allRows]
+      .map(r => r.map(c => '"' + String(c).replace(/"/g,'""') + '"').join(','))
+      .join('\r\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const now = new Date();
+    const ts = `${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}_${String(now.getHours()).padStart(2,'0')}${String(now.getMinutes()).padStart(2,'0')}`;
+    a.href = url;
+    a.download = `lisnavi_export_${ts}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast(`${allRows.length.toLocaleString()}件をダウンロードしました`);
+
+  } catch(e) {
+    showToast('エラー: ' + e.message);
+  }
+
+  hideLoading();
+  btn.disabled = false;
+  btn.textContent = '全件CSVダウンロード';
 }
 
 function escHtml(s) {
