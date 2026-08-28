@@ -1,0 +1,1364 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ジョブコンプラス 架電スクリプト</title>
+<style>
+:root{
+  --navy:#1a3560;--navy2:#0f2240;--navy-bg:#eef3fb;--navy-light:#d4e4f7;
+  --green:#0b5e3c;--green2:#0e7a4e;--green-bg:#e4f2ea;--green-light:#b8dfc9;
+  --red:#b0001a;--red-bg:#fce8eb;--red-light:#f9c0c8;
+  --amber:#7a5000;--amber-bg:#fff6dc;--amber-light:#ffd97a;
+  --gray:#f3f5f8;--border:#dde2ea;--text:#111827;--muted:#6b7280;
+  --shadow:0 2px 8px rgba(0,0,0,.08);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Meiryo','メイリオ','Hiragino Kaku Gothic ProN',sans-serif;font-size:14px;background:var(--gray);color:var(--text);line-height:1.5;}
+
+/* ── ヘッダー ── */
+.hd{background:var(--navy);color:#fff;padding:11px 18px;position:sticky;top:0;z-index:300;box-shadow:0 2px 6px rgba(0,0,0,.2);}
+.hd-inner{display:flex;align-items:center;justify-content:space-between;}
+.hd-title{font-size:15px;font-weight:700;letter-spacing:.3px;}
+.hd-sub{font-size:10px;opacity:.5;margin-top:1px;}
+
+/* ── タブ ── */
+.nav{display:flex;background:var(--navy2);position:sticky;top:47px;z-index:299;overflow-x:auto;scrollbar-width:none;border-bottom:2px solid #06121f;}
+.nav::-webkit-scrollbar{display:none;}
+.nb{flex-shrink:0;padding:10px 18px;font-size:12px;font-weight:700;color:rgba(255,255,255,.4);background:none;border:none;border-bottom:3px solid transparent;cursor:pointer;white-space:nowrap;}
+.nb.on{color:#fff;border-bottom-color:#5ba3f5;}
+.nb:hover{color:rgba(255,255,255,.75);}
+
+/* ── ページ ── */
+.pg{display:none;max-width:900px;margin:0 auto;padding:16px 14px 100px;}
+.pg.on{display:block;}
+
+/* ════════════════════════════════
+   スクリプト ステップナビ
+════════════════════════════════ */
+.step-nav{
+  background:#fff;border:1px solid var(--border);border-radius:12px;
+  padding:14px 16px;margin-bottom:16px;
+  box-shadow:var(--shadow);
+  position:sticky;top:90px;z-index:100;
+}
+.step-nav-title{font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.8px;margin-bottom:10px;}
+.step-nav-dots{display:flex;align-items:center;gap:0;overflow-x:auto;scrollbar-width:none;padding-bottom:4px;}
+.step-nav-dots::-webkit-scrollbar{display:none;}
+.snd-item{display:flex;flex-direction:column;align-items:center;flex-shrink:0;}
+.snd-dot{
+  width:36px;height:36px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:13px;font-weight:700;color:#fff;cursor:pointer;
+  transition:transform .1s,box-shadow .1s;
+  border:2px solid transparent;
+}
+.snd-dot:hover{transform:scale(1.1);box-shadow:0 3px 8px rgba(0,0,0,.15);}
+.snd-dot.navy{background:var(--navy);}
+.snd-dot.green{background:var(--green);}
+.snd-dot.amber{background:#8b5a00;}
+.snd-label{font-size:9px;font-weight:700;margin-top:4px;text-align:center;color:var(--muted);white-space:nowrap;width:44px;overflow:hidden;text-overflow:ellipsis;}
+.snd-line{width:18px;height:2px;background:var(--border);flex-shrink:0;margin-bottom:18px;}
+
+/* ════════════════════════════════
+   ステップカード
+════════════════════════════════ */
+.step-card{
+  background:#fff;border-radius:12px;
+  margin-bottom:20px;overflow:hidden;
+  box-shadow:var(--shadow);
+  border:1px solid var(--border);
+  scroll-margin-top:160px;
+}
+.step-card.green-card{border-color:var(--green-light);box-shadow:0 2px 12px rgba(11,94,60,.1);}
+.step-card.amber-card{border-color:var(--amber-light);box-shadow:0 2px 12px rgba(122,80,0,.1);}
+
+/* ステップヘッダー */
+.sc-head{
+  display:flex;align-items:center;gap:14px;
+  padding:14px 18px;
+  color:#fff;
+}
+.sc-head.navy{background:linear-gradient(135deg,var(--navy) 0%,#224080 100%);}
+.sc-head.green{background:linear-gradient(135deg,var(--green) 0%,var(--green2) 100%);}
+.sc-head.amber{background:linear-gradient(135deg,#6b4400 0%,#9b6600 100%);}
+.sc-num{
+  font-size:22px;font-weight:700;
+  width:48px;height:48px;border-radius:10px;
+  background:rgba(255,255,255,.15);
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;letter-spacing:-1px;border:1px solid rgba(255,255,255,.2);
+}
+.sc-title{font-size:16px;font-weight:700;line-height:1.25;}
+.sc-sub{font-size:11px;opacity:.7;margin-top:3px;}
+
+/* ── 吹き出し（スピーチバブル） ── */
+.bubbles{padding:16px 18px;display:flex;flex-direction:column;gap:14px;}
+.bubble-row{display:flex;gap:10px;align-items:flex-start;}
+.bubble-row.kyaku{flex-direction:row-reverse;}
+
+.bubble-avatar{
+  flex-shrink:0;width:36px;height:36px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:10px;font-weight:700;
+}
+.bubble-avatar.tantou{background:var(--navy);color:#fff;}
+.bubble-avatar.kyaku{background:#e0d4c8;color:#5b3a00;}
+
+.bubble-content{max-width:calc(100% - 52px);}
+.bubble-name{font-size:10px;font-weight:700;color:var(--muted);margin-bottom:4px;letter-spacing:.5px;}
+.bubble-row.kyaku .bubble-name{text-align:right;}
+.bubble-text{
+  font-size:14px;line-height:1.8;
+  padding:12px 15px;border-radius:12px;
+  position:relative;
+}
+.bubble-text.tantou{
+  background:var(--navy-bg);color:var(--text);
+  border-top-left-radius:3px;
+}
+.bubble-text.kyaku{
+  background:#f2ece5;color:var(--text);
+  border-top-right-radius:3px;
+}
+.bubble-text b{color:var(--navy);}
+
+/* ── 必須フレーズ 特大BOX ── */
+.must-box{margin:0;border-top:1px solid var(--border);}
+.must-label{
+  display:flex;align-items:center;gap:8px;
+  font-size:11px;font-weight:700;letter-spacing:.8px;
+  padding:10px 18px;
+}
+.must-label.green{background:var(--green);color:#fff;}
+.must-label.navy{background:var(--navy);color:#fff;}
+.must-label .ml-icon{
+  width:20px;height:20px;border-radius:50%;
+  background:rgba(255,255,255,.25);
+  display:flex;align-items:center;justify-content:center;
+  font-size:12px;
+}
+.must-text{
+  font-size:24px;font-weight:700;line-height:1.65;
+  padding:22px 22px 24px;
+  letter-spacing:.2px;
+}
+.must-text.green{background:var(--green-bg);color:#063d26;}
+.must-text.navy{background:var(--navy-bg);color:#0d1e47;}
+
+/* ── NG / OK 比較パネル ── */
+.compare{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid var(--border);}
+.compare-col{padding:14px 16px;}
+.compare-col.ng-col{background:var(--red-bg);border-right:1px solid var(--red-light);}
+.compare-col.ok-col{background:var(--green-bg);}
+.compare-title{font-size:11px;font-weight:700;margin-bottom:8px;letter-spacing:.5px;}
+.compare-title.ng{color:var(--red);}
+.compare-title.ok{color:var(--green);}
+.compare-item{font-size:12px;line-height:1.6;margin-bottom:4px;}
+.compare-item.ng{color:var(--red);}
+.compare-item.ok{color:var(--green);}
+
+/* ── タグバー ── */
+.tagbar{
+  display:flex;gap:10px;align-items:flex-start;
+  padding:11px 18px;font-size:13px;font-weight:600;line-height:1.55;
+  border-top:1px solid var(--border);
+}
+.tagbar.ng{background:var(--red-bg);color:var(--red);}
+.tagbar.ok{background:var(--green-bg);color:var(--green);}
+.tagbar.note{background:var(--amber-bg);color:var(--amber);}
+.tag-mark{font-size:14px;flex-shrink:0;margin-top:1px;}
+
+/* ── サブヘッド ── */
+.sub-head{
+  font-size:12px;font-weight:700;
+  padding:8px 18px;
+  border-top:1px solid var(--border);border-bottom:1px solid var(--border);
+}
+.sub-head.navy{background:var(--navy-bg);color:var(--navy);}
+.sub-head.green{background:var(--green-bg);color:var(--green);}
+.sub-head.red{background:var(--red-bg);color:var(--red);}
+
+/* ── 4点グリッド（STEP3） ── */
+.four-grid{
+  display:grid;grid-template-columns:1fr 1fr;
+  gap:10px;padding:14px 18px;
+  border-bottom:1px solid var(--border);
+}
+.four-item{
+  background:var(--navy-bg);border-radius:8px;
+  padding:10px 13px;border-left:4px solid var(--navy);
+}
+.four-num{font-size:10px;font-weight:700;color:var(--navy);opacity:.6;margin-bottom:3px;letter-spacing:.5px;}
+.four-title{font-size:13px;font-weight:700;color:var(--navy);}
+.four-eg{font-size:11px;color:var(--muted);margin-top:3px;}
+
+/* ── YES/NOツリー ── */
+.tree-wrap{background:var(--gray);border-top:1px solid var(--border);padding:16px 18px;}
+.tree-title{font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.8px;margin-bottom:14px;}
+.tree-root{display:flex;flex-direction:column;align-items:center;}
+.tree-node{
+  border-radius:8px;padding:10px 16px;
+  font-size:13px;font-weight:700;text-align:center;
+  width:100%;max-width:300px;
+}
+.tree-node.question{background:var(--amber-bg);color:var(--amber);border:2px solid var(--amber-light);}
+.tree-node.ans-yes{background:var(--green-bg);color:var(--green);border:1px solid var(--green-light);font-size:12px;}
+.tree-node.ans-no{background:#f0f1f4;color:var(--muted);border:1px solid var(--border);font-size:12px;}
+.tree-talk{
+  background:#fff;border:1px solid var(--border);border-radius:8px;
+  padding:10px 13px;font-size:13px;line-height:1.7;width:100%;
+}
+.tree-closing{
+  background:var(--green-bg);border:2px solid var(--green-light);border-radius:8px;
+  padding:12px 14px;font-size:14px;font-weight:700;line-height:1.6;
+  color:#063d26;width:100%;text-align:center;
+}
+.tree-end{
+  background:#f0f1f4;border:1px solid var(--border);border-radius:8px;
+  padding:10px 13px;font-size:12px;line-height:1.6;color:var(--muted);width:100%;
+}
+.tree-arr{width:2px;height:16px;background:var(--border);margin:6px auto;}
+.tree-branch{display:flex;gap:14px;width:100%;}
+.tree-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;}
+.tree-badge{font-size:11px;font-weight:700;padding:3px 10px;border-radius:4px;}
+.tree-badge.yes{background:var(--green-bg);color:var(--green);}
+.tree-badge.no{background:var(--red-bg);color:var(--red);}
+
+/* ── アラート ── */
+.alert{font-size:12px;font-weight:700;padding:9px 14px;border-radius:7px;margin-bottom:10px;line-height:1.55;}
+.alert.red{background:var(--red-bg);color:var(--red);border-left:4px solid var(--red);}
+.alert.note{background:var(--amber-bg);color:var(--amber);border-left:4px solid var(--amber-light);}
+.alert.green{background:var(--green-bg);color:var(--green);border-left:4px solid var(--green);}
+
+/* ════════════════════════════════
+   指摘ランキング
+════════════════════════════════ */
+.rank-card{background:#fff;border-radius:12px;margin-bottom:16px;overflow:hidden;box-shadow:var(--shadow);}
+.rank-head{background:var(--red);color:#fff;padding:11px 18px;font-size:13px;font-weight:700;}
+.rank-rows{padding:14px 18px;}
+.rank-row{margin-bottom:12px;display:flex;flex-direction:column;gap:4px;}
+.rank-row:last-child{margin-bottom:0;}
+.rank-meta{display:flex;align-items:center;gap:8px;}
+.rank-badge{
+  font-size:11px;font-weight:700;width:28px;height:28px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;color:#fff;flex-shrink:0;
+}
+.rank-badge.r1{background:#8b0000;}
+.rank-badge.r2{background:#b8001a;}
+.rank-badge.r3{background:#d9314a;}
+.rank-badge.r4{background:#e06c3a;}
+.rank-badge.r5{background:#d4a017;}
+.rank-badge.r6{background:#6aaa2a;}
+.rank-text{font-size:13px;font-weight:700;}
+.rank-bar-wrap{background:var(--gray);border-radius:4px;height:8px;overflow:hidden;}
+.rank-bar{height:100%;border-radius:4px;}
+.rank-bar.r1{background:#8b0000;}
+.rank-bar.r2{background:#b8001a;}
+.rank-bar.r3{background:#d9314a;}
+.rank-bar.r4{background:#e06c3a;}
+.rank-bar.r5{background:#d4a017;}
+.rank-bar.r6{background:#6aaa2a;}
+.rank-count{font-size:11px;color:var(--muted);font-weight:600;}
+
+/* ════════════════════════════════
+   ビジュアルフロー
+════════════════════════════════ */
+.vflow-card{background:#fff;border-radius:12px;margin-bottom:16px;overflow:hidden;box-shadow:var(--shadow);}
+.vflow-head{background:var(--navy);color:#fff;padding:11px 18px;font-size:13px;font-weight:700;}
+.vflow-body{padding:18px 16px 14px;overflow-x:auto;}
+.vflow{display:flex;align-items:flex-start;gap:0;min-width:560px;}
+.vf-item{flex:1;display:flex;flex-direction:column;align-items:center;position:relative;}
+.vf-item+.vf-item::before{
+  content:'';position:absolute;top:19px;left:0;
+  width:50%;height:2px;background:var(--border);z-index:0;
+}
+.vf-item+.vf-item::after{
+  content:'';position:absolute;top:19px;right:0;
+  width:50%;height:2px;background:var(--border);z-index:0;
+}
+.vf-circle{
+  width:38px;height:38px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:14px;font-weight:700;color:#fff;
+  position:relative;z-index:1;
+  box-shadow:0 2px 6px rgba(0,0,0,.15);
+}
+.vf-circle.navy{background:var(--navy);}
+.vf-circle.green{background:var(--green);box-shadow:0 2px 8px rgba(11,94,60,.3);}
+.vf-circle.amber{background:#8b5a00;}
+.vf-text{font-size:10px;font-weight:700;text-align:center;margin-top:6px;line-height:1.35;color:var(--text);}
+.vf-sub{font-size:9px;color:var(--muted);text-align:center;margin-top:1px;}
+.vflow-legend{display:flex;gap:16px;padding:8px 18px 14px;flex-wrap:wrap;}
+.vfl-item{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:700;}
+.vfl-dot{width:12px;height:12px;border-radius:50%;}
+
+/* ════════════════════════════════
+   チェックリスト
+════════════════════════════════ */
+.progress-card{
+  background:var(--navy);color:#fff;border-radius:12px;
+  padding:14px 18px;margin-bottom:14px;
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  box-shadow:var(--shadow);
+}
+.progress-label{font-size:11px;font-weight:700;opacity:.65;margin-bottom:4px;}
+.progress-count{font-size:28px;font-weight:700;line-height:1;}
+.progress-bar-wrap{background:rgba(255,255,255,.15);border-radius:4px;height:6px;margin-top:8px;width:180px;}
+.progress-bar{background:#4dd9a0;border-radius:4px;height:6px;transition:width .3s;}
+.btn-reset{font-size:11px;font-weight:700;color:rgba(255,255,255,.55);background:none;border:1px solid rgba(255,255,255,.2);border-radius:5px;padding:5px 12px;cursor:pointer;}
+.cl-group{margin-bottom:14px;}
+.cl-group-title{font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.8px;margin-bottom:7px;padding:0 2px;}
+.cl-item{
+  display:flex;align-items:center;gap:12px;
+  background:#fff;border:1.5px solid var(--border);border-radius:9px;
+  padding:13px 15px;margin-bottom:6px;cursor:pointer;
+  transition:all .12s;box-shadow:0 1px 3px rgba(0,0,0,.04);
+}
+.cl-item:hover{border-color:#9ab4d8;box-shadow:0 2px 6px rgba(0,0,0,.08);}
+.cl-item.done{background:var(--green-bg);border-color:var(--green-light);}
+.cl-item.done .cl-text{color:var(--green);text-decoration:line-through;opacity:.7;}
+.cl-item.warn{border-color:var(--amber-light);}
+.cl-item.done.warn{background:var(--green-bg);border-color:var(--green-light);}
+.cl-check{
+  width:24px;height:24px;flex-shrink:0;
+  border:2px solid var(--border);border-radius:6px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:14px;font-weight:700;color:transparent;transition:all .12s;
+}
+.cl-item.done .cl-check{background:var(--green);border-color:var(--green);color:#fff;}
+.cl-item.warn .cl-check{border-color:var(--amber-light);}
+.cl-text{font-size:13px;font-weight:600;line-height:1.45;color:var(--text);}
+
+/* ════════════════════════════════
+   電話番号・テーブル
+════════════════════════════════ */
+.tcard{background:#fff;border-radius:12px;margin-bottom:14px;overflow:hidden;box-shadow:var(--shadow);}
+.tcard-head{padding:11px 18px;font-size:13px;font-weight:700;color:#fff;}
+.tcard-head.navy{background:var(--navy);}
+.tcard-head.green{background:var(--green);}
+.tcard-head.red{background:var(--red);}
+.tbl{width:100%;border-collapse:collapse;font-size:13px;}
+.tbl th{background:var(--navy);color:#fff;padding:9px 13px;text-align:left;font-weight:700;}
+.tbl th.green{background:var(--green);}
+.tbl td{padding:10px 13px;border-bottom:1px solid var(--border);vertical-align:top;}
+.tbl tr:nth-child(even) td{background:#f8f9fb;}
+.tbl td.q{font-weight:700;color:var(--green);width:40%;}
+.tel-n{font-size:16px;font-weight:700;color:var(--navy);}
+.rl{list-style:none;}
+.rl li{display:flex;gap:10px;padding:10px 14px;border-bottom:1px solid var(--border);font-size:13px;line-height:1.55;background:#fff;}
+.rl li:nth-child(even){background:#f8f9fb;}
+.rn{flex-shrink:0;width:24px;height:24px;background:var(--red-bg);color:var(--red);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;margin-top:1px;}
+
+/* ════════════════════════════════
+   断り・FAQカード
+════════════════════════════════ */
+.refusal-card{background:#fff;border-radius:12px;margin-bottom:14px;overflow:hidden;box-shadow:var(--shadow);}
+.ref-head{padding:11px 18px;font-size:13px;font-weight:700;color:#fff;background:var(--navy);}
+.ref-body{padding:16px 18px;}
+.fc-wrap{display:flex;flex-direction:column;align-items:center;gap:0;}
+.fc-node{border-radius:8px;padding:10px 16px;font-size:13px;font-weight:700;text-align:center;width:100%;max-width:320px;}
+.fc-node.start{background:var(--navy);color:#fff;}
+.fc-node.q{background:var(--amber-bg);color:var(--amber);border:2px solid var(--amber-light);}
+.fc-node.action{background:var(--navy-bg);color:var(--navy);border:1px solid var(--navy-light);font-size:12px;}
+.fc-node.end{background:var(--gray);color:var(--muted);border:1px solid var(--border);font-size:12px;}
+.fc-node.success{background:var(--green-bg);color:var(--green);border:1px solid var(--green-light);}
+.fc-arr{display:flex;flex-direction:column;align-items:center;margin:4px 0;}
+.fc-line{width:2px;height:16px;background:var(--border);}
+.fc-head{width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-top:7px solid var(--border);}
+.fc-branch{display:flex;gap:12px;width:100%;max-width:480px;}
+.fc-bcol{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;}
+.fc-blabel{font-size:11px;font-weight:700;padding:3px 10px;border-radius:4px;margin-bottom:2px;}
+.fc-blabel.yes{background:var(--green-bg);color:var(--green);}
+.fc-blabel.no{background:var(--red-bg);color:var(--red);}
+.fc-blabel.work{background:var(--navy-bg);color:var(--navy);}
+.fc-blabel.nowork{background:var(--amber-bg);color:var(--amber);}
+.qa-block{margin-bottom:10px;}
+.qa-q{background:var(--green);color:#fff;font-size:13px;font-weight:700;padding:9px 15px;border-radius:8px 8px 0 0;}
+.qa-a{background:#fff;border:1px solid var(--border);border-top:none;padding:13px 15px;font-size:13px;line-height:1.75;border-radius:0 0 8px 8px;}
+.qa-ng{background:var(--red-bg);color:var(--red);font-size:12px;font-weight:700;padding:8px 15px;border:1px solid var(--red-light);border-top:none;border-radius:0 0 8px 8px;}
+
+/* ── 時間帯チャート ── */
+.time-chart{padding:16px 18px 20px;}
+.time-bars{display:flex;align-items:flex-end;gap:5px;height:80px;border-bottom:2px solid var(--border);}
+.tbar{flex:1;border-radius:4px 4px 0 0;position:relative;}
+.tbar-tip{position:absolute;bottom:calc(100% + 3px);left:50%;transform:translateX(-50%);font-size:9px;font-weight:700;white-space:nowrap;color:var(--muted);}
+.time-labels{display:flex;gap:5px;margin-top:5px;}
+.tlabel{flex:1;text-align:center;font-size:9px;color:var(--muted);font-weight:600;}
+.tlegend{display:flex;gap:14px;margin-top:12px;flex-wrap:wrap;}
+.tleg-item{display:flex;align-items:center;gap:5px;font-size:11px;font-weight:700;}
+.tleg-dot{width:10px;height:10px;border-radius:2px;}
+
+/* 区切り */
+.sec-title{font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.8px;margin:18px 0 8px;}
+.divider{height:1px;background:var(--border);margin:20px 0;}
+</style>
+</head>
+<body>
+
+<div class="hd">
+  <div class="hd-inner">
+    <div>
+      <div class="hd-title">ジョブコンプラス　架電スクリプト</div>
+      <div class="hd-sub">工場・製造業 求人サイト　求職者向け架電専用</div>
+    </div>
+  </div>
+</div>
+
+<div class="nav">
+  <button class="nb on" onclick="go('script')">スクリプト</button>
+  <button class="nb" onclick="go('follow')">フォローコール</button>
+  <button class="nb" onclick="go('refusal')">断り・FAQ</button>
+  <button class="nb" onclick="go('tel')">電話番号</button>
+  <button class="nb" onclick="go('rules')">ルール</button>
+</div>
+
+
+<!-- ══════════════════════════════════
+     スクリプト
+══════════════════════════════════ -->
+<div id="script" class="pg on">
+
+  <!-- ビジュアルフロー -->
+  <div class="vflow-card">
+    <div class="vflow-head">架電の流れ　—　全7ステップ</div>
+    <div class="vflow-body">
+      <div class="vflow">
+        <div class="vf-item"><div class="vf-circle navy">1</div><div class="vf-text">オープナー</div><div class="vf-sub">状況確認・分岐</div></div>
+        <div class="vf-item"><div class="vf-circle navy">2</div><div class="vf-text">ヒアリング</div><div class="vf-sub">希望条件確認</div></div>
+        <div class="vf-item"><div class="vf-circle navy">3</div><div class="vf-text">求人案内</div><div class="vf-sub">4点伝達</div></div>
+        <div class="vf-item"><div class="vf-circle navy">4</div><div class="vf-text">応募条件</div><div class="vf-sub">応募歴確認</div></div>
+        <div class="vf-item"><div class="vf-circle green">5</div><div class="vf-text" style="color:var(--green);font-weight:700;">中間YES</div><div class="vf-sub" style="color:var(--green);">最重要</div></div>
+        <div class="vf-item"><div class="vf-circle navy">6</div><div class="vf-text">YES後</div><div class="vf-sub">住所・健康等</div></div>
+        <div class="vf-item"><div class="vf-circle green">7</div><div class="vf-text" style="color:var(--green);font-weight:700;">最終締め</div><div class="vf-sub" style="color:var(--green);">折り返し</div></div>
+      </div>
+    </div>
+    <div class="vflow-legend">
+      <div class="vfl-item"><div class="vfl-dot" style="background:var(--navy);"></div>通常ステップ</div>
+      <div class="vfl-item" style="color:var(--green);"><div class="vfl-dot" style="background:var(--green);"></div>重要クロージング</div>
+
+    </div>
+  </div>
+
+  <!-- ステップナビ -->
+  <div class="step-nav">
+    <div class="step-nav-title">ステップに直接ジャンプ</div>
+    <div class="step-nav-dots">
+      <div class="snd-item"><div class="snd-dot navy" onclick="jumpTo('s1')">1</div><div class="snd-label">状況確認</div></div>
+      <div class="snd-line"></div>
+      <div class="snd-item"><div class="snd-dot navy" onclick="jumpTo('s2')">2</div><div class="snd-label">ヒアリング</div></div>
+      <div class="snd-line"></div>
+      <div class="snd-item"><div class="snd-dot navy" onclick="jumpTo('s3')">3</div><div class="snd-label">求人案内</div></div>
+      <div class="snd-line"></div>
+      <div class="snd-item"><div class="snd-dot navy" onclick="jumpTo('s4')">4</div><div class="snd-label">応募条件</div></div>
+      <div class="snd-line"></div>
+      <div class="snd-item"><div class="snd-dot green" onclick="jumpTo('s5')">5</div><div class="snd-label">中間YES</div></div>
+      <div class="snd-line"></div>
+      <div class="snd-item"><div class="snd-dot navy" onclick="jumpTo('s6')">6</div><div class="snd-label">YES後確認</div></div>
+      <div class="snd-line"></div>
+      <div class="snd-item"><div class="snd-dot green" onclick="jumpTo('s7')">7</div><div class="snd-label">最終締め</div></div>
+    </div>
+  </div>
+
+  <!-- STEP 1 -->
+  <div class="step-card" id="s1">
+    <div class="sc-head navy">
+      <div class="sc-num">1</div>
+      <div>
+        <div class="sc-title">オープナー　／　ご挨拶と状況確認</div>
+        <div class="sc-sub">求職状況を確認してから分岐へ　—　フルネームで必ず本人確認</div>
+      </div>
+    </div>
+    <div class="sub-head navy" style="margin:0 0 8px;">登録区分別　導入トーク</div>
+    <div style="display:flex;flex-direction:column;gap:8px;padding:0 16px 12px;">
+
+      <div style="border:1px solid var(--navy-light);border-radius:8px;overflow:hidden;">
+        <div style="background:var(--navy);color:#fff;font-size:12px;font-weight:700;padding:5px 12px;">会員登録者</div>
+        <div style="padding:10px 12px;background:var(--navy-bg);font-size:13px;line-height:1.7;">「お世話になっております。ジョブコンプラス サポートセンターの〇〇と申します。<br>現在、ジョブコンプラスにご登録いただいた皆様へ、サポートのご連絡をしております。<br><b>△△様</b>、現在も継続してお仕事探し中でしょうか？」</div>
+      </div>
+
+      <div style="border:1px solid var(--green-light);border-radius:8px;overflow:hidden;">
+        <div style="background:var(--green);color:#fff;font-size:12px;font-weight:700;padding:5px 12px;">新規応募者</div>
+        <div style="padding:10px 12px;background:#eef7f4;font-size:13px;line-height:1.7;">「お世話になっております。ジョブコンプラス サポートセンターの〇〇と申します。<br>現在、ジョブコンプラスにご登録いただいた皆様へ、状況伺いとサポートのご連絡をしております。<br><b>△△様</b>、現在も継続してお仕事探し中でしょうか？」</div>
+      </div>
+
+      <div style="border:1px solid var(--amber-light);border-radius:8px;overflow:hidden;">
+        <div style="background:var(--amber);color:#fff;font-size:12px;font-weight:700;padding:5px 12px;">古参応募者（1か月以上前の登録者）</div>
+        <div style="padding:10px 12px;background:var(--amber-bg);font-size:13px;line-height:1.7;">「お世話になっております。ジョブコンプラス サポートセンターの〇〇と申します。<br>過去、ジョブコンプラスにご登録いただいた皆様へ、状況伺いとサポートのご連絡をしております。<br><b>△△様</b>、現在はお仕事探し中でしょうか？」</div>
+      </div>
+
+    </div>
+
+    <div class="sub-head navy">求職者の状況別　分岐フロー</div>
+    <div style="padding:14px 16px;display:flex;flex-direction:column;gap:8px;">
+
+      <div style="display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:10px;background:var(--navy-bg);border:1px solid var(--navy-light);border-radius:8px;padding:10px 13px;">
+        <div style="font-size:20px;">A</div>
+        <div>
+          <div style="font-size:12px;font-weight:700;color:var(--navy);">「まだ探している」→ 求職中</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:2px;">「承知いたしました。現在ですと、△△様のご希望に近い案件がいくつかございます。差し支えなければ、特に優先したい条件（職種や勤務地など）を伺ってもよろしいでしょうか？」</div>
+        </div>
+        <div onclick="jumpTo('s2')" style="font-size:11px;font-weight:700;color:var(--navy);background:var(--navy-light);padding:3px 8px;border-radius:4px;white-space:nowrap;cursor:pointer;">STEP 2へ ▶</div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:10px;background:#eef7f4;border:1px solid var(--green-light);border-radius:8px;padding:10px 13px;">
+        <div style="font-size:20px;">B</div>
+        <div>
+          <div style="font-size:12px;font-weight:700;color:var(--green);">「就業中だが探したい」→ 潜在ニーズあり</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:2px;">「そうだったのですね。お忙しい中ありがとうございます。今のお仕事を変えようかなと思われた、何かきっかけや、現状の職場での『こうなればいいな』というご希望はございますか？もしよろしければ、今後のための情報収集としてお手伝いさせてください。」</div>
+        </div>
+        <div onclick="jumpTo('s2')" style="font-size:11px;font-weight:700;color:var(--green);background:var(--green-light);padding:3px 8px;border-radius:4px;white-space:nowrap;cursor:pointer;">STEP 2へ ▶</div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:auto 1fr;align-items:center;gap:10px;background:var(--amber-bg);border:1px solid var(--amber-light);border-radius:8px;padding:10px 13px;">
+        <div style="font-size:20px;">C</div>
+        <div>
+          <div style="font-size:12px;font-weight:700;color:var(--amber);">「選考結果待ち」→ 応援＆再接触予約</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:2px;">「そうでしたか！良いご縁となるよう応援しております。ちなみに、結果はいつ頃出るご予定でしょうか？万が一ご縁がなかった場合に、すぐ代わりのご提案ができるよう、その時期に改めて状況を伺ってもよろしいでしょうか？」</div>
+          <div style="font-size:11px;font-weight:700;color:var(--amber);margin-top:5px;">→ 結果時期を確認して再架電を設定してから終話</div>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:auto 1fr;align-items:center;gap:10px;background:#f0f1f4;border:1px solid var(--border);border-radius:8px;padding:10px 13px;">
+        <div style="font-size:20px;">D</div>
+        <div>
+          <div style="font-size:12px;font-weight:700;color:var(--muted);">「もう決まった」→ お祝い＋就業予定を確認してから終了</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:2px;">「そうなのですね！就職決定、誠におめでとうございます！いつ頃の就業予定でしょうか。」</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:4px;">（就業日確認後）「今回はサポートの出番がなく安心いたしました。もし今後またお探しになる機会がございましたら、いつでもジョブコンプラスを頼ってくださいね。本日はご回答ありがとうございました。」</div>
+          <div style="font-size:11px;font-weight:700;color:var(--muted);margin-top:5px;">→ 就業予定日を確認してから丁寧に終話</div>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:10px;background:#fdf0f8;border:1px solid #e8b4d8;border-radius:8px;padding:10px 13px;">
+        <div style="font-size:20px;">E</div>
+        <div>
+          <div style="font-size:12px;font-weight:700;color:#7a1f5a;">「検討中だが迷っている」→ 決め手の深掘り</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:2px;">「ご検討中なのですね。迷われているということは、何か気になる点があるのでしょうか？『ここさえ良ければ決めたい』という条件や、逆に『ここが少し引っかかる』というポイントなど、もしよろしければ整理のお手伝いをさせてください。」</div>
+        </div>
+        <div onclick="jumpTo('s2')" style="font-size:11px;font-weight:700;color:#7a1f5a;background:#f5d0ea;padding:3px 8px;border-radius:4px;white-space:nowrap;cursor:pointer;">STEP 2へ ▶</div>
+      </div>
+
+    </div>
+    <div class="tagbar note">
+      <div class="tag-mark">注</div>
+      <div>「時間がない」→ 断り対応1へ　　C・Dの場合はSTEP 2以降には進まず、案内または終話で完了</div>
+    </div>
+  </div>
+
+  <!-- STEP 2 -->
+  <div class="step-card" id="s2">
+    <div class="sc-head navy">
+      <div class="sc-num">2</div>
+      <div>
+        <div class="sc-title">ヒアリング</div>
+        <div class="sc-sub">希望条件を確認してから求人案内へ　—　指摘3位</div>
+      </div>
+    </div>
+    <div class="bubbles">
+      <div class="bubble-row">
+        <div class="bubble-avatar tantou">担当</div>
+        <div class="bubble-content">
+          <div class="bubble-name">年齢確認</div>
+          <div class="bubble-text tantou">「現在、年齢は〇〇歳でお間違いなかったでしょうか？」</div>
+        </div>
+      </div>
+      <div class="bubble-row">
+        <div class="bubble-avatar tantou">担当</div>
+        <div class="bubble-content">
+          <div class="bubble-name">エリア・寮の希望</div>
+          <div class="bubble-text tantou">「通勤可能なエリアを教えていただけますか？入寮は可能でしょうか？」</div>
+        </div>
+      </div>
+      <div class="bubble-row">
+        <div class="bubble-avatar tantou">担当</div>
+        <div class="bubble-content">
+          <div class="bubble-name">希望職種・働き方</div>
+          <div class="bubble-text tantou">「ご希望の仕事内容はございますか？重労働でも高収入が良いか、軽作業で負担少な目かどちらがご希望ですか？」</div>
+        </div>
+      </div>
+      <div class="bubble-row">
+        <div class="bubble-avatar tantou">担当</div>
+        <div class="bubble-content">
+          <div class="bubble-name">月収希望</div>
+          <div class="bubble-text tantou">「月収は最低いくらほしいなどのご希望はございますか？」</div>
+        </div>
+      </div>
+    </div>
+    <div class="tagbar ng">
+      <div class="tag-mark">×</div>
+      <div>希望エリアと全く異なる案件を紹介しない（指摘3位：山形希望→三重紹介など）</div>
+    </div>
+  </div>
+
+  <!-- STEP 3 -->
+  <div class="step-card" id="s3">
+    <div class="sc-head navy">
+      <div class="sc-num">3</div>
+      <div>
+        <div class="sc-title">求人のご案内</div>
+        <div class="sc-sub">下記4点を必ず全部伝える　—　指摘5位</div>
+      </div>
+    </div>
+    <div class="four-grid">
+      <div class="four-item">
+        <div class="four-num">伝達必須　1</div>
+        <div class="four-title">雇用形態</div>
+        <div class="four-eg">派遣 / アルバイト / 正社員 等</div>
+      </div>
+      <div class="four-item">
+        <div class="four-num">伝達必須　2</div>
+        <div class="four-title">月収例</div>
+        <div class="four-eg">〇〇万円〜</div>
+      </div>
+      <div class="four-item">
+        <div class="four-num">伝達必須　3</div>
+        <div class="four-title">勤務地</div>
+        <div class="four-eg">〇〇県〇〇市・〇〇エリア</div>
+      </div>
+      <div class="four-item">
+        <div class="four-num">伝達必須　4</div>
+        <div class="four-title">業務内容</div>
+        <div class="four-eg">ピッキング・軽作業 等</div>
+      </div>
+      <div class="four-item" style="grid-column:1/-1;">
+        <div class="four-num">伝達必須　5</div>
+        <div class="four-title">求人会社名</div>
+        <div class="four-eg">◻◻（会社名を必ず明言する）</div>
+      </div>
+    </div>
+    <div class="bubbles" style="padding-top:12px;">
+      <div class="bubble-row">
+        <div class="bubble-avatar tantou">担当</div>
+        <div class="bubble-content">
+          <div class="bubble-name">担当者　—　上記4点を読み上げる</div>
+          <div class="bubble-text tantou">「△△様にぴったりの求人をご案内させていただきます。雇用形態は【〇〇】、月収例は〇〇円、勤務地は〇〇県〇〇市、業務内容は〇〇（ピッキング・軽作業など）となっております。求人会社は◻◻になります。細かい条件は面談の際に担当から詳しくご説明いただけます。」</div>
+        </div>
+      </div>
+    </div>
+    <div class="tagbar ng">
+      <div class="tag-mark">×</div>
+      <div>「担当者から説明します」だけで済ませない。上記4点を全部伝えてから次へ。</div>
+    </div>
+  </div>
+
+  <!-- STEP 4 -->
+  <div class="step-card" id="s4">
+    <div class="sc-head navy">
+      <div class="sc-num">4</div>
+      <div>
+        <div class="sc-title">応募条件の確認</div>
+        <div class="sc-sub">応募歴と就業時期を確認する</div>
+      </div>
+    </div>
+    <div class="bubbles">
+      <div class="bubble-row">
+        <div class="bubble-avatar tantou">担当</div>
+        <div class="bubble-content">
+          <div class="bubble-name">応募歴の確認</div>
+          <div class="bubble-text tantou">「ちなみに△△様、過去3ヶ月以内に（会社名）へご応募されたことはございますか？」</div>
+        </div>
+      </div>
+      <div class="bubble-row">
+        <div class="bubble-avatar tantou">担当</div>
+        <div class="bubble-content">
+          <div class="bubble-name">就業時期の確認</div>
+          <div class="bubble-text tantou">「もし求人内容が気に入っていただけた場合、1ヶ月以内のご就業は可能でしょうか？」</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 5 中間クロージング -->
+  <div class="step-card green-card" id="s5">
+    <div class="sc-head green">
+      <div class="sc-num">5</div>
+      <div>
+        <div class="sc-title">中間クロージング　—　YES取り</div>
+        <div class="sc-sub">指摘1位・2位　最重要ポイント　—　ここが一番大事</div>
+      </div>
+    </div>
+    <div class="must-box">
+      <div class="must-label green">
+        <div class="ml-icon">★</div>
+        必須フレーズ　—　そのまま読む
+      </div>
+      <div class="must-text green">「この後の流れは応募登録後に、求人のURLをメールにてお送りします。<br>その後、求人会社の担当の者より、詳細の話を含めた<b style="color:var(--red);">面談・選考</b>のご案内のご連絡を差し上げます。<br>お電話またはオンラインにてご対応いただくことが可能です。<br>以上の流れになりますので、求人会社の担当の者より、詳細の話を含めた<b style="color:var(--red);">面談・選考</b>のご案内の<b>ご連絡を差し上げてもよろしいでしょうか？</b>」</div>
+    </div>
+    <div class="compare">
+      <div class="compare-col ng-col">
+        <div class="compare-title ng">× これはNG</div>
+        <div class="compare-item ng">「お話だけ聞いていただく形でよろしいですか？」</div>
+        <div class="compare-item ng">「担当者から説明してもらうだけでいいですか？」</div>
+        <div class="compare-item ng">「面談だけ進めてもよいですか？」</div>
+        <div style="font-size:11px;color:var(--red);margin-top:6px;">→ YES取りとして成立しない</div>
+      </div>
+      <div class="compare-col ok-col">
+        <div class="compare-title ok">○ これがOK</div>
+        <div class="compare-item ok">「応募・選考・登録」という<br>言葉を使ってYESを取る</div>
+        <div style="font-size:11px;color:var(--green);margin-top:6px;">→ この言葉を使えばOK</div>
+      </div>
+    </div>
+    <div class="sub-head navy" style="margin-top:12px;">Noだった場合の対応</div>
+    <div class="bubbles">
+      <div class="bubble-row">
+        <div class="bubble-avatar tantou">担当</div>
+        <div class="bubble-content">
+          <div class="bubble-name">担当者　—　懸念点を確認して再提案へ</div>
+          <div class="bubble-text tantou">「さようでございますか。差し支えなければ、どのような点がご懸念となっておりましたでしょうか。」</div>
+        </div>
+      </div>
+    </div>
+    <div class="tagbar note"><div class="tag-mark">注</div><div>懸念点を聞いたうえで　→　STEP 3（求人のご案内）に戻り条件に合った別案件を提案する</div></div>
+  </div>
+
+  <!-- STEP 6 -->
+  <div class="step-card" id="s6">
+    <div class="sc-head navy">
+      <div class="sc-num">6</div>
+      <div>
+        <div class="sc-title">YES後ヒアリング</div>
+        <div class="sc-sub">応募確定後に実施する　—　YES前に絶対に聞かない</div>
+      </div>
+    </div>
+    <div class="sub-head navy">住所確認　—　全員必須</div>
+    <div class="bubbles">
+      <div class="bubble-row">
+        <div class="bubble-avatar tantou">担当</div>
+        <div class="bubble-content">
+          <div class="bubble-name">担当者</div>
+          <div class="bubble-text tantou">「応募の際に皆さまにお伺いしているのですが、〇〇県〇〇市以降の住所をお伺いさせていただけますでしょうか？（番地・マンション名・部屋番号まで）」</div>
+        </div>
+      </div>
+      <div class="bubble-row kyaku">
+        <div class="bubble-avatar kyaku">客</div>
+        <div class="bubble-content">
+          <div class="bubble-name">求職者</div>
+          <div class="bubble-text kyaku">（住所を回答）</div>
+        </div>
+      </div>
+      <div class="bubble-row">
+        <div class="bubble-avatar tantou">担当</div>
+        <div class="bubble-content">
+          <div class="bubble-name">担当者　—　必ず復唱確認</div>
+          <div class="bubble-text tantou">「〇〇県〇〇市〇〇町〇丁目〇番〇号　〇〇マンション〇〇号室、でよろしいでしょうか？」</div>
+        </div>
+      </div>
+    </div>
+    <div class="tagbar ng"><div class="tag-mark">×</div><div>都道府県・市区町村だけはNG。番地・マンション名・部屋番号まで必ず確認・復唱する。答えない場合は応募不可。</div></div>
+
+    <div class="sub-head navy">健康状態の確認　—　優先度1・2位の求人のみ</div>
+    <div class="bubbles">
+      <div class="bubble-row">
+        <div class="bubble-avatar tantou">担当</div>
+        <div class="bubble-content">
+          <div class="bubble-name">担当者</div>
+          <div class="bubble-text tantou">「現在、大きなご病気・通院中のこと、または腰痛など業務に影響が出る可能性のあるお体の不調はございますでしょうか？また、これまでに大きな病気にかかったことはございますでしょうか？」</div>
+        </div>
+      </div>
+    </div>
+    <div class="tagbar ng"><div class="tag-mark">×</div><div>通院・障がい申告あり　→　UTエイム社のみGoogleチャット確認。それ以外は即案内NG。</div></div>
+
+    <div class="sub-head navy">身長・体重・タトゥー　—　優先度1位のみ</div>
+    <div class="bubbles">
+      <div class="bubble-row">
+        <div class="bubble-avatar tantou">担当</div>
+        <div class="bubble-content">
+          <div class="bubble-name">担当者</div>
+          <div class="bubble-text tantou">「差し支えなければご身長と体重をお伺いしてもよろしいでしょうか。またタトゥーの有無も教えていただけますでしょうか。」</div>
+        </div>
+      </div>
+    </div>
+    <div class="tagbar note"><div class="tag-mark">注</div><div>タトゥーありの場合：入っている<b>箇所・大きさ</b>をヒアリングしたうえで、UTエイム社案件のみGoogleチャットで確認。それ以外は応募不可。</div></div>
+
+    <div class="sub-head navy">連絡可能時間帯　—　全員必須</div>
+    <div class="bubbles">
+      <div class="bubble-row">
+        <div class="bubble-avatar tantou">担当</div>
+        <div class="bubble-content">
+          <div class="bubble-name">担当者</div>
+          <div class="bubble-text tantou">「普段お電話取りやすい時間帯等ございますでしょうか。」</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 7 最終クロージング -->
+  <div class="step-card green-card" id="s7">
+    <div class="sc-head green">
+      <div class="sc-num">7</div>
+      <div>
+        <div class="sc-title">最終クロージング</div>
+        <div class="sc-sub">会社名・電話番号・メール確認の3点セット　—　指摘4位</div>
+      </div>
+    </div>
+    <div class="must-box">
+      <div class="must-label navy">
+        <div class="ml-icon">★</div>
+        必須フレーズ　—　そのまま読む
+      </div>
+      <div class="must-text navy">「〇〇社から<b>通話終了後最短30分以内・遅くとも4日以内</b>にお電話にてご連絡をさせていただきます。出れなかった場合は折り返しのご対応をお願い致します。」</div>
+    </div>
+    <div class="bubbles">
+      <div class="bubble-row">
+        <div class="bubble-avatar tantou">担当</div>
+        <div class="bubble-content">
+          <div class="bubble-name">担当者　—　続けて伝える</div>
+          <div class="bubble-text tantou">「折り返しのお電話番号は〇〇〇〇-〇〇〇-〇〇〇からになります。私が今から応募登録をし、<b>30分以内に登録完了メール</b>が届きますので、ぜひご確認いただけますと幸いです。」</div>
+        </div>
+      </div>
+      <div class="bubble-row">
+        <div class="bubble-avatar tantou">担当</div>
+        <div class="bubble-content">
+          <div class="bubble-name">担当者　—　締めの言葉</div>
+          <div class="bubble-text tantou">「こちらで正式に『応募』の手続きが完了いたしました。どうぞよろしくお願いいたします。それでは失礼いたします。」</div>
+        </div>
+      </div>
+    </div>
+    <div class="tagbar note"><div class="tag-mark">注</div><div><b>連絡方法の内部ルール</b>　①通常選考に進む方　→　通話終了から<b>最短30分以内・遅くとも4日以内</b>に担当企業から求職者へ直接電話。　②ブラックリスト等の即NG該当者　→　電話ではなく<b>メールにてお断り</b>（電話連絡はしない）。②の該当者には電話連絡の案内をしない。</div></div>
+    <div class="tagbar ng"><div class="tag-mark">×</div><div>会社名・電話番号を言わずに終話しない（指摘4位）</div></div>
+  </div>
+
+</div>
+
+
+
+<!-- ══════════════════════════════════
+     フォローコールスクリプト
+══════════════════════════════════ -->
+<div id="follow" class="pg">
+
+  <div class="alert note">後日登録が2日以上空くアポに対し、再度応募の言質を取るための架電。ログが残っていない場合はアポ無効。</div>
+
+  <div class="vflow-card">
+    <div class="vflow-head">フォローコールの流れ　—　全3ステップ＋例外対応</div>
+    <div class="vflow-body">
+      <div class="vflow">
+        <div class="vf-item"><div class="vf-circle navy">1</div><div class="vf-text">導入</div><div class="vf-sub">発信・着信別</div></div>
+        <div class="vf-item"><div class="vf-circle navy">2</div><div class="vf-text">ご案内</div><div class="vf-sub">内容の再確認</div></div>
+        <div class="vf-item"><div class="vf-circle green">3</div><div class="vf-text" style="color:var(--green);font-weight:700;">終話</div><div class="vf-sub" style="color:var(--green);">折り返し案内</div></div>
+      </div>
+    </div>
+    <div class="vflow-legend">
+      <div class="vfl-item"><div class="vfl-dot" style="background:var(--navy);"></div>通常ステップ</div>
+      <div class="vfl-item" style="color:var(--green);"><div class="vfl-dot" style="background:var(--green);"></div>重要クロージング</div>
+    </div>
+  </div>
+
+  <div class="step-nav">
+    <div class="step-nav-title">ステップに直接ジャンプ</div>
+    <div class="step-nav-dots">
+      <div class="snd-item"><div class="snd-dot navy" onclick="jumpTo('f1')">1</div><div class="snd-label">導入</div></div>
+      <div class="snd-line"></div>
+      <div class="snd-item"><div class="snd-dot navy" onclick="jumpTo('f2')">2</div><div class="snd-label">ご案内</div></div>
+      <div class="snd-line"></div>
+      <div class="snd-item"><div class="snd-dot green" onclick="jumpTo('f3')">3</div><div class="snd-label">終話</div></div>
+      <div class="snd-line"></div>
+      <div class="snd-item"><div class="snd-dot navy" onclick="jumpTo('f4')" style="background:var(--red);">NG</div><div class="snd-label">応募NG</div></div>
+      <div class="snd-line"></div>
+      <div class="snd-item"><div class="snd-dot navy" onclick="jumpTo('f5')" style="background:var(--amber);">不在</div><div class="snd-label">不在対応</div></div>
+    </div>
+  </div>
+
+  <!-- フォローコール STEP 1 -->
+  <div class="step-card" id="f1">
+    <div class="sc-head navy">
+      <div class="sc-num">1</div>
+      <div>
+        <div class="sc-title">導入</div>
+        <div class="sc-sub">発信・着信で第一声を使い分ける</div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px;padding:14px 16px;">
+      <div style="border:1px solid var(--navy-light);border-radius:8px;overflow:hidden;">
+        <div style="background:var(--navy);color:#fff;font-size:12px;font-weight:700;padding:5px 12px;">発信（こちらからかける）</div>
+        <div style="padding:10px 12px;background:var(--navy-bg);font-size:13px;line-height:1.7;">「お世話になっております。ジョブコンプラス サポートセンターの〇〇と申します。<br>先日ジョブコンプラスからお電話させていただいたのですが、<b>〇〇様</b>でお間違えないでしょうか。」</div>
+      </div>
+      <div style="border:1px solid var(--green-light);border-radius:8px;overflow:hidden;">
+        <div style="background:var(--green);color:#fff;font-size:12px;font-weight:700;padding:5px 12px;">着信（求職者からの折り返し）</div>
+        <div style="padding:10px 12px;background:#eef7f4;font-size:13px;line-height:1.7;">「お電話ありがとうございます。ジョブコンプラス サポートセンターの〇〇と申します。」</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- フォローコール STEP 2 -->
+  <div class="step-card" id="f2">
+    <div class="sc-head navy">
+      <div class="sc-num">2</div>
+      <div>
+        <div class="sc-title">ご案内</div>
+        <div class="sc-sub">前回案内内容の再確認　—　応募・先行登録の言質を取る</div>
+      </div>
+    </div>
+    <div class="must-box">
+      <div class="must-label navy">
+        <div class="ml-icon">★</div>
+        必須フレーズ　—　そのまま読む
+      </div>
+      <div class="must-text navy">「先日ご案内させていただいた〇〇社の求人ですが、このお電話のあと応募と先行登録させていただきます。<br>念のため、先日ご案内させていただいた内容を再度ご確認させていただきます。<br><b>派遣会社〇〇・勤務地〇〇県〇〇市・月収例〇〇・お仕事の内容は〇〇・雇用形態は〇〇</b>です。<br>こちらの内容で<b>ご応募・先行登録を進めてよろしいでしょうか。</b>」</div>
+    </div>
+    <div class="four-grid">
+      <div class="four-item">
+        <div class="four-num">再確認　1</div>
+        <div class="four-title">派遣会社</div>
+      </div>
+      <div class="four-item">
+        <div class="four-num">再確認　2</div>
+        <div class="four-title">勤務地</div>
+        <div class="four-eg">〇〇県〇〇市</div>
+      </div>
+      <div class="four-item">
+        <div class="four-num">再確認　3</div>
+        <div class="four-title">月収例</div>
+      </div>
+      <div class="four-item">
+        <div class="four-num">再確認　4</div>
+        <div class="four-title">仕事内容</div>
+      </div>
+      <div class="four-item">
+        <div class="four-num">再確認　5</div>
+        <div class="four-title">雇用形態</div>
+        <div class="four-eg">派遣 / アルバイト / 正社員 等</div>
+      </div>
+    </div>
+    <div class="tagbar ng"><div class="tag-mark">×</div><div>「話を聞くだけ」レベルの返答はYES取りとして成立しない。必ず<b>応募・先行登録</b>の言葉で確認する（指摘1位・2位）</div></div>
+  </div>
+
+  <!-- フォローコール STEP 3 -->
+  <div class="step-card green-card" id="f3">
+    <div class="sc-head green">
+      <div class="sc-num">3</div>
+      <div>
+        <div class="sc-title">終話</div>
+        <div class="sc-sub">登録完了メール・折り返しの案内</div>
+      </div>
+    </div>
+    <div class="must-box">
+      <div class="must-label navy">
+        <div class="ml-icon">★</div>
+        必須フレーズ　—　そのまま読む
+      </div>
+      <div class="must-text navy">「お電話終了後、<b>30分以内に登録完了メール</b>が届きます。<br>また<b>本日中、遅くとも4日以内</b>に、採用担当の者からご連絡が来ますので、出れなかった場合は折り返しのご対応をお願いいたします。」</div>
+    </div>
+    <div class="bubbles">
+      <div class="bubble-row">
+        <div class="bubble-avatar tantou">担当</div>
+        <div class="bubble-content">
+          <div class="bubble-name">担当者　—　締めの言葉</div>
+          <div class="bubble-text tantou">「こちらで正式に『応募』の手続きが完了いたしました。どうぞよろしくお願いいたします。それでは失礼いたします。」</div>
+        </div>
+      </div>
+    </div>
+    <div class="tagbar ng"><div class="tag-mark">×</div><div>会社名・電話番号を言わずに終話しない（指摘4位）</div></div>
+  </div>
+
+  <!-- 応募NG -->
+  <div class="refusal-card" id="f4">
+    <div class="ref-head" style="background:var(--red);">応募NGと言われた場合</div>
+    <div class="ref-body">
+      <div class="bubbles" style="padding:0;">
+        <div class="bubble-row">
+          <div class="bubble-avatar tantou">担当</div>
+          <div class="bubble-content">
+            <div class="bubble-name">懸念点のヒアリング</div>
+            <div class="bubble-text tantou">「こちらの求人、<b>〇〇社／〇〇県／月収例〇〇万</b>のご条件の求人でしたが、どのあたりがご懸念点だったでしょうか。<br>ご懸念点確認の上、担当者に伝えさせていただきます。」</div>
+          </div>
+        </div>
+      </div>
+      <div class="tagbar ng" style="margin-top:10px;"><div class="tag-mark">×</div><div>断っている求職者に強引に進めない。懸念点を確認したうえで丁寧に受け入れる（指摘6位）</div></div>
+    </div>
+  </div>
+
+  <!-- 不在の場合 -->
+  <div class="refusal-card" id="f5">
+    <div class="ref-head" style="background:var(--amber);">不在の場合</div>
+    <div class="ref-body">
+      <div style="font-size:12px;color:var(--muted);margin-bottom:10px;">リスナビのメモ欄にフォローコールフォーマットを記載する（テンプレートから開けます）</div>
+
+      <div style="border:1px solid var(--navy-light);border-radius:8px;overflow:hidden;margin-bottom:10px;">
+        <div style="background:var(--navy);color:#fff;font-size:12px;font-weight:700;padding:5px 12px;">【フォローコール記録】</div>
+        <div style="padding:10px 12px;background:var(--navy-bg);font-size:13px;line-height:2;font-family:monospace,'Hiragino Sans',sans-serif;">
+          ■ 架電日時　：〇〇月〇〇日（〇）〇〇:〇〇<br>
+          ■ 結果　　　：不在（繋がらず）<br>
+          ■ 対応内容　：〇〇の求人 ／ 後日登録の件
+        </div>
+      </div>
+
+      <div style="border:1px solid var(--amber-light);border-radius:8px;overflow:hidden;">
+        <div style="background:var(--amber);color:#fff;font-size:12px;font-weight:700;padding:5px 12px;">【不在時の対応ルール】　※本日中に繋がらない場合</div>
+        <div style="padding:10px 12px;background:var(--amber-bg);font-size:13px;line-height:2;font-family:monospace,'Hiragino Sans',sans-serif;">
+          □ 後日登録　→ 不可となる<br>
+          □ 対応①　　：架電者が新しい求人を案内する<br>
+          □ 対応②　　：架電者が再度フォローコールを行う<br>
+          ■ 次回架電予定：〇〇月〇〇日（〇）〇〇:〇〇 ／ 担当：
+        </div>
+      </div>
+
+      <div class="tagbar ng" style="margin-top:10px;"><div class="tag-mark">×</div><div>1日中連絡が取れなかった場合は<b>アポは無効</b>となり、その分の残枠がプラスされる</div></div>
+    </div>
+  </div>
+
+</div>
+
+
+<!-- ══════════════════════════════════
+     断り・FAQ
+══════════════════════════════════ -->
+<div id="refusal" class="pg">
+
+  <div class="sec-title">断り対応フロー</div>
+
+  <div class="refusal-card">
+    <div class="ref-head">断り1　「今ちょっと忙しい」「時間がない」</div>
+    <div class="ref-body">
+      <div class="fc-wrap">
+        <div class="fc-node start" style="max-width:320px;width:100%;">「今ちょっと忙しい」「時間がない」</div>
+        <div class="fc-arr"><div class="fc-line"></div><div class="fc-head"></div></div>
+        <div class="fc-node action" style="max-width:320px;width:100%;">「5分ほどでご案内が可能です。少しだけお時間いただけますでしょうか？」</div>
+        <div class="fc-arr"><div class="fc-line"></div><div class="fc-head"></div></div>
+        <div class="fc-branch" style="max-width:480px;">
+          <div class="fc-bcol">
+            <div class="fc-blabel yes">時間を作ってくれた</div>
+            <div class="fc-node success" style="width:100%;">STEP 2 へ進む</div>
+          </div>
+          <div class="fc-bcol">
+            <div class="fc-blabel no">やっぱり無理</div>
+            <div class="fc-node action" style="width:100%;font-size:12px;">「いつ頃お電話のご都合がよろしいでしょうか？」再架電日時を確認する</div>
+            <div class="fc-node end" style="width:100%;margin-top:6px;">3日以内で再架電設定・ステータス更新</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="refusal-card">
+    <div class="ref-head">断り2　「今は仕事を探していない」</div>
+    <div class="ref-body">
+      <div class="fc-wrap">
+        <div class="fc-node start" style="max-width:320px;width:100%;">「今は仕事を探していない」</div>
+        <div class="fc-arr"><div class="fc-line"></div><div class="fc-head"></div></div>
+        <div class="fc-node q" style="max-width:320px;width:100%;">「現在は就業中でしょうか？」</div>
+        <div class="fc-arr"><div class="fc-line"></div><div class="fc-head"></div></div>
+        <div class="fc-branch" style="max-width:520px;">
+          <div class="fc-bcol">
+            <div class="fc-blabel work">就業中</div>
+            <div class="fc-node action" style="width:100%;font-size:12px;">「最新の求人で良い条件のものがございまして…条件を聞いていただいて、よろしければご検討いただけたらと思います。ちなみに△△様は——（ヒアリングへ）」</div>
+            <div style="font-size:11px;font-weight:700;background:var(--red-bg);color:var(--red);padding:2px 8px;border-radius:3px;margin-top:6px;">再度断られたら</div>
+            <div class="fc-node end" style="width:100%;margin-top:4px;font-size:11px;">丁寧に終話。強引に進めない（指摘6位）</div>
+          </div>
+          <div class="fc-bcol">
+            <div class="fc-blabel nowork">離職中・不明</div>
+            <div class="fc-node action" style="width:100%;font-size:12px;">「月35〜40万円以上稼げるお仕事をご紹介しております。こちらのお電話で就業が決まるわけではなく、条件気に入っていただけたら前向きにご検討いただけたらと思います。ちなみに△△様は——（ヒアリングへ）」</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+  <div class="sec-title">FAQ　よくある質問</div>
+
+  <div class="qa-block"><div class="qa-q">「派遣先はどこの会社ですか？」</div><div class="qa-a">「派遣先については事前にお伝えできないルールになっていて、こちらでも詳しい情報が分からないんです。申し訳ないのですが、担当の〇〇（会社名）へ直接ご確認いただけますでしょうか。」</div></div>
+  <div class="qa-block"><div class="qa-q">「メールで送ってください」</div><div class="qa-a">「こちらのお仕事は皆さまに電話にてご案内させていただいております。ちなみに△△様は——（ヒアリングへ）」</div><div class="qa-ng">「メールで連絡します」は絶対に言わない</div></div>
+  <div class="qa-block"><div class="qa-q">「今すぐは難しいです」</div><div class="qa-a">「こちらの電話のみで就業が決まるわけではなく、条件気に入っていただけたら前向きに選考進んでいただけたらと思います。面談でさらに具体的な内容をお伝えしますので、現在のお仕事と比較して検討してみてください。」</div></div>
+  <div class="qa-block"><div class="qa-q">「面談はちょっと…」</div><div class="qa-a">「希望のすり合わせをお話しする場で、WEBで10分ほどで終わります。履歴書不要で、勤務条件のすり合わせが主な内容です。」</div></div>
+  <div class="qa-block"><div class="qa-q">「試用期間はありますか？」</div><div class="qa-a">「求人ごとに異なりますので、ご登録後の案内時に担当者が試用期間の有無・期間・待遇を正確にお伝えします。まずは条件を確認してからの判断で大丈夫です。」</div></div>
+  <div class="qa-block"><div class="qa-q">「作業内容を教えてください」</div><div class="qa-a">「ピッキングは棚から必要な部品を取って仕分けるだけの作業です。軽作業は検品や箱詰めなど体力負担の少ない工程が中心です。未経験スタートの方も多く、2週間から1ヶ月で慣れる仕事ですのでご安心ください。」</div></div>
+
+</div>
+
+
+<!-- ══════════════════════════════════
+     電話番号
+══════════════════════════════════ -->
+<div id="tel" class="pg">
+
+  <div class="alert red">会社名と電話番号をセットで必ず伝えること　—　指摘4位</div>
+
+  <div class="tcard">
+    <div class="tcard-head navy">担当者からの折り返し電話番号</div>
+    <table class="tbl">
+      <tr><th>担当会社</th><th>折り返し電話番号・備考</th><th style="min-width:130px;">稼働時間</th></tr>
+
+      <tr>
+        <td>UTグループ（エイム）</td>
+        <td>
+          <div class="tel-n">0120-971-999</div>
+          <div style="font-size:11px;font-weight:700;color:var(--amber);margin-top:5px;background:var(--amber-bg);padding:3px 8px;border-radius:4px;">コールセンター稼働中。面接官は休みの場合あり（人数は日によって変動）</div>
+        </td>
+        <td style="font-size:12px;color:var(--muted);">—</td>
+      </tr>
+
+      <tr>
+        <td>UTエージェント</td>
+        <td>
+          <div class="tel-n">0120-971-999</div>
+          <div style="font-size:11px;font-weight:700;color:var(--amber);margin-top:5px;background:var(--amber-bg);padding:3px 8px;border-radius:4px;">コールセンター稼働中。面接官は休みの場合あり（人数は日によって変動）</div>
+        </td>
+        <td style="font-size:12px;color:var(--muted);">—</td>
+      </tr>
+
+      <tr>
+        <td>綜合キャリアオプション</td>
+        <td class="tel-n">0120-045-428</td>
+        <td style="font-size:12px;">
+          平日 9:00〜20:00<br>土日祝 9:00〜18:00<br>
+          <span style="font-size:11px;color:var(--amber);font-weight:700;">GW：4/29 9-18時、4/30・5/1 9-20時</span>
+        </td>
+      </tr>
+
+      <tr>
+        <td>シーデーピージャパン</td>
+        <td>
+          <div><span class="tel-n">0120-907-909</span>　<span style="font-size:11px;color:var(--muted);">新規登録者</span></div>
+          <div style="margin-top:4px;"><span class="tel-n">022-253-7592</span>　<span style="font-size:11px;color:var(--muted);">過去登録者（仙台営業所）</span></div>
+          <div style="font-size:11px;font-weight:700;color:var(--amber);margin-top:5px;background:var(--amber-bg);padding:3px 8px;border-radius:4px;">「0120または022の番号から折り返しがある」と伝えること。案件によって営業所番号は異なります。</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:3px;">※ 人数減少の可能性あり（具体的な人数未決定）</div>
+        </td>
+        <td style="font-size:12px;color:var(--muted);">—</td>
+      </tr>
+
+      <tr>
+        <td>ジャパンクリエイト</td>
+        <td class="tel-n">0120-35-0909</td>
+        <td style="font-size:12px;color:var(--muted);">—</td>
+      </tr>
+
+      <tr>
+        <td>ワールドインテック</td>
+        <td class="tel-n">0120-951-130</td>
+        <td style="font-size:12px;">
+          平日 9:00〜20:00<br>土日祝 9:00〜18:00<br>
+          <span style="font-size:11px;color:var(--green);font-weight:700;">※ 基本的に1/1以外は稼働</span>
+        </td>
+      </tr>
+
+      <tr>
+        <td>トリプルエース（DPT）</td>
+        <td>
+          <div class="tel-n">0120-192-390</div>
+          <div style="font-size:11px;font-weight:700;color:var(--green);margin-top:5px;background:var(--green-bg);padding:3px 8px;border-radius:4px;">派遣会社ではなく<b>紹介会社</b>としてご案内。DPT社から応募後に連絡がきます。</div>
+        </td>
+        <td style="font-size:12px;">平日 9:00〜18:00</td>
+      </tr>
+
+      <tr>
+        <td>BREXA Next</td>
+        <td class="tel-n">0120-89-4651</td>
+        <td style="font-size:12px;color:var(--muted);">—</td>
+      </tr>
+
+      <tr>
+        <td>SUBARU nw Sight</td>
+        <td class="tel-n">0120-928-486</td>
+        <td style="font-size:12px;color:var(--muted);">—</td>
+      </tr>
+
+      <tr>
+        <td>日総工産</td>
+        <td>
+          <div class="tel-n">0120-717-450</div>
+          <div style="font-size:11px;font-weight:700;color:var(--red);margin-top:5px;background:var(--red-bg);padding:3px 8px;border-radius:4px;">
+            応募後、<b>ショートメール</b>にて面接設定用リンクが届きます。<br>
+            リンクから面接設定できていない場合は上記番号よりコールセンターから連絡があります。
+          </div>
+        </td>
+        <td style="font-size:12px;color:var(--muted);">—</td>
+      </tr>
+
+      <tr>
+        <td>テクノスマイル社</td>
+        <td>
+          <div><span class="tel-n">0120-573-486</span>　<span style="font-size:11px;color:var(--muted);">9:30〜19:00</span></div>
+          <div style="margin-top:4px;"><span class="tel-n">0120-499-300</span>　<span style="font-size:11px;color:var(--muted);">9:30〜17:00</span></div>
+          <div style="font-size:11px;font-weight:700;color:var(--amber);margin-top:5px;background:var(--amber-bg);padding:3px 8px;border-radius:4px;">求職者へは「0120〜のフリーダイヤルから折り返しがあります」と案内。番号を直接聞かれた場合のみ2つを伝える。</div>
+        </td>
+        <td style="font-size:12px;color:var(--muted);">—</td>
+      </tr>
+
+      <tr>
+        <td>アスタリスク社</td>
+        <td class="tel-n">0532-69-5269</td>
+        <td style="font-size:12px;">9:00〜18:30<br><span style="font-size:11px;color:var(--muted);">それ以外はコールセンターに転送</span></td>
+      </tr>
+
+      <tr>
+        <td>日本ケイテム</td>
+        <td class="tel-n">0120-181-450</td>
+        <td style="font-size:12px;">平日 9:00〜21:00<br>土日 10:15〜20:00</td>
+      </tr>
+
+      <tr>
+        <td>パーソルファクトリーパートナーズ</td>
+        <td class="tel-n">0120-498-314</td>
+        <td style="font-size:12px;color:var(--muted);">—</td>
+      </tr>
+
+      <tr>
+        <td>東洋ワーク</td>
+        <td style="color:var(--muted);font-size:12px;">担当者へ確認</td>
+        <td style="font-size:12px;color:var(--muted);">—</td>
+      </tr>
+
+    </table>
+  </div>
+
+  <!-- 時間帯チャート -->
+  <div class="tcard">
+    <div class="tcard-head navy">時間帯別　通電率の目安</div>
+    <div class="time-chart">
+      <div style="font-size:11px;font-weight:700;color:var(--muted);margin-bottom:12px;">架電する時間帯で成果が大きく変わります</div>
+      <div class="time-bars">
+        <div class="tbar" style="height:50%;background:#4a8fd4;"><span class="tbar-tip">普通</span></div>
+        <div class="tbar" style="height:78%;background:#1a5fbf;"><span class="tbar-tip">良い</span></div>
+        <div class="tbar" style="height:88%;background:#1a4fa0;"></div>
+        <div class="tbar" style="height:92%;background:#1a4fa0;"><span class="tbar-tip">最良</span></div>
+        <div class="tbar" style="height:82%;background:#1a5fbf;"></div>
+        <div class="tbar" style="height:68%;background:#4a8fd4;"></div>
+        <div class="tbar" style="height:35%;background:#e06c3a;"><span class="tbar-tip">悪い</span></div>
+        <div class="tbar" style="height:22%;background:#c0001a;"><span class="tbar-tip">最悪</span></div>
+        <div class="tbar" style="height:42%;background:#e06c3a;"></div>
+        <div class="tbar" style="height:68%;background:#4a8fd4;"></div>
+        <div class="tbar" style="height:85%;background:#1a5fbf;"><span class="tbar-tip">良い</span></div>
+        <div class="tbar" style="height:78%;background:#1a5fbf;"></div>
+      </div>
+      <div class="time-labels">
+        <div class="tlabel">9時</div><div class="tlabel">10時</div><div class="tlabel">11時</div><div class="tlabel">12時</div><div class="tlabel">13時</div><div class="tlabel">14時</div><div class="tlabel">15時</div><div class="tlabel">16時</div><div class="tlabel">17時</div><div class="tlabel">18時</div><div class="tlabel">19時</div><div class="tlabel">20時</div>
+      </div>
+      <div class="tlegend">
+        <div class="tleg-item"><div class="tleg-dot" style="background:#1a4fa0;"></div>通電率が高い</div>
+        <div class="tleg-item"><div class="tleg-dot" style="background:#4a8fd4;"></div>普通</div>
+        <div class="tleg-item"><div class="tleg-dot" style="background:#e06c3a;"></div>やや低い</div>
+        <div class="tleg-item"><div class="tleg-dot" style="background:#c0001a;"></div>最も低い（14〜16時）</div>
+      </div>
+      <div class="alert note" style="margin-top:12px;margin-bottom:0;">10〜14時・夕方が通電率良好。14〜16時は最も悪いためプレディクティブ架電に切り替える。</div>
+    </div>
+  </div>
+
+  <div class="tcard">
+    <div class="tcard-head navy">折り返し案内トーク</div>
+    <div class="bubbles">
+      <div class="bubble-row">
+        <div class="bubble-avatar tantou">担当</div>
+        <div class="bubble-content">
+          <div class="bubble-name">担当者</div>
+          <div class="bubble-text tantou">「担当の<b>[会社名]</b>より、<b>[電話番号]</b>にてご連絡させていただきます。私が今から応募登録をし、<b>30分以内に登録完了メール</b>が届きますので、あわせてご確認いただけますと幸いです。」</div>
+        </div>
+      </div>
+    </div>
+    <div class="tagbar note"><div class="tag-mark">注</div><div>会社名・電話番号・メール確認の3点を必ず伝える</div></div>
+  </div>
+
+</div>
+
+
+<!-- ══════════════════════════════════
+     ルール
+══════════════════════════════════ -->
+<div id="rules" class="pg">
+
+  <div class="tcard">
+    <div class="tcard-head red">クライアント注意事項　—　指摘順</div>
+    <ul class="rl">
+      <li><span class="rn">1</span><div><b>指摘1位</b>　応募意思確認は「応募・選考登録に進んでよろしいでしょうか」と明確に聞く。曖昧な同意はNG。</div></li>
+      <li><span class="rn">2</span><div><b>指摘2位</b>　「話を聞くだけ」「担当者から説明してもらう」はYES取りとして成立しない。必ず応募の言葉を使う。</div></li>
+      <li><span class="rn">3</span><div><b>指摘3位</b>　希望条件（エリア・職種）を事前に確認し、全く異なる案件を紹介しない。</div></li>
+      <li><span class="rn">4</span><div><b>指摘4位</b>　折り返しは会社名・電話番号をセットで必ず明言する。案内なしで終話しない。</div></li>
+      <li><span class="rn">5</span><div><b>指摘5位</b>　仕事内容・勤務地・月収・雇用形態を必ず伝えてから応募確認に進む。</div></li>
+      <li><span class="rn">6</span><div><b>指摘6位</b>　断っている求職者に強引に進めない。一度だけ再案内し、断られたら丁寧に受け入れる。</div></li>
+      <li><span class="rn">7</span><div>住所確認（番地・マンション名・部屋番号まで）は応募YES後に実施する。</div></li>
+      <li><span class="rn">8</span><div>健康状態・身長体重・タトゥー確認は優先度1・2位の求人のみ、かつ応募YES後に実施。全員に聞かない。</div></li>
+      <li><span class="rn">9</span><div>通院・障がい申告　→　UTエイム社のみGoogleチャット確認。それ以外は即案内NG。</div></li>
+      <li><span class="rn">10</span><div>登録後のメール確認案内を必ず入れる。</div></li>
+      <li><span class="rn">11</span><div>「メールで連絡します」はNG。電話でのご案内が原則。</div></li>
+      <li><span class="rn">12</span><div>UTエイムとUTエージェントは同一会社扱い（3ヶ月ルール）。3日ではNG。</div></li>
+      <li><span class="rn">13</span><div>外国籍　→　UTエイムのみ永住権・N2以上の条件で送客可能。他はすべてNG。</div></li>
+      <li><span class="rn">14</span><div><b>「非公開求人」をフックとして使用しない。</b>案内・断り対応・FAQのいずれでも使用禁止。</div></li>
+    </ul>
+  </div>
+
+  <div class="tcard">
+    <div class="tcard-head green">ルールQ&A</div>
+    <table class="tbl">
+      <tr><th class="green">質問</th><th class="green">回答</th></tr>
+      <tr><td class="q">通電しやすい時間は？</td><td>10〜14時と18時以降が良い。15〜17時が最も悪い。夕方は就業中の方の退勤時間と重なり通電率が上がる。</td></tr>
+      <tr><td class="q">プレディクティブとグループどっち？</td><td>通電率が悪い時間帯 → プレディクティブ。良い時間帯 → グループ架電。ボーナス案件の都道府県に絞って架電する方法もある。</td></tr>
+      <tr><td class="q">求職者は何県が多い？</td><td>東海地方（愛知・三重・静岡・岐阜）のニーズは高め。フットワークが軽い人も多め。全国に求職者はいる。</td></tr>
+      <tr><td class="q">求職者は何歳が多い？</td><td>18〜54歳まで幅広い。年齢が高くなるにつれて需要も高くなるイメージ。</td></tr>
+      <tr>
+        <td class="q">何歳まで送客できる？</td>
+        <td>
+          基本18〜54歳。求人リストに記載があれば55歳以上も可。
+          <div style="margin-top:8px;display:flex;flex-direction:column;gap:5px;">
+            <div style="background:var(--navy-bg);border:1px solid var(--navy-light);border-radius:6px;padding:7px 10px;font-size:12px;">
+              <div style="font-weight:700;color:var(--navy);margin-bottom:3px;">UTエイム</div>
+              <div style="color:var(--muted);">上限 <b style="color:var(--navy);">49歳まで</b></div>
+            </div>
+            <div style="background:#eef7f4;border:1px solid var(--green-light);border-radius:6px;padding:7px 10px;font-size:12px;">
+              <div style="font-weight:700;color:var(--green);margin-bottom:3px;">UTエージェント</div>
+              <div style="color:var(--muted);">基本ルール：上限 <b style="color:var(--green);">55歳まで</b></div>
+              <div style="color:var(--muted);margin-top:3px;">求人リスト・求人サーチの年齢がそれ以下の場合は、その年齢に従って誘導</div>
+              <div style="color:var(--amber);font-weight:700;margin-top:4px;font-size:11px;">※ 55歳以上のUT求人があった場合も55歳まで</div>
+            </div>
+          </div>
+        </td>
+      </tr>
+      <tr><td class="q">同じ会社に再応募できる？</td><td>社内・社外共に<b>3ヶ月以上</b>空いていれば可。<br><small>※ UTグループ（UTエイム・UTエージェント）は応募時に限り同一会社として扱う</small></td></tr>
+      <tr><td class="q">同じ求職者は何社まで応募できる？</td><td>何社でも可。別会社へは社内応募から<b>3日以上</b>空いていれば可。</td></tr>
+      <tr><td class="q">UTエイムとUTエージェントは3日でOK？</td><td>NG。同一会社扱いのため<b>3ヶ月</b>あける必要がある。</td></tr>
+      <tr><td class="q">何ヶ月先まで案内していい？</td><td>概ね<b>1ヶ月以内</b>を検討していればOK。架電時にハッキリ決まっていなくても大丈夫。</td></tr>
+      <tr><td class="q">担当ルールとは？</td><td>最後にアポを獲得してから<b>3日以内</b>は前回アポを獲得した担当者に繋げるルール。求職者が1からヒアリングし直す手間がなくなる。直近で別担当の登録があったら回す。</td></tr>
+      <tr><td class="q">人物照合とは？</td><td>UTエイム案件のみ必要な一次審査。バックオフィスがGoogleチャットに照合を送信し、OKの場合のみ応募・登録が可能。</td></tr>
+      <tr><td class="q">人物照合に落ちたら？</td><td>別会社に再案内する。照合NGの理由（過去勤務・トラブル退職・他媒体応募等）は求職者へ伝える必要なし。<b>UTエージェントへの送客は可能。</b></td></tr>
+      <tr><td class="q">外国籍の方への送客は？</td><td><b>全求人会社NG。</b><br>繋がってしまった場合は「すみません、間違えて発信してしまいました」「今ご案内できる求人がなかったので、新しい求人が出たら再度ご案内します」等と伝え、発信規制リストに記入。</td></tr>
+      <tr><td class="q">既往歴・障がいの申告があった場合は？</td><td>適応障害・通院・障がい者手帳を持っている場合は全案件NG。<br>現在通院していない方は業務内容に支障がなければご案内可能。</td></tr>
+      <tr>
+        <td class="q">タトゥーがある場合・自己申告された場合</td>
+        <td>
+          服で隠れる隠れない・大小関係なく、<b>UTエイム以外は送客不可</b>。ワンポイントOK等、求人に記載がある場合はOK。<br>
+          <div style="background:var(--navy-bg);border:1px solid var(--navy-light);border-radius:6px;padding:7px 10px;font-size:12px;margin-top:6px;">
+            <div style="font-weight:700;color:var(--navy);margin-bottom:3px;">UTエイムのみ相談可能</div>
+            <div style="color:var(--muted);">大きさ・位置・服に隠れるかをヒアリングし、バックオフィスへ送信（Googleチャットにて確認）</div>
+          </div>
+        </td>
+      </tr>
+      <tr><td class="q">詳しい会社名を聞かれた場合</td><td>URLに「トヨタ」「レクサス」等の記載があっても求職者へは伝えない。「就労先は採用後のお伝えになるので、こちらからお伝えすることはできません」と伝える。<b>求人会社は必ず伝えること。</b></td></tr>
+      <tr><td class="q">今は探してない・就業中といわれたら？</td><td>「就業中・離職中どちらにもご案内しています。ちなみに△△様は〜（ヒアリングへ）」<br>「ぜひ現在の条件と比較して検討してみてください」<br>「差し支えなければ現在の職種をお伺いしてもよろしいでしょうか」<br>切り出してヒアリングに繋げる。</td></tr>
+      <tr><td class="q">すぐに就業できない・迷っている場合</td><td>「こちらの電話のみで就業が決まるわけではなく、条件を気に入っていただけたら前向きに選考進んでいただけたらと思います」と伝え、今すぐ決まるわけではないことを明確にする。</td></tr>
+      <tr><td class="q">メールで送ってほしい・○時しか連絡取れないといわれたら？</td><td>【案内前】「皆様にお電話のみでご案内しております。ちなみに△△様は〜（ヒアリングへ）」「では○時頃に再度お電話します」<br>【案内後】「求人担当にお伝えしますが、何度かご連絡しますので出られなかった際は折り返しをお願いします」<br><small>※ 登録完了後に応募求人の内容・URLが載ったメールが求職者に送信されます</small></td></tr>
+      <tr><td class="q">時間がない・こちらからかけますといわれたら？</td><td>「5分ほどでご案内可能です」「お電話出られない場合があるのでこちらからかけます。何時頃が可能でしょうか」</td></tr>
+      <tr><td class="q">面接が嫌だといわれたら？</td><td>「希望のすり合わせをお話しする場のため、求人会社からのお電話で10分ほどで終わります。履歴書不要で、内容も勤務条件のすり合わせが主な内容です。」</td></tr>
+      <tr>
+        <td class="q">彼氏・彼女・家族・友人と一緒に働きたいといわれた場合</td>
+        <td>
+          ① 同時に応募したい方のジョブコンプラス登録有無を確認<br>
+          ② <b>登録あり</b> → 電話番号を控え、応募履歴を調査。両者ともご案内できる求人会社へ案内<br>
+          　 <b>登録なし</b> → 電話口で登録してもらう「ジョブコンプラスに登録がある方のみご案内可能ですので、このお電話でご登録いただいてもよろしいでしょうか」<br>
+          ③ 登録なし・リスナビで番号ヒットしない場合：氏名（フルネーム）・生年月日・メールアドレス・住所をヒアリング<br>
+          ④ 終話：「〇〇様とご友人の〇〇様へ、1週間以内に〇〇社からご連絡させていただきます。」
+        </td>
+      </tr>
+      <tr><td class="q">寮費は月給に含まれているか？</td><td>含まれていない。寮費補助がある場合は特典・月収例・寮情報欄に記載がある。</td></tr>
+      <tr><td class="q">フォローコールとは？</td><td>後日登録が2日以上空くアポに対し、バックオフィスが再架電して再度応募の言質を取るもの。ログが残っていない場合はアポ無効。スクリプト・フローは【フォローコール】ページ参照。</td></tr>
+    </table>
+  </div>
+
+</div>
+
+
+<script>
+const tabs=['script','follow','refusal','tel','rules'];
+function go(id){
+  tabs.forEach(t=>document.getElementById(t).classList.remove('on'));
+  document.querySelectorAll('.nb').forEach(b=>b.classList.remove('on'));
+  document.getElementById(id).classList.add('on');
+  document.querySelectorAll('.nb')[tabs.indexOf(id)].classList.add('on');
+  window.scrollTo(0,0);
+}
+function jumpTo(id){
+  const el=document.getElementById(id);
+  if(el) el.scrollIntoView({behavior:'smooth'});
+}
+</script>
+<script src="./jc-common.js"></script>
+</body>
+</html>
