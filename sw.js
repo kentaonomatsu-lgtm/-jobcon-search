@@ -1,8 +1,9 @@
 /**
- * ジョブコン求人サーチ - Service Worker v2
+ * ジョブコン求人サーチ - Service Worker v3
  * data.json は5分キャッシュ。更新があればページに通知して自動リロード。
+ * HTMLはネット優先（更新を即反映）、オフライン時のみキャッシュを使用。
  */
-const CACHE_NAME = "jcsearch-v2";
+const CACHE_NAME = "jcsearch-v3";
 const DATA_JSON_PATH = "./data.json";
 const DATA_MAX_AGE_MS = 5 * 60 * 1000; // 5分
 
@@ -10,7 +11,7 @@ const DATA_MAX_AGE_MS = 5 * 60 * 1000; // 5分
 self.addEventListener("install", e => {
   e.waitUntil(
     caches.open(CACHE_NAME)
-      .then(c => c.addAll(["./", "./index.html", "./data.json"]))
+      .then(c => c.addAll(["./", "./index.html", "./script.html", "./data.json"]))
       .then(() => self.skipWaiting())
   );
 });
@@ -68,6 +69,23 @@ self.addEventListener("fetch", e => {
         // ネットワーク失敗 → 古いキャッシュをそのまま返す
         return cached || new Response('{"error":"offline"}', { headers: { "Content-Type": "application/json" } });
       })
+    );
+    return;
+  }
+
+  // HTMLページ：ネット優先（更新を即反映）。失敗時のみキャッシュ
+  const isHTML = e.request.mode === "navigate" || url.pathname.endsWith(".html");
+  if (isHTML) {
+    e.respondWith(
+      fetch(e.request)
+        .then(res => {
+          if (res.ok) {
+            const copy = res.clone();
+            caches.open(CACHE_NAME).then(c => c.put(e.request, copy));
+          }
+          return res;
+        })
+        .catch(() => caches.match(e.request).then(c => c || caches.match("./index.html")))
     );
     return;
   }
