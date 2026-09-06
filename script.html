@@ -145,6 +145,14 @@ body{font-family:'Meiryo','メイリオ','Hiragino Kaku Gothic ProN',sans-serif;
 }
 .must-text.green{background:var(--green-bg);color:#063d26;}
 .must-text.navy{background:var(--navy-bg);color:#0d1e47;}
+.must-label.red{background:var(--red);color:#fff;}
+.must-text.red{background:var(--red-bg);color:#7a0012;}
+.acc{border-top:1px solid var(--border);}
+.acc-head{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:9px 15px;background:var(--navy-bg);color:var(--navy);font-size:12px;font-weight:700;cursor:pointer;-webkit-user-select:none;user-select:none;}
+.acc-mark{flex-shrink:0;width:18px;height:18px;border-radius:50%;background:var(--navy);color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;line-height:1;transition:transform .2s;}
+.acc-body{display:none;}
+.acc.open .acc-body{display:block;}
+.acc.open .acc-mark{transform:rotate(45deg);}
 
 /* ── NG / OK 比較パネル ── */
 .compare{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid var(--border);}
@@ -596,7 +604,7 @@ body{font-family:'Meiryo','メイリオ','Hiragino Kaku Gothic ProN',sans-serif;
       <div class="sc-num">3</div>
       <div>
         <div class="sc-title">求人のご案内</div>
-        <div class="sc-sub">下記4点を必ず全部伝える　—　指摘5位</div>
+        <div class="sc-sub">下記6点を必ず全部伝える　—　指摘5位</div>
       </div>
     </div>
     <div class="four-grid">
@@ -620,24 +628,60 @@ body{font-family:'Meiryo','メイリオ','Hiragino Kaku Gothic ProN',sans-serif;
         <div class="four-title">業務内容</div>
         <div class="four-eg">ピッキング・軽作業 等</div>
       </div>
-      <div class="four-item" style="grid-column:1/-1;">
+      <div class="four-item">
         <div class="four-num">伝達必須　5</div>
         <div class="four-title">求人会社名</div>
         <div class="four-eg">◻◻（会社名を必ず明言する）</div>
+      </div>
+      <div class="four-item" style="grid-column:1/-1;border:2px solid var(--red-light);background:var(--red-bg);">
+        <div class="four-num" style="color:var(--red);">伝達必須　6</div>
+        <div class="four-title" style="color:var(--red);">仕事内容の詳細　＋　求人の魅力</div>
+        <div class="four-eg">1日の流れ・扱う物・作業環境　／　寮・待遇・休日 など</div>
       </div>
     </div>
     <div class="bubbles" style="padding-top:12px;">
       <div class="bubble-row">
         <div class="bubble-avatar tantou">担当</div>
         <div class="bubble-content">
-          <div class="bubble-name">担当者　—　上記4点を読み上げる</div>
-          <div class="bubble-text tantou">「△△様にぴったりの求人をご案内させていただきます。雇用形態は【〇〇】、月収例は〇〇円、勤務地は〇〇県〇〇市、業務内容は〇〇（ピッキング・軽作業など）となっております。求人会社は◻◻になります。細かい条件は面談の際に担当から詳しくご説明いただけます。」</div>
+          <div class="bubble-name">担当者　—　上記6点を読み上げる</div>
+          <div class="bubble-text tantou">「△△様にぴったりの求人をご案内させていただきます。雇用形態は【〇〇】、月収例は〇〇円、勤務地は〇〇県〇〇市、業務内容は〇〇（ピッキング・軽作業など）となっております。求人会社は◻◻になります。<b style="color:var(--red);">具体的なお仕事内容は〇〇（1日の流れ・扱う物の大きさ・作業環境など）で、こちらの求人は〇〇（寮完備・未経験歓迎・土日休み・日払い可など）が魅力のお仕事です。</b>細かい条件は面談の際に担当から詳しくご説明いただけます。」</div>
         </div>
+      </div>
+    </div>
+    <div class="acc">
+      <div class="acc-head" onclick="accToggle(this)">
+        <div>魅力の伝え方　—　言い換えの例</div>
+        <div class="acc-mark">＋</div>
+      </div>
+      <div class="acc-body">
+        <div class="four-grid">
+          <div class="four-item">
+            <div class="four-num">魅力　1</div>
+            <div class="four-title">収入面</div>
+            <div class="four-eg">月収例・各種手当・日払い/週払い・入社祝い金 の有無</div>
+          </div>
+          <div class="four-item">
+            <div class="four-num">魅力　2</div>
+            <div class="four-title">住まい</div>
+            <div class="four-eg">寮の有無・家具家電付き・寮費補助・赴任交通費</div>
+          </div>
+          <div class="four-item">
+            <div class="four-num">魅力　3</div>
+            <div class="four-title">働きやすさ</div>
+            <div class="four-eg">未経験歓迎・研修あり・土日休み・空調完備・力仕事少なめ</div>
+          </div>
+          <div class="four-item">
+            <div class="four-num">魅力　4</div>
+            <div class="four-title">将来性</div>
+            <div class="four-eg">正社員登用・長期安定・資格取得支援</div>
+          </div>
+        </div>
+        <div class="tagbar note"><div class="tag-mark">注</div><div>求人票に記載のない条件は伝えない。<b>確定していない待遇を断定で言わない</b>（「〜の場合があります」で伝える）。</div></div>
       </div>
     </div>
     <div class="tagbar ng">
       <div class="tag-mark">×</div>
-      <div>「担当者から説明します」だけで済ませない。上記4点を全部伝えてから次へ。</div>
+      <div>「担当者から説明します」だけで済ませない。上記6点を全部伝えてから次へ。<b>仕事内容の詳細と魅力を必ず自分の言葉で伝える。</b></div>
     </div>
   </div>
 
@@ -658,14 +702,16 @@ body{font-family:'Meiryo','メイリオ','Hiragino Kaku Gothic ProN',sans-serif;
           <div class="bubble-text tantou">「ちなみに△△様、過去3ヶ月以内に（会社名）へご応募されたことはございますか？」</div>
         </div>
       </div>
-      <div class="bubble-row">
-        <div class="bubble-avatar tantou">担当</div>
-        <div class="bubble-content">
-          <div class="bubble-name">就業時期の確認</div>
-          <div class="bubble-text tantou">「もし求人内容が気に入っていただけた場合、1ヶ月以内のご就業は可能でしょうか？」</div>
-        </div>
-      </div>
     </div>
+    <div class="sub-head red">就業時期の確認　—　全員に必ずヒアリング</div>
+    <div class="must-box">
+      <div class="must-label red">
+        <div class="ml-icon">★</div>
+        必須ヒアリング　—　省略不可
+      </div>
+      <div class="must-text red">「もし求人内容が気に入っていただけた場合、<b>1ヶ月以内のご就業は可能でしょうか？</b>」</div>
+    </div>
+    <div class="tagbar ng"><div class="tag-mark">×</div><div>就業時期を確認せずにクロージングへ進まない。<b>全件必ず確認する</b>。</div></div>
   </div>
 
   <!-- STEP 5 中間クロージング -->
@@ -744,42 +790,55 @@ body{font-family:'Meiryo','メイリオ','Hiragino Kaku Gothic ProN',sans-serif;
         </div>
       </div>
     </div>
-    <div class="tagbar ng"><div class="tag-mark">×</div><div>都道府県・市区町村だけはNG。番地・マンション名・部屋番号まで必ず確認・復唱する。答えない場合は応募不可。</div></div>
+    <div class="tagbar note"><div class="tag-mark">注</div><div>番地・マンション名・部屋番号まで確認・復唱する。<b>答えられない場合は都道府県・市区町村まででOK</b>。</div></div>
 
-    <div class="sub-head navy">健康状態の確認　—　優先度1・2位の求人のみ</div>
-    <div class="bubbles">
-      <div class="bubble-row">
-        <div class="bubble-avatar tantou">担当</div>
-        <div class="bubble-content">
-          <div class="bubble-name">担当者</div>
-          <div class="bubble-text tantou">「現在、大きなご病気・通院中のこと、または腰痛など業務に影響が出る可能性のあるお体の不調はございますでしょうか？また、これまでに大きな病気にかかったことはございますでしょうか？」</div>
+    <div class="acc">
+      <div class="acc-head" onclick="accToggle(this)">
+        <div>健康状態の確認　—　優先度1・2位の求人のみ</div>
+        <div class="acc-mark">＋</div>
+      </div>
+      <div class="acc-body">
+        <div class="bubbles">
+          <div class="bubble-row">
+            <div class="bubble-avatar tantou">担当</div>
+            <div class="bubble-content">
+              <div class="bubble-name">担当者</div>
+              <div class="bubble-text tantou">「現在、大きなご病気・通院中のこと、または腰痛など業務に影響が出る可能性のあるお体の不調はございますでしょうか？また、これまでに大きな病気にかかったことはございますでしょうか？」</div>
+            </div>
+          </div>
         </div>
+        <div class="tagbar ng"><div class="tag-mark">×</div><div>通院・障がい申告あり　→　UTエイム社のみGoogleチャット確認。それ以外は即案内NG。</div></div>
       </div>
     </div>
-    <div class="tagbar ng"><div class="tag-mark">×</div><div>通院・障がい申告あり　→　UTエイム社のみGoogleチャット確認。それ以外は即案内NG。</div></div>
 
-    <div class="sub-head navy">身長・体重・タトゥー　—　優先度1位のみ</div>
-    <div class="bubbles">
-      <div class="bubble-row">
-        <div class="bubble-avatar tantou">担当</div>
-        <div class="bubble-content">
-          <div class="bubble-name">担当者</div>
-          <div class="bubble-text tantou">「差し支えなければご身長と体重をお伺いしてもよろしいでしょうか。またタトゥーの有無も教えていただけますでしょうか。」</div>
+    <div class="acc">
+      <div class="acc-head" onclick="accToggle(this)">
+        <div>身長・体重・タトゥー　—　優先度1位のみ</div>
+        <div class="acc-mark">＋</div>
+      </div>
+      <div class="acc-body">
+        <div class="bubbles">
+          <div class="bubble-row">
+            <div class="bubble-avatar tantou">担当</div>
+            <div class="bubble-content">
+              <div class="bubble-name">担当者</div>
+              <div class="bubble-text tantou">「差し支えなければご身長と体重をお伺いしてもよろしいでしょうか。またタトゥーの有無も教えていただけますでしょうか。」</div>
+            </div>
+          </div>
         </div>
+        <div class="tagbar note"><div class="tag-mark">注</div><div>タトゥーありの場合：入っている<b>箇所・大きさ</b>をヒアリングしたうえで、UTエイム社案件のみGoogleチャットで確認。それ以外は応募不可。</div></div>
       </div>
     </div>
-    <div class="tagbar note"><div class="tag-mark">注</div><div>タトゥーありの場合：入っている<b>箇所・大きさ</b>をヒアリングしたうえで、UTエイム社案件のみGoogleチャットで確認。それ以外は応募不可。</div></div>
 
-    <div class="sub-head navy">連絡可能時間帯　—　全員必須</div>
-    <div class="bubbles">
-      <div class="bubble-row">
-        <div class="bubble-avatar tantou">担当</div>
-        <div class="bubble-content">
-          <div class="bubble-name">担当者</div>
-          <div class="bubble-text tantou">「普段お電話取りやすい時間帯等ございますでしょうか。」</div>
-        </div>
+    <div class="sub-head red">連絡可能時間帯　—　全員に必ずヒアリング</div>
+    <div class="must-box">
+      <div class="must-label red">
+        <div class="ml-icon">★</div>
+        必須ヒアリング　—　省略不可
       </div>
+      <div class="must-text red">「普段<b>お電話取りやすい時間帯</b>等ございますでしょうか。」</div>
     </div>
+    <div class="tagbar ng"><div class="tag-mark">×</div><div>連絡可能時間帯を聞かずに終話しない。<b>全件必ず確認する</b>。</div></div>
   </div>
 
   <!-- STEP 7 最終クロージング -->
@@ -796,25 +855,19 @@ body{font-family:'Meiryo','メイリオ','Hiragino Kaku Gothic ProN',sans-serif;
         <div class="ml-icon">★</div>
         必須フレーズ　—　そのまま読む
       </div>
-      <div class="must-text navy">「〇〇社から<b>通話終了後最短30分以内・遅くとも4日以内</b>にお電話にてご連絡をさせていただきます。出れなかった場合は折り返しのご対応をお願い致します。」</div>
+      <div class="must-text navy">「〇〇社から<b>通話終了後最短30分以内・遅くとも明日中</b>にお電話にてご連絡をさせていただきます。出れなかった場合は折り返しのご対応をお願い致します。」</div>
     </div>
     <div class="bubbles">
       <div class="bubble-row">
         <div class="bubble-avatar tantou">担当</div>
         <div class="bubble-content">
           <div class="bubble-name">担当者　—　続けて伝える</div>
-          <div class="bubble-text tantou">「折り返しのお電話番号は〇〇〇〇-〇〇〇-〇〇〇からになります。私が今から応募登録をし、<b>30分以内に登録完了メール</b>が届きますので、ぜひご確認いただけますと幸いです。」</div>
-        </div>
-      </div>
-      <div class="bubble-row">
-        <div class="bubble-avatar tantou">担当</div>
-        <div class="bubble-content">
-          <div class="bubble-name">担当者　—　締めの言葉</div>
-          <div class="bubble-text tantou">「こちらで正式に『応募』の手続きが完了いたしました。どうぞよろしくお願いいたします。それでは失礼いたします。」</div>
+          <div class="bubble-text tantou">「今回は、<b>（派遣会社）</b>のお仕事にご応募いただく形で、この後こちらで正式なお手続きを進めさせていただきます。折り返しのお電話番号は〇〇〇〇-〇〇〇-〇〇〇からになります。私が今から応募登録をし、<b>30分以内に登録完了メール</b>が届きますので、ぜひご確認いただけますと幸いです。」</div>
         </div>
       </div>
     </div>
-    <div class="tagbar note"><div class="tag-mark">注</div><div><b>連絡方法の内部ルール</b>　①通常選考に進む方　→　通話終了から<b>最短30分以内・遅くとも4日以内</b>に担当企業から求職者へ直接電話。　②ブラックリスト等の即NG該当者　→　電話ではなく<b>メールにてお断り</b>（電話連絡はしない）。②の該当者には電話連絡の案内をしない。</div></div>
+    <div class="tagbar note"><div class="tag-mark">注</div><div><b>連絡方法の内部ルール</b>　①通常選考に進む方　→　通話終了から<b>最短30分以内・遅くとも翌日中</b>に担当企業から求職者へ直接電話。　②ブラックリスト等の即NG該当者　→　電話ではなく<b>メールにてお断り</b>（電話連絡はしない）。②の該当者には電話連絡の案内をしない。</div></div>
+    <div class="tagbar note"><div class="tag-mark">注</div><div><b>土日を挟む場合は要確認</b>。担当企業の稼働時間により翌日中の連絡ができないことがあるため、【電話番号】ページの稼働時間を確認してから案内する。</div></div>
     <div class="tagbar ng"><div class="tag-mark">×</div><div>会社名・電話番号を言わずに終話しない（指摘4位）</div></div>
   </div>
 
@@ -1085,7 +1138,7 @@ body{font-family:'Meiryo','メイリオ','Hiragino Kaku Gothic ProN',sans-serif;
           <div class="tel-n">0120-971-999</div>
           <div style="font-size:11px;font-weight:700;color:var(--amber);margin-top:5px;background:var(--amber-bg);padding:3px 8px;border-radius:4px;">コールセンター稼働中。面接官は休みの場合あり（人数は日によって変動）</div>
         </td>
-        <td style="font-size:12px;color:var(--muted);">—</td>
+        <td style="font-size:12px;">平日 9:00〜21:00<br>土日祝 9:00〜18:00</td>
       </tr>
 
       <tr>
@@ -1094,7 +1147,7 @@ body{font-family:'Meiryo','メイリオ','Hiragino Kaku Gothic ProN',sans-serif;
           <div class="tel-n">0120-971-999</div>
           <div style="font-size:11px;font-weight:700;color:var(--amber);margin-top:5px;background:var(--amber-bg);padding:3px 8px;border-radius:4px;">コールセンター稼働中。面接官は休みの場合あり（人数は日によって変動）</div>
         </td>
-        <td style="font-size:12px;color:var(--muted);">—</td>
+        <td style="font-size:12px;">平日 9:00〜21:00<br>土日祝 9:00〜18:00</td>
       </tr>
 
       <tr>
@@ -1114,13 +1167,13 @@ body{font-family:'Meiryo','メイリオ','Hiragino Kaku Gothic ProN',sans-serif;
           <div style="font-size:11px;font-weight:700;color:var(--amber);margin-top:5px;background:var(--amber-bg);padding:3px 8px;border-radius:4px;">「0120または022の番号から折り返しがある」と伝えること。案件によって営業所番号は異なります。</div>
           <div style="font-size:11px;color:var(--muted);margin-top:3px;">※ 人数減少の可能性あり（具体的な人数未決定）</div>
         </td>
-        <td style="font-size:12px;color:var(--muted);">—</td>
+        <td style="font-size:12px;">平日 9:00〜19:00<br>土日祝 9:00〜18:00</td>
       </tr>
 
       <tr>
         <td>ジャパンクリエイト</td>
         <td class="tel-n">0120-35-0909</td>
-        <td style="font-size:12px;color:var(--muted);">—</td>
+        <td style="font-size:12px;">平日 9:15〜20:00<br>土日祝 9:15〜18:00</td>
       </tr>
 
       <tr>
@@ -1144,13 +1197,38 @@ body{font-family:'Meiryo','メイリオ','Hiragino Kaku Gothic ProN',sans-serif;
       <tr>
         <td>BREXA Next</td>
         <td class="tel-n">0120-89-4651</td>
-        <td style="font-size:12px;color:var(--muted);">—</td>
+        <td style="font-size:12px;">
+          平日 9:00〜19:00<br>土日祝 9:00〜18:00<br>
+          <span style="font-size:11px;color:var(--amber);font-weight:700;">GW・お盆は土日と同じ</span>
+        </td>
       </tr>
 
       <tr>
         <td>SUBARU nw Sight</td>
         <td class="tel-n">0120-928-486</td>
         <td style="font-size:12px;color:var(--muted);">—</td>
+      </tr>
+
+      <tr>
+        <td>MantoMan</td>
+        <td>
+          <div><span class="tel-n">0120-106-191</span>　<span style="font-size:11px;color:var(--muted);">岡山</span></div>
+          <div style="margin-top:4px;"><span class="tel-n">0120-106-191</span>　<span style="font-size:11px;color:var(--muted);">三河</span></div>
+        </td>
+        <td style="font-size:12px;">平日 9:00〜20:00<br>土日祝 9:00〜18:00</td>
+      </tr>
+
+      <tr>
+        <td>ビート業務部03</td>
+        <td>
+          <div class="tel-n">06-7688-5288</div>
+          <div style="margin-top:4px;"><span class="tel-n">090-6567-9431</span>　<span style="font-size:11px;color:var(--muted);">個人番号</span></div>
+          <div style="font-size:11px;font-weight:700;color:var(--amber);margin-top:5px;background:var(--amber-bg);padding:3px 8px;border-radius:4px;">個人番号は社内確認用。求職者へは案内しない。</div>
+        </td>
+        <td style="font-size:12px;">
+          平日 9:00〜18:00<br>
+          <span style="font-size:11px;color:var(--red);font-weight:700;">※ 土日祝の営業はしていない</span>
+        </td>
       </tr>
 
       <tr>
@@ -1162,7 +1240,7 @@ body{font-family:'Meiryo','メイリオ','Hiragino Kaku Gothic ProN',sans-serif;
             リンクから面接設定できていない場合は上記番号よりコールセンターから連絡があります。
           </div>
         </td>
-        <td style="font-size:12px;color:var(--muted);">—</td>
+        <td style="font-size:12px;">平日 9:00〜18:00<br>土日 9:00〜18:00</td>
       </tr>
 
       <tr>
@@ -1172,7 +1250,10 @@ body{font-family:'Meiryo','メイリオ','Hiragino Kaku Gothic ProN',sans-serif;
           <div style="margin-top:4px;"><span class="tel-n">0120-499-300</span>　<span style="font-size:11px;color:var(--muted);">9:30〜17:00</span></div>
           <div style="font-size:11px;font-weight:700;color:var(--amber);margin-top:5px;background:var(--amber-bg);padding:3px 8px;border-radius:4px;">求職者へは「0120〜のフリーダイヤルから折り返しがあります」と案内。番号を直接聞かれた場合のみ2つを伝える。</div>
         </td>
-        <td style="font-size:12px;color:var(--muted);">—</td>
+        <td style="font-size:12px;">
+          0120-573-486　9:30〜19:00<br>0120-499-300　9:30〜17:00<br>
+          <span style="font-size:11px;color:var(--red);font-weight:700;">※ 祝日は稼働無し</span>
+        </td>
       </tr>
 
       <tr>
@@ -1190,7 +1271,7 @@ body{font-family:'Meiryo','メイリオ','Hiragino Kaku Gothic ProN',sans-serif;
       <tr>
         <td>パーソルファクトリーパートナーズ</td>
         <td class="tel-n">0120-498-314</td>
-        <td style="font-size:12px;color:var(--muted);">—</td>
+        <td style="font-size:12px;">平日 9:00〜20:00<br>土日祝 10:00〜17:00</td>
       </tr>
 
       <tr>
@@ -1353,6 +1434,9 @@ function go(id){
   document.getElementById(id).classList.add('on');
   document.querySelectorAll('.nb')[tabs.indexOf(id)].classList.add('on');
   window.scrollTo(0,0);
+}
+function accToggle(el){
+  el.parentElement.classList.toggle('open');
 }
 function jumpTo(id){
   const el=document.getElementById(id);

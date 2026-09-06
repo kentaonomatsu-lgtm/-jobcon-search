@@ -1,9 +1,9 @@
 /**
- * ジョブコン求人サーチ - Service Worker v3
+ * ジョブコン求人サーチ - Service Worker v4
  * data.json は5分キャッシュ。更新があればページに通知して自動リロード。
  * HTMLはネット優先（更新を即反映）、オフライン時のみキャッシュを使用。
  */
-const CACHE_NAME = "jcsearch-v3";
+const CACHE_NAME = "jcsearch-v4";
 const DATA_JSON_PATH = "./data.json";
 const DATA_MAX_AGE_MS = 5 * 60 * 1000; // 5分
 
@@ -11,7 +11,7 @@ const DATA_MAX_AGE_MS = 5 * 60 * 1000; // 5分
 self.addEventListener("install", e => {
   e.waitUntil(
     caches.open(CACHE_NAME)
-      .then(c => c.addAll(["./", "./index.html", "./script.html", "./data.json"]))
+      .then(c => c.addAll(["./", "./index.html", "./script.html", "./jc-common.js", "./data.json"]))
       .then(() => self.skipWaiting())
   );
 });
@@ -28,6 +28,9 @@ self.addEventListener("activate", e => {
 });
 
 self.addEventListener("fetch", e => {
+  // GET以外（更新確認のHEADなど）はSWを通さず素通しさせる
+  if (e.request.method !== "GET") return;
+
   const url = new URL(e.request.url);
   const isDataJson = url.pathname.endsWith("/data.json");
   const isGAS = url.hostname.includes("script.google.com");
@@ -73,9 +76,11 @@ self.addEventListener("fetch", e => {
     return;
   }
 
-  // HTMLページ：ネット優先（更新を即反映）。失敗時のみキャッシュ
-  const isHTML = e.request.mode === "navigate" || url.pathname.endsWith(".html");
-  if (isHTML) {
+  // HTML / JS：ネット優先（更新を即反映）。失敗時のみキャッシュ
+  const isApp = e.request.mode === "navigate"
+             || url.pathname.endsWith(".html")
+             || url.pathname.endsWith(".js");
+  if (isApp) {
     e.respondWith(
       fetch(e.request)
         .then(res => {
