@@ -39,6 +39,13 @@
   --red-bg:#fef2f2;
 
   --gry:#f3f4f6;
+
+  /* アウトソ用アクセント */
+  --outs:#1a3560;
+  --outs-d:#122648;
+  --outs-bg:#eff4ff;
+  --outs-line:#93b4ef;
+
   --hd-h:56px;
   --qbar-h:52px;
   --nav-h:60px;
@@ -130,6 +137,22 @@ header{
   white-space:nowrap;
 }
 .hd-cnt b{font-size:17px;}
+
+/* アウトソモード時ヘッダー切り替え */
+body.outs-mode .hd-icon{
+  background:linear-gradient(135deg,var(--outs),var(--outs-d));
+  box-shadow:0 2px 6px rgba(26,53,96,.35);
+}
+body.outs-mode .hd-logo span{color:var(--outs);}
+body.outs-mode .hd-cnt{
+  color:var(--outs);
+  background:var(--outs-bg);
+  border-color:var(--outs-line);
+}
+body.outs-mode .hd-search input:focus{
+  border-color:var(--outs);
+  box-shadow:0 0 0 3px rgba(26,53,96,.12);
+}
 
 /* ===== 送客可否チェック（ヘッダー内） ===== */
 .hd-tel-wrap{
@@ -235,6 +258,62 @@ header{
   white-space:nowrap;flex:none;
 }
 
+/* ===== PC メインタブ ===== */
+.main-tabs{
+  display:none; /* PC のみ表示 */
+  gap:0;
+  margin-bottom:12px;
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:var(--r);
+  overflow:hidden;
+  box-shadow:var(--sh);
+}
+.main-tab-btn{
+  flex:1;min-height:46px;
+  display:flex;align-items:center;justify-content:center;gap:7px;
+  font-size:14px;font-weight:800;
+  color:var(--sub);
+  border-right:1px solid var(--line);
+  transition:all .15s;
+  background:#fff;
+}
+.main-tab-btn:last-child{border-right:none;}
+.main-tab-btn.active{
+  background:var(--pri);color:#fff;
+}
+.main-tab-btn.active.outs{
+  background:var(--outs);color:#fff;
+}
+.main-tab-btn .tab-badge{
+  font-size:11px;font-weight:800;
+  background:rgba(255,255,255,.25);
+  padding:2px 8px;border-radius:20px;
+  display:none;
+}
+.main-tab-btn.active .tab-badge{display:inline;}
+
+@media(min-width:769px){
+  .main-tabs{display:flex;}
+}
+
+/* アウトソバナー（メインエリア上部） */
+.outs-banner{
+  display:none;
+  background:linear-gradient(135deg,var(--outs),var(--outs-d));
+  color:#fff;
+  border-radius:var(--r-sm);
+  padding:10px 14px;
+  margin-bottom:10px;
+  font-size:13px;font-weight:800;
+  align-items:center;gap:8px;
+  box-shadow:var(--sh-md);
+}
+.outs-banner.show{display:flex;}
+.outs-banner-icon{font-size:18px;}
+.outs-banner-text{flex:1;}
+.outs-banner-sub{font-size:11.5px;opacity:.8;font-weight:700;margin-top:1px;}
+
 /* ===== ボトムナビ（スマホのみ） ===== */
 .bottom-nav{
   display:none;
@@ -258,6 +337,7 @@ header{
   padding-bottom:2px;
 }
 .bn-tab.active{color:var(--pri);}
+.bn-tab.active.outs-tab{color:var(--outs);}
 .bn-icon{font-size:22px;line-height:1;}
 .bn-badge{
   position:absolute;top:-2px;right:-4px;
@@ -532,6 +612,7 @@ mark.hit{
 .c-h{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:4px;}
 .badge{font-size:11.5px;font-weight:800;padding:3px 9px;border-radius:6px;}
 .badge.pri{background:var(--gry);color:var(--sub);border:1px solid var(--line);}
+.badge.outs{background:var(--outs-bg);color:var(--outs);border:1px solid var(--outs-line);}
 .c-co{font-size:16px;font-weight:800;line-height:1.35;word-break:break-all;}
 .c-ti{
   font-size:12.5px;color:#4b5563;margin-top:3px;
@@ -574,6 +655,7 @@ mark.hit{
 .pill.sub{background:#fef3c7;color:#92400e;border:1px solid #fcd34d;}
 .pill.bx{background:var(--or-bg);color:var(--or);border:1px solid var(--or-line);}
 .pill.sf,.pill.emp{background:var(--gry);color:#374151;}
+.pill.outs-flag{background:var(--outs-bg);color:var(--outs);border:1px solid var(--outs-line);}
 
 /* メタ */
 .c-meta{font-size:11.5px;color:#6b7280;margin-top:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
@@ -689,19 +771,17 @@ ruby rt{font-size:58%;opacity:.85;font-weight:700;letter-spacing:0;}
     flex-direction:column;
     padding-bottom:var(--nav-h);
   }
-  .side{display:none;} /* ドロワーに移行 */
+  .side{display:none;}
   .bottom-nav{display:block;}
   .main{padding:10px;}
-  .hd-logo{display:none;}/* スマホは省略 */
-  .hd-cnt{display:none;} /* スマホは省略（ドロワーに表示） */
+  .hd-logo{display:none;}
+  .hd-cnt{display:none;}
 
-  /* カードをスマホ最適化 */
   .c-top{flex-direction:column;gap:10px;}
   .c-r{flex-direction:row;align-items:center;width:100%;justify-content:space-between;}
   .sal-block{min-width:0;flex:1;text-align:left;}
   .sal-main{justify-content:flex-start;}
 
-  /* クイックバー */
   .qbar{gap:6px;padding:0 10px;}
   .qb-chip{min-height:34px;padding:0 10px;font-size:12.5px;}
   .qb-chip input{width:38px;font-size:12.5px;}
@@ -745,7 +825,6 @@ ruby rt{font-size:58%;opacity:.85;font-weight:700;letter-spacing:0;}
 
 <!-- ===== クイックバー ===== -->
 <div class="qbar" aria-label="クイック絞り込み">
-  <!-- 更新ボタン -->
   <button class="qb-chip" id="hdRefreshBtn" onclick="manualRefresh()" aria-label="最新を確認">
     <span id="hdRefreshLabel">⟳ 更新</span>
   </button>
@@ -792,6 +871,10 @@ ruby rt{font-size:58%;opacity:.85;font-weight:700;letter-spacing:0;}
       <span class="bn-icon">📋</span>
       <span>求人一覧</span>
     </button>
+    <button class="bn-tab" id="bn-outsource" onclick="showView('outsource')">
+      <span class="bn-icon">🏢</span>
+      <span>アウトソ</span>
+    </button>
     <button class="bn-tab" id="bn-filter" onclick="openDrawer()">
       <span class="rel">
         <span class="bn-icon">🔧</span>
@@ -814,20 +897,38 @@ ruby rt{font-size:58%;opacity:.85;font-weight:700;letter-spacing:0;}
     <span class="drawer-title">🔧 絞り込み</span>
     <button class="drawer-close" onclick="closeDrawer()" aria-label="閉じる">✕</button>
   </div>
-  <div class="drawer-body" id="drawerBody">
-    <!-- JS で共有コンテンツを複製 -->
-  </div>
+  <div class="drawer-body" id="drawerBody"></div>
 </div>
 
 <!-- ===== メインレイアウト ===== -->
 <div class="layout">
   <!-- PC サイドパネル -->
-  <aside class="side" aria-label="絞り込みパネル" id="sidePanel">
-    <!-- JS で生成 -->
-  </aside>
+  <aside class="side" aria-label="絞り込みパネル" id="sidePanel"></aside>
 
   <!-- メイン -->
   <main class="main" aria-label="求人一覧">
+
+    <!-- PC 用メインタブ -->
+    <div class="main-tabs" id="mainTabs">
+      <button class="main-tab-btn active" id="pc-tab-list" onclick="switchMainTab('list')">
+        📋 求人一覧
+        <span class="tab-badge" id="pc-tab-list-badge">-</span>
+      </button>
+      <button class="main-tab-btn outs" id="pc-tab-outsource" onclick="switchMainTab('outsource')">
+        🏢 アウトソーシング事業部
+        <span class="tab-badge" id="pc-tab-outs-badge">-</span>
+      </button>
+    </div>
+
+    <!-- アウトソバナー（アウトソタブ時に表示） -->
+    <div class="outs-banner" id="outsBanner">
+      <span class="outs-banner-icon">🏢</span>
+      <div class="outs-banner-text">
+        <div>アウトソーシング事業部 可能求人</div>
+        <div class="outs-banner-sub">トリプルエース株式会社 ／ 予算フラグ：1</div>
+      </div>
+    </div>
+
     <!-- エリア（スマホ「エリア」タブでも表示） -->
     <div id="area-section">
       <div class="area-card">
@@ -847,12 +948,16 @@ ruby rt{font-size:58%;opacity:.85;font-weight:700;letter-spacing:0;}
       <span id="hdUpdated" style="font-size:11.5px;color:var(--sub);font-weight:700;">読込中…</span>
     </div>
 
-    <!-- カード一覧 -->
+    <!-- 通常求人カード一覧 -->
     <div class="cards" id="cards">
       <div class="skel-card"><div class="skel skel-line w80"></div><div class="skel skel-line w60"></div><div class="skel skel-line w40"></div></div>
       <div class="skel-card"><div class="skel skel-line w80"></div><div class="skel skel-line w60"></div><div class="skel skel-line w40"></div></div>
       <div class="skel-card"><div class="skel skel-line w80"></div><div class="skel skel-line w60"></div><div class="skel skel-line w40"></div></div>
     </div>
+
+    <!-- アウトソ求人カード一覧（初期非表示） -->
+    <div class="cards" id="cards-outsource" style="display:none;"></div>
+
     <div class="more-text" id="more"></div>
     <button id="loadMoreBtn" class="load-more" onclick="loadMore()" hidden>さらに読み込む ▼</button>
   </main>
@@ -862,11 +967,13 @@ ruby rt{font-size:58%;opacity:.85;font-weight:700;letter-spacing:0;}
 /* ====== 設定 ====== */
 const DATA_JSON_URL = "./data.json";
 const GAS_API_URL = "https://script.google.com/macros/s/AKfycbyDO5dsR1BlXNIIOHTWR21NeVtD91sq-1HREiL9aVQmZZGc-9oK8rbLixZ6PmJAVyY7hw/exec";
-// ★ dpt-registration-system が動いているPCのIPアドレスに変更してください
 const CHECK_API_URL = "https://revival-whoever-tweed.ngrok-free.dev/api/check-application-history";
-/* HOURS/toHourly は v9 で廃止（時給←→月給換算表示を廃止） */
 const PAGE_SIZE = 50;
 const SW_CACHE = "jcsearch-v2";
+
+/* アウトソーシング事業部フィルタ定数 */
+const OUTS_COMPANY = "トリプルエース株式会社";
+const OUTS_BUDGET  = 1;
 
 const REGIONS = {
   "北海道・東北":["北海道","青森県","岩手県","宮城県","秋田県","山形県","福島県"],
@@ -885,10 +992,13 @@ const KANA_PREF={"北海道":"ほっかいどう","青森県":"あおもりけ�
 let ALL_JOBS = [];
 let LAST_UPDATED_AT = null;
 let filtered = [];
+let filteredOuts = [];
 let displayCount = PAGE_SIZE;
+let displayCountOuts = PAGE_SIZE;
 let _refreshing = false;
-let _currentView = "list"; // list | area
-let NG_COMPANIES = new Set(); // 送客NG企業名（電話番号チェックで取得）
+/* list | outsource | area */
+let _currentView = "list";
+let NG_COMPANIES = new Set();
 let _telChecking = false;
 
 const state = {
@@ -907,15 +1017,45 @@ function escMark(text){
   const re = new RegExp(kw.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),'gi');
   return t.replace(re, m=>'<mark class="hit">'+m+'</mark>');
 }
-/* toHourly は v9 で廃止 */
-/* salVal: フィルター・ソート用の統一万円換算値
-   時給(hr円) → hr×173÷10000 万円相当 / 月給(sl万円) → そのまま */
 function salVal(j){
   if(j.wt==="時給"&&j.hr>0) return Math.round(j.hr*173/10000*10)/10;
   return j.sl||0;
 }
 function kanaPref(pf){ return KANA_PREF[pf]||""; }
 function rubyP(pf){ const k=kanaPref(pf); return k?'<ruby>'+esc(pf)+'<rt>'+esc(k)+'</rt></ruby>':esc(pf); }
+
+/* ====== アウトソタブ切り替え ====== */
+function switchMainTab(tab){
+  _currentView = tab;
+  const isOuts = tab === "outsource";
+
+  /* PC タブボタン */
+  $("pc-tab-list").classList.toggle("active", !isOuts);
+  $("pc-tab-outsource").classList.toggle("active", isOuts);
+
+  /* カード切り替え */
+  $("cards").style.display         = isOuts ? "none" : "";
+  $("cards-outsource").style.display = isOuts ? "" : "none";
+
+  /* アウトソバナー */
+  $("outsBanner").classList.toggle("show", isOuts);
+
+  /* body クラスでヘッダー色変更 */
+  document.body.classList.toggle("outs-mode", isOuts);
+
+  /* 件数バー更新 */
+  updateCounts();
+
+  /* ロードモアボタン */
+  const hasMore = isOuts
+    ? filteredOuts.length > displayCountOuts
+    : filtered.length > displayCount;
+  $("loadMoreBtn").hidden = !hasMore;
+  $("more").textContent = "";
+
+  /* アウトソ初回レンダリング */
+  if(isOuts) renderOuts();
+}
 
 /* ====== 送客可否チェック ====== */
 async function checkTel(){
@@ -934,22 +1074,13 @@ async function checkTel(){
     });
     const data = await res.json();
     if(!data.success) throw new Error(data.error||"エラー");
-
-    // NG企業セットを更新
     NG_COMPANIES = new Set(data.ngCompanies||[]);
-
-    // バナー表示
     showTelBanner(data);
-
-    // フィルター再適用
     renderAll();
-
-    // ヘッダーの色を変える
     const wrap = $("hdTelWrap");
     wrap.classList.remove("ng-active","ok-active");
     if(NG_COMPANIES.size > 0) wrap.classList.add("ng-active");
     else wrap.classList.add("ok-active");
-
     $("hdTelClr").hidden = false;
   }catch(e){
     alert("取得エラー："+e.message);
@@ -963,8 +1094,6 @@ async function checkTel(){
 function showTelBanner(data){
   const ng = (data.applications||[]).filter(a=>a.period==="1month"||a.period==="3months");
   const isNG = ng.length > 0;
-
-  // ヘッダーのNG件数表示を更新
   let badge = $("hdTelBadge");
   if(!badge){
     badge = document.createElement("span");
@@ -979,8 +1108,6 @@ function showTelBanner(data){
     badge.textContent = data.total === 0 ? "履歴なし" : "送客可";
     badge.style.color = "#16803a";
   }
-
-  // トースト（3秒で自動消滅）
   let toast = $("telToast");
   if(!toast){
     toast = document.createElement("div");
@@ -1015,7 +1142,6 @@ function clearTelCheck(){
 }
 
 /* ====== ローディングバー ====== */
-let _lbTimer=null;
 function lbStart(){ const b=$("loadbar");b.style.width="0";b.style.opacity="1";b.style.transition="width 2s ease";requestAnimationFrame(()=>{b.style.width="80%";}); }
 function lbDone(){ const b=$("loadbar");b.style.transition="width .2s ease,opacity .5s ease .2s";b.style.width="100%";setTimeout(()=>{b.style.opacity="0";},300); }
 
@@ -1085,7 +1211,6 @@ async function loadFromGAS(){
 /* ====== フィルタ ====== */
 function baseFilter(){
   let r=ALL_JOBS;
-  // 送客NG企業を除外（電話番号チェック済みの場合のみ）
   if(NG_COMPANIES.size>0) r=r.filter(j=>!NG_COMPANIES.has(j.co));
   if(state.kw){const k=state.kw.toLowerCase();r=r.filter(j=>(j.co||"").toLowerCase().includes(k)||(j.pf||"").includes(k)||(j.ct||"").includes(k)||(j.sk||"").includes(k)||(j.gy||"").includes(k)||(j.ti||"").includes(k)||(j.id||"").includes(k)||(j.maker||"").toLowerCase().includes(k));}
   if(state.pris.size)  r=r.filter(j=>state.pris.has(j.pr));
@@ -1107,6 +1232,14 @@ function baseFilter(){
 }
 function filterJobs(){ let r=baseFilter();if(state.prefs.size) r=r.filter(j=>state.prefs.has(j.pf));return r; }
 
+/* アウトソ専用フィルタ：通常フィルタ + L列・B列条件を重ねる */
+function filterOutsJobs(){
+  let r = baseFilter();
+  if(state.prefs.size) r=r.filter(j=>state.prefs.has(j.pf));
+  r = r.filter(j => j.co === OUTS_COMPANY && Number(j.budget) === OUTS_BUDGET);
+  return r;
+}
+
 /* ====== ソート ====== */
 function sortJobs(r){
   const m=state.sort;
@@ -1118,9 +1251,10 @@ function sortJobs(r){
 }
 
 /* ====== HTML生成 ====== */
-function pillsHtml(j){
+function pillsHtml(j, isOuts){
   const ageNG=state.age!==null&&j.ag<state.age;
   let p="";
+  if(isOuts) p+='<span class="pill outs-flag">🏢 アウトソ対象</span>';
   if(j.pf) p+='<span class="pill loc">'+rubyP(j.pf)+(j.ct?" "+esc(j.ct):"")+'</span>';
   if(j.ag) p+='<span class="pill age'+(ageNG?' ng':'')+'">〜'+j.ag+'歳'+(ageNG?'（対象外）':'')+'</span>';
   if(j.gn) p+='<span class="pill gen">'+esc(j.gn)+'</span>';
@@ -1186,17 +1320,19 @@ function quotaBannerHtml(j){
     +'</div></div>';
 }
 
-function cardHtml(j){
+function cardHtml(j, isOuts){
   const meta=[j.gy,j.sk].filter(Boolean).map(escMark).join("　/　");
+  const badgeLabel = isOuts ? '🏢 アウトソ' : '優先'+esc(j.pr||"－")+'位';
+  const badgeCls   = isOuts ? 'badge outs' : 'badge pri';
   return '<div class="card">'
     +quotaBannerHtml(j)
     +salBannerHtml(j)
     +'<div class="c-top">'
       +'<div class="c-l">'
-        +'<div class="c-h"><span class="badge pri">優先'+esc(j.pr||"－")+'位</span></div>'
+        +'<div class="c-h"><span class="'+badgeCls+'">'+badgeLabel+'</span></div>'
         +'<div class="c-co">'+escMark(j.co)+'</div>'
         +(j.ti?'<div class="c-ti">'+escMark(j.ti)+'</div>':"")
-        +'<div class="pills">'+pillsHtml(j)+'</div>'
+        +'<div class="pills">'+pillsHtml(j, isOuts)+'</div>'
         +(meta?'<div class="c-meta">'+meta+'</div>':"")
       +'</div>'
       +'<div class="c-r">'+salBlock(j)
@@ -1216,27 +1352,55 @@ function cardHtml(j){
   +'</div>';
 }
 
-/* ====== レンダリング ====== */
+/* ====== レンダリング（通常） ====== */
 function render(){
   const list=filtered.slice(0,displayCount);
   if(!list.length){
     $("cards").innerHTML='<div class="empty"><b>該当する求人がありません</b>条件をゆるめてください</div>';
     $("more").textContent="";$("loadMoreBtn").hidden=true;return;
   }
-  $("cards").innerHTML=list.map(cardHtml).join("");
+  $("cards").innerHTML=list.map(j=>cardHtml(j,false)).join("");
   const hasMore=filtered.length>displayCount;
   $("more").textContent=hasMore?"上位"+list.length+"件を表示中（全"+filtered.length.toLocaleString()+"件）":(filtered.length>PAGE_SIZE?"全"+filtered.length.toLocaleString()+"件表示":"");
   $("loadMoreBtn").hidden=!hasMore;
 }
-function loadMore(){ displayCount+=PAGE_SIZE;render(); }
+
+/* ====== レンダリング（アウトソ） ====== */
+function renderOuts(){
+  const list=filteredOuts.slice(0,displayCountOuts);
+  const el=$("cards-outsource");
+  if(!list.length){
+    el.innerHTML='<div class="empty"><b>アウトソーシング事業部 対象求人がありません</b>L列がトリプルエース株式会社、かつB列が1の求人が対象です</div>';
+    $("more").textContent="";$("loadMoreBtn").hidden=true;return;
+  }
+  el.innerHTML=list.map(j=>cardHtml(j,true)).join("");
+  const hasMore=filteredOuts.length>displayCountOuts;
+  $("more").textContent=hasMore?"上位"+list.length+"件を表示中（全"+filteredOuts.length.toLocaleString()+"件）":(filteredOuts.length>PAGE_SIZE?"全"+filteredOuts.length.toLocaleString()+"件表示":"");
+  $("loadMoreBtn").hidden=!hasMore;
+}
+
+function loadMore(){
+  if(_currentView==="outsource"){
+    displayCountOuts+=PAGE_SIZE;renderOuts();
+  } else {
+    displayCount+=PAGE_SIZE;render();
+  }
+}
 
 /* ====== カウント ====== */
 function updateCounts(){
-  const n=filtered.length,t=ALL_JOBS.length;
+  const isOuts = _currentView === "outsource";
+  const n = isOuts ? filteredOuts.length : filtered.length;
+  const t = ALL_JOBS.length;
   $("hc").textContent=n.toLocaleString();$("ht").textContent=t.toLocaleString();
   $("bc").textContent=n.toLocaleString();$("bt").textContent=t.toLocaleString();
-  $("qbc")?($("qbc").textContent=n.toLocaleString()):null;
-  $("qbt")?($("qbt").textContent=t.toLocaleString()):null;
+
+  /* PCタブのバッジ更新 */
+  const listBadge=$("pc-tab-list-badge");
+  const outsBadge=$("pc-tab-outs-badge");
+  if(listBadge) listBadge.textContent=filtered.length.toLocaleString()+"件";
+  if(outsBadge) outsBadge.textContent=filteredOuts.length.toLocaleString()+"件";
+
   const cnt=f=>ALL_JOBS.filter(f).length;
   const set=(id,v)=>{const el=$(id);if(el) el.textContent=v;};
   set("c-dorm",cnt(j=>j.dorm==="1").toLocaleString());
@@ -1287,7 +1451,6 @@ function updateReset(){
     ||state.prefs.size||state.pris.size||state.quicks.size||state.emps.size||state.cos.size;
   $("kwx").hidden=!state.kw;
   $("qbclear").hidden=!on;
-  // クイックバー年齢/月収の active 反映
   const ageChip=$("qb-age-chip");
   if(ageChip) ageChip.classList.toggle("active",state.age!==null);
   const salChip=$("qb-sal-chip");
@@ -1430,7 +1593,6 @@ function openDrawer(){
   $("drawer").classList.add("open");
   $("drawerOverlay").classList.add("open");
   document.body.style.overflow="hidden";
-  // ドロワーにも同じコンテンツ（スマホ時）
   $("drawerBody").innerHTML=buildFilterHTML();
   syncAllUI();
 }
@@ -1439,58 +1601,78 @@ function closeDrawer(){
   $("drawerOverlay").classList.remove("open");
   document.body.style.overflow="";
 }
+
 function showView(view){
   _currentView=view;
-  document.querySelectorAll(".bn-tab").forEach(t=>t.classList.remove("active"));
-  $("bn-"+view).classList.add("active");
+  const isOuts = view === "outsource";
+
+  /* ボトムナビのアクティブ切り替え */
+  document.querySelectorAll(".bn-tab").forEach(t=>t.classList.remove("active","outs-tab"));
+  const activeTab=$("bn-"+view);
+  if(activeTab){
+    activeTab.classList.add("active");
+    if(isOuts) activeTab.classList.add("outs-tab");
+  }
+
+  /* body クラスでヘッダー色変更 */
+  document.body.classList.toggle("outs-mode", isOuts);
+
   const area=$("area-section");
   const cards=$("cards");
+  const cardsOuts=$("cards-outsource");
   const countBar=document.querySelector(".count-bar");
   const activeBar=$("active");
-  const loadMore=$("loadMoreBtn");
+  const loadMoreBtn=$("loadMoreBtn");
   const more=$("more");
+  const outsBanner=$("outsBanner");
+
   if(view==="area"){
-    area.style.display="";cards.style.display="none";
+    area.style.display="";cards.style.display="none";cardsOuts.style.display="none";
     if(countBar) countBar.style.display="none";
-    if(loadMore) loadMore.hidden=true;
+    if(loadMoreBtn) loadMoreBtn.hidden=true;
     if(more) more.textContent="";
     if(activeBar) activeBar.style.display="none";
-  } else {
-    area.style.display="";cards.style.display="";
+    if(outsBanner) outsBanner.classList.remove("show");
+  } else if(view==="outsource"){
+    area.style.display="";cards.style.display="none";cardsOuts.style.display="";
     if(countBar) countBar.style.display="";
     if(activeBar) activeBar.style.display="";
+    if(outsBanner) outsBanner.classList.add("show");
+    updateCounts();
+    renderOuts();
+  } else {
+    /* list */
+    area.style.display="";cards.style.display="";cardsOuts.style.display="none";
+    if(countBar) countBar.style.display="";
+    if(activeBar) activeBar.style.display="";
+    if(outsBanner) outsBanner.classList.remove("show");
+    updateCounts();
     render();
   }
 }
 
 /* ====== コンポーネント同期 ====== */
 function syncAllUI(){
-  // 年齢
   document.querySelectorAll(".age-sync").forEach(el=>{
     el.value=state.age===null?"":state.age;
     el.classList.toggle("set",state.age!==null);
   });
-  // 性別
   document.querySelectorAll(".tab[data-g],.gender-sync").forEach(t=>{
     const on=t.dataset.g===state.gender&&state.gender!=="";
     t.classList.toggle("on",on);t.setAttribute("aria-pressed",on);
   });
-  // 月収
   document.querySelectorAll(".sal-sync").forEach(el=>{
     el.value=state.salMin;el.classList.toggle("set",state.salMin>0);
   });
   const salr=$("salr");if(salr) salr.value=Math.min(46,state.salMin);
-  // タイル
   ["dorm","free","sub"].forEach(q=>{
     const on=state.quicks.has(q);
     const t=$("t-"+q);if(t){t.classList.toggle("on",on);t.setAttribute("aria-pressed",on);}
   });
-  // こだわり
   ["bonus","day","night","2shift"].forEach(q=>{
     const on=state.quicks.has(q);
     const c=$("q-"+q);if(c){c.classList.toggle("on",on);c.setAttribute("aria-pressed",on);}
   });
-  // 優先順位・雇用形態 → renderAll で生成後に同期
   document.querySelectorAll("#pris .tab").forEach(t=>{
     const on=state.pris.has(t.dataset.p);
     t.classList.toggle("on",on);t.setAttribute("aria-pressed",on);
@@ -1504,7 +1686,6 @@ function syncAllUI(){
 
 /* ====== renderAll ====== */
 function renderAll(){
-  // PCサイドパネルにHTMLをセット
   $("sidePanel").innerHTML=buildFilterHTML();
 
   const emps={};
@@ -1578,8 +1759,12 @@ let _applyTimer=null;
 function apply(){ if(_applyTimer) clearTimeout(_applyTimer);_applyTimer=setTimeout(_applyNow,30); }
 function _applyNow(){
   displayCount=PAGE_SIZE;
+  displayCountOuts=PAGE_SIZE;
   filtered=sortJobs(filterJobs());
-  render();updateCounts();updateActive();updateReset();
+  filteredOuts=sortJobs(filterOutsJobs());
+  if(_currentView==="outsource") renderOuts();
+  else render();
+  updateCounts();updateActive();updateReset();
 }
 
 /* ====== 操作 ====== */
