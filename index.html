@@ -728,6 +728,26 @@ function registerSW(){
   });
 }
 
+/* ===== 自動更新（手動ボタン不要）=====
+   ・AUTO_POLL_MS おきに data.json を裏で再フェッチ → SW が中身の変化を検知して
+     DATA_UPDATED を通知 → 上の registerSW() のリスナーが自動で再描画する。
+   ・タブに戻ってきた瞬間（visibilitychange）にも即チェックし、体感の遅延を減らす。
+   ・GASのライブAPIも LIVE_CHECK_MS おきにバックグラウンドで確認し、
+     GitHub側の同期が万一止まっていても取りこぼさないようにする（安全網）。 */
+const AUTO_POLL_MS  = 60 * 1000;      // data.json 再チェック間隔
+const LIVE_CHECK_MS = 10 * 60 * 1000; // ライブAPIでの保険チェック間隔
+
+function pingDataJson(){
+  fetch(DATA_JSON_URL+"?t="+Date.now(),{cache:"no-cache"}).catch(()=>{});
+}
+function startAutoRefresh(){
+  setInterval(pingDataJson,AUTO_POLL_MS);
+  setInterval(checkGasUpdate,LIVE_CHECK_MS);
+  document.addEventListener("visibilitychange",()=>{
+    if(document.visibilityState==="visible") pingDataJson();
+  });
+}
+
 async function loadInitialData(){
   lbStart();
   try{
@@ -736,14 +756,12 @@ async function loadInitialData(){
     const data=await res.json();
     if(data&&Array.isArray(data.jobs)){ALL_JOBS=data.jobs;LAST_UPDATED_AT=data.updatedAt||null;renderAll();showUpdatedDate();lbDone();setTimeout(checkGasUpdate,100);}
   }catch(e){await loadFromGAS();lbDone();}
+  startAutoRefresh();
 }
 async function checkGasUpdate(){
-  const lastCheck=sessionStorage.getItem("jc_last_check");
-  if(lastCheck&&Date.now()-Number(lastCheck)<10*60*1000) return;
   try{
     const res=await fetch(GAS_API_URL,{cache:"no-store"});const data=await res.json();
     if(data&&Array.isArray(data.jobs)&&data.jobs.length>0&&(!LAST_UPDATED_AT||data.updatedAt>LAST_UPDATED_AT)){ALL_JOBS=data.jobs;LAST_UPDATED_AT=data.updatedAt||null;renderAll();showUpdatedDate(true);}
-    sessionStorage.setItem("jc_last_check",String(Date.now()));
   }catch(e){}
 }
 async function loadFromGAS(){

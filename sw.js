@@ -1,11 +1,13 @@
 /**
- * ジョブコン求人サーチ - Service Worker v4
- * data.json は5分キャッシュ。更新があればページに通知して自動リロード。
+ * ジョブコン求人サーチ - Service Worker v5
+ * data.json は1分キャッシュ。更新があればページに通知して自動再描画。
+ * フロント側(index.html)が1分おきに裏でdata.jsonへアクセスしにいくため、
+ * ここでの実際のネットワーク確認も最短1分間隔で回る（自動反映・ボタン不要）。
  * HTMLはネット優先（更新を即反映）、オフライン時のみキャッシュを使用。
  */
-const CACHE_NAME = "jcsearch-v4";
+const CACHE_NAME = "jcsearch-v5";
 const DATA_JSON_PATH = "./data.json";
-const DATA_MAX_AGE_MS = 5 * 60 * 1000; // 5分
+const DATA_MAX_AGE_MS = 60 * 1000; // 1分
 
 // インストール：静的アセットをキャッシュ
 self.addEventListener("install", e => {
