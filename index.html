@@ -738,7 +738,9 @@ const AUTO_POLL_MS  = 60 * 1000;      // data.json 再チェック間隔
 const LIVE_CHECK_MS = 10 * 60 * 1000; // ライブAPIでの保険チェック間隔
 
 function pingDataJson(){
-  fetch(DATA_JSON_URL+"?t="+Date.now(),{cache:"no-cache"}).catch(()=>{});
+  /* ★重要: クエリ文字列を付けない（SW側が同一URLをキャッシュキーとして
+     新旧比較しているため、毎回違うURLだと差分検知が一度も発火しない） */
+  fetch(DATA_JSON_URL,{cache:"no-cache"}).catch(()=>{});
 }
 function startAutoRefresh(){
   setInterval(pingDataJson,AUTO_POLL_MS);
