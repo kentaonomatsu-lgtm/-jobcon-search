@@ -386,6 +386,13 @@ mark.hit{background:#fef08a;color:inherit;padding:0 1px;border-radius:2px;font-w
 
 .c-id{font-size:12px;font-weight:800;color:var(--sub);background:var(--gry);border:1.5px solid var(--line);min-height:36px;padding:0 10px;border-radius:8px;white-space:nowrap;cursor:pointer;transition:all .15s;}
 .c-id.ok{background:#059669;border-color:#059669;color:#fff;}
+/* 仕事No.（カード上に常時表示・タップでコピー） */
+.c-jn{display:flex;align-items:center;gap:6px;width:100%;margin-top:6px;padding:5px 9px;text-align:left;font-family:inherit;background:var(--gry);border:1.5px solid var(--line);border-radius:8px;cursor:pointer;transition:all .15s;}
+.c-jn .jn-l{flex-shrink:0;font-size:10.5px;font-weight:800;color:var(--sub);}
+.c-jn .jn-v{flex:1;min-width:0;font-size:12px;font-weight:700;color:var(--ink);word-break:break-all;line-height:1.35;}
+.c-jn .jn-c{flex-shrink:0;font-size:10.5px;font-weight:800;color:var(--sub);}
+.c-jn.ok{background:#059669;border-color:#059669;}
+.c-jn.ok .jn-l,.c-jn.ok .jn-v,.c-jn.ok .jn-c{color:#fff;}
 
 .pills{display:flex;flex-wrap:wrap;gap:4px;margin-top:7px;}
 .pill{font-size:11.5px;font-weight:800;padding:4px 10px;border-radius:30px;white-space:nowrap;}
@@ -474,7 +481,7 @@ ruby rt{font-size:58%;opacity:.85;font-weight:700;letter-spacing:0;}
     <div class="hd-logo">ジョブコン<span>サーチ</span></div>
   </div>
   <div class="hd-search">
-    <input id="kw" type="search" placeholder="社名・地域・職種・案件IDで検索"
+    <input id="kw" type="search" placeholder="社名・地域・職種・案件ID・仕事No.で検索（スペースでAND）"
       aria-label="キーワード検索" oninput="setKw(this.value)" autocomplete="off">
     <button class="hd-search-x" id="kwx" aria-label="検索をクリア"
       onclick="setKw('');document.getElementById('kw').value='';" hidden>×</button>
@@ -649,11 +656,63 @@ const state={
 
 const $=id=>document.getElementById(id);
 function esc(s){const d=document.createElement("div");d.textContent=s;return d.innerHTML;}
-function escMark(text){
-  const t=esc(text);const kw=state.kw.trim();if(!kw) return t;
-  const re=new RegExp(kw.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),'gi');
-  return t.replace(re,m=>'<mark class="hit">'+m+'</mark>');
+function escAttr(s){return esc(s).replace(/"/g,"&quot;").replace(/'/g,"&#39;");}
+
+/* ===== 検索の正規化 =====
+   全角/半角・大文字/小文字・空白・ハイフン類・アンダーバーの揺れを吸収する。
+   aggr=true は仕事No.・案件ID用で、長音「ー」も除く
+   （日本語入力オンで「-」を打つと「ー」になるため）。 */
+const SEP_RE=/[\s\-_‐-―−]/g;
+const SEP_AGGR_RE=/[\s\-_‐-―−ー]/g;
+function normSearch(s,aggr){return String(s==null?"":s).normalize("NFKC").toLowerCase().replace(aggr?SEP_AGGR_RE:SEP_RE,"");}
+
+/* 検索語（スペース区切りAND）。入力が変わった時だけ作り直す */
+let _pairsKey=null,_pairs=[];
+function getPairs(){
+  if(_pairsKey!==state.kw){
+    _pairsKey=state.kw;
+    _pairs=String(state.kw||"").split(/[\s　]+/).filter(Boolean)
+      .map(t=>({g:normSearch(t),a:normSearch(t,true)})).filter(p=>p.g||p.a);
+  }
+  return _pairs;
 }
+/* 求人ごとの検索用文字列（初回のみ作成。データ再読込で求人オブジェクトが変われば自動で作り直し） */
+const _idx=new WeakMap();
+function jobIndex(j){
+  let x=_idx.get(j);
+  if(!x){
+    x={s:normSearch([j.co,j.pf,j.ct,j.sk,j.gy,j.ti,j.id,j.maker,j.jn].join("\u0001")),
+       n:normSearch([j.jn,j.id].join("\u0001"),true)};
+    _idx.set(j,x);
+  }
+  return x;
+}
+function kwMatch(j,pairs){
+  const x=jobIndex(j);
+  for(const p of pairs){
+    if(!((p.g&&x.s.includes(p.g))||(p.a&&x.n.includes(p.a)))) return false;
+  }
+  return true;
+}
+
+/* ヒット箇所のハイライト（正規化後の位置を元の文字位置に戻して囲む） */
+function markText(raw,aggr){
+  const src=String(raw==null?"":raw);
+  const terms=getPairs().map(p=>aggr?p.a:p.g).filter(Boolean);
+  if(!terms.length||!src) return esc(src);
+  const chars=Array.from(src);let norm="";const map=[];
+  chars.forEach((ch,ci)=>{const n=normSearch(ch,aggr);for(let k=0;k<n.length;k++){norm+=n[k];map.push(ci);}});
+  const rs=[];
+  terms.forEach(t=>{let i=norm.indexOf(t);while(i>=0){rs.push([map[i],map[i+t.length-1]]);i=norm.indexOf(t,i+t.length);}});
+  if(!rs.length) return esc(src);
+  rs.sort((a,b)=>a[0]-b[0]||b[1]-a[1]);
+  const merged=[];
+  rs.forEach(r=>{const l=merged[merged.length-1];if(l&&r[0]<=l[1]+1) l[1]=Math.max(l[1],r[1]);else merged.push([r[0],r[1]]);});
+  let out="",p=0;
+  merged.forEach(([a,b])=>{out+=esc(chars.slice(p,a).join(""))+'<mark class="hit">'+esc(chars.slice(a,b+1).join(""))+'</mark>';p=b+1;});
+  return out+esc(chars.slice(p).join(""));
+}
+function escMark(text){return markText(text,false);}
 function salVal(j){if(j.wt==="時給"&&j.hr>0) return Math.round(j.hr*173/10000*10)/10;return j.sl||0;}
 function kanaPref(pf){return KANA_PREF[pf]||"";}
 function rubyP(pf){const k=kanaPref(pf);return k?'<ruby>'+esc(pf)+'<rt>'+esc(k)+'</rt></ruby>':esc(pf);}
@@ -774,7 +833,7 @@ async function loadFromGAS(){
 function baseFilter(){
   let r=ALL_JOBS;
   if(NG_COMPANIES.size>0) r=r.filter(j=>!NG_COMPANIES.has(j.co));
-  if(state.kw){const k=state.kw.toLowerCase();r=r.filter(j=>(j.co||"").toLowerCase().includes(k)||(j.pf||"").includes(k)||(j.ct||"").includes(k)||(j.sk||"").includes(k)||(j.gy||"").includes(k)||(j.ti||"").includes(k)||(j.id||"").includes(k)||(j.maker||"").toLowerCase().includes(k));}
+  if(state.kw){const pairs=getPairs();if(pairs.length) r=r.filter(j=>kwMatch(j,pairs));}
   if(state.pris.size)  r=r.filter(j=>state.pris.has(j.pr));
   if(state.emps.size)  r=r.filter(j=>state.emps.has(j.emp));
   if(state.cos.size)   r=r.filter(j=>state.cos.has(j.co));
@@ -796,6 +855,9 @@ function filterJobs(){let r=baseFilter();if(state.prefs.size) r=r.filter(j=>stat
 function filterOutsJobs(){let r=baseFilter();if(state.prefs.size) r=r.filter(j=>state.prefs.has(j.pf));return r.filter(j=>isOutsJob(j));}
 
 function sortJobs(r){
+  /* ★コピーしてから並べ替える。絞り込みなしの時 r は ALL_JOBS そのものなので、
+     そのまま sort すると元データの並びが壊れ、同順位の並びが前回のソート結果に引きずられる */
+  r=r.slice();
   const m=state.sort;
   if(m==="pri") r.sort((a,b)=>(+a.pr||9)-(+b.pr||9));
   else if(m==="sal_h") r.sort((a,b)=>salVal(b)-salVal(a));
@@ -879,6 +941,7 @@ function cardHtml(j, showOutsBanner){
         +(j.ti?'<div class="c-ti">'+escMark(j.ti)+'</div>':"")
         +'<div class="pills">'+pillsHtml(j)+'</div>'
         +(meta?'<div class="c-meta">'+meta+'</div>':"")
+        +(j.jn?'<button class="c-jn" data-jn="'+escAttr(j.jn)+'" onclick="copyJn(this)" aria-label="仕事No. '+escAttr(j.jn)+' をコピー"><span class="jn-l">仕事No.</span><span class="jn-v">'+markText(j.jn,true)+'</span><span class="jn-c">コピー</span></button>':"")
       +'</div>'
       +'<div class="c-r">'+salBlock(j)
         +'<button class="c-id" onclick="copyId(this,\''+esc(j.id)+'\')" aria-label="案件ID '+esc(j.id)+' をコピー">#'+esc(j.id)+' コピー</button>'
@@ -900,7 +963,7 @@ function cardHtml(j, showOutsBanner){
 /* ===== レンダリング ===== */
 function render(){
   const list=filtered.slice(0,displayCount);
-  if(!list.length){$("cards").innerHTML='<div class="empty"><b>該当する求人がありません</b>条件をゆるめてください</div>';$("more").textContent="";$("loadMoreBtn").hidden=true;return;}
+  if(!list.length){$("cards").innerHTML='<div class="empty"><b>該当する求人がありません</b>'+(state.kw?'検索ワードを減らすか、仕事No.・案件IDは一部だけでも検索できます<br>（スペース区切りは「すべてを含む」で検索します）':'条件をゆるめてください')+'</div>';$("more").textContent="";$("loadMoreBtn").hidden=true;return;}
   /* 通常一覧では showOutsBanner=true → アウトソ対象カードにバナーを出す */
   $("cards").innerHTML=list.map(j=>cardHtml(j,true)).join("");
   const hasMore=filtered.length>displayCount;
@@ -1182,6 +1245,12 @@ function selectRegion(r){state.region=(state.region===r)?"":r;renderRegions();re
 function togglePref(p){state.prefs.has(p)?state.prefs.delete(p):state.prefs.add(p);renderRegions();renderPrefs();apply();}
 function setSort(v){state.sort=v;apply();}
 function toggleDet(btn){const d=btn.closest(".card").querySelector(".det");d.classList.toggle("open");btn.setAttribute("aria-expanded",d.classList.contains("open"));}
+function copyJn(btn){
+  const t=btn.dataset.jn||"";const c=btn.querySelector(".jn-c");
+  const done=()=>{btn.classList.add("ok");if(c) c.textContent="✓ コピー済";setTimeout(()=>{btn.classList.remove("ok");if(c) c.textContent="コピー";},1500);};
+  const fallback=()=>{const ta=document.createElement("textarea");ta.value=t;ta.style.cssText="position:fixed;opacity:0;";document.body.appendChild(ta);ta.select();try{document.execCommand("copy");done();}catch(e){}document.body.removeChild(ta);};
+  if(navigator.clipboard&&navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(done,fallback); else fallback();
+}
 function copyId(btn,id){navigator.clipboard.writeText(id).then(()=>{btn.classList.add("ok");btn.textContent="#"+id+" ✓";setTimeout(()=>{btn.classList.remove("ok");btn.textContent="#"+id+" コピー";},1500);});}
 
 function clearTiles(){["dorm","free","sub"].forEach(q=>{state.quicks.delete(q);const t=$("t-"+q);if(t){t.classList.remove("on");t.setAttribute("aria-pressed","false");}});apply();}
