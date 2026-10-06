@@ -782,7 +782,7 @@ function registerSW(){
   }).catch(()=>{});
   navigator.serviceWorker.addEventListener('message',async e=>{
     if(e.data&&e.data.type==='DATA_UPDATED'){
-      try{const res=await fetch('./data.json?t='+Date.now(),{cache:'no-store'});const data=await res.json();if(data&&Array.isArray(data.jobs)&&data.jobs.length>0){ALL_JOBS=data.jobs;LAST_UPDATED_AT=data.updatedAt||null;renderAll();showUpdatedDate(true);}}catch(err){}
+      try{const res=await fetch('./data.json?t='+Date.now(),{cache:'no-store'});const data=await res.json();if(data&&Array.isArray(data.jobs)&&data.jobs.length>0&&(!LAST_UPDATED_AT||(data.updatedAt||'')>=LAST_UPDATED_AT)){ALL_JOBS=data.jobs;LAST_UPDATED_AT=data.updatedAt||null;renderAll();showUpdatedDate(true);}}catch(err){}
     }
   });
 }
@@ -793,8 +793,13 @@ function registerSW(){
    ・タブに戻ってきた瞬間（visibilitychange）にも即チェックし、体感の遅延を減らす。
    ・GASのライブAPIも LIVE_CHECK_MS おきにバックグラウンドで確認し、
      GitHub側の同期が万一止まっていても取りこぼさないようにする（安全網）。 */
-const AUTO_POLL_MS  = 60 * 1000;      // data.json 再チェック間隔
-const LIVE_CHECK_MS = 10 * 60 * 1000; // ライブAPIでの保険チェック間隔
+const AUTO_POLL_MS  = 60 * 1000;      // data.json（GitHub）の保険チェック間隔
+const VER_POLL_MS   = 30 * 1000;      // GASの軽量バージョン確認（鮮度の本命）
+const STALE_WARN_MS = 60 * 1000;      // これ以上GASを確認できなければ赤帯で警告
+let LAST_VER_OK = 0;                  // GASを最後に確認できた時刻(ms)
+let LAST_VER_ERR = "";                // 直近のエラー内容
+const PAGE_OPENED_AT = Date.now();
+let _verBusy = false;
 
 function pingDataJson(){
   /* ★重要: クエリ文字列を付けない（SW側が同一URLをキャッシュキーとして
@@ -802,11 +807,50 @@ function pingDataJson(){
   fetch(DATA_JSON_URL,{cache:"no-cache"}).catch(()=>{});
 }
 function startAutoRefresh(){
+  initFreshnessUI();
   setInterval(pingDataJson,AUTO_POLL_MS);
-  setInterval(checkGasUpdate,LIVE_CHECK_MS);
+  setInterval(checkGasUpdate,VER_POLL_MS);
+  setInterval(renderFreshness,5000);
   document.addEventListener("visibilitychange",()=>{
-    if(document.visibilityState==="visible") pingDataJson();
+    if(document.visibilityState==="visible"){checkGasUpdate();pingDataJson();}
   });
+  window.addEventListener("focus",checkGasUpdate);
+  window.addEventListener("online",checkGasUpdate);
+}
+
+/* ===== 鮮度表示（最終確認◯秒前／赤帯） ===== */
+function initFreshnessUI(){
+  if($("jcStaleBar")) return;
+  const st=document.createElement("style");
+  st.textContent="#jcStaleBar{display:none;position:sticky;top:0;z-index:9999;background:#B11F35;color:#fff;font-size:12.5px;font-weight:700;padding:8px 12px;text-align:center;line-height:1.5}"+
+    "#hdChecked{font-size:11px;font-weight:700;margin-left:6px;color:var(--sub)}#hdChecked.ng{color:#B11F35}";
+  document.head.appendChild(st);
+  const bar=document.createElement("div");bar.id="jcStaleBar";
+  document.body.insertBefore(bar,document.body.firstChild);
+  const hd=$("hdUpdated");
+  if(hd&&!$("hdChecked")){const sp=document.createElement("span");sp.id="hdChecked";hd.insertAdjacentElement("afterend",sp);}
+  renderFreshness();
+}
+function fmtAgo(ms){
+  const sec=Math.max(0,Math.floor(ms/1000));
+  if(sec<60) return sec+"秒前";
+  const m=Math.floor(sec/60);
+  return m<60?m+"分前":Math.floor(m/60)+"時間前";
+}
+function renderFreshness(){
+  const chk=$("hdChecked"),bar=$("jcStaleBar");if(!chk||!bar) return;
+  const base=LAST_VER_OK||PAGE_OPENED_AT;
+  const gap=Date.now()-base;
+  if(LAST_VER_OK&&gap<=STALE_WARN_MS){
+    chk.className="";chk.textContent="最終確認 "+fmtAgo(Date.now()-LAST_VER_OK);bar.style.display="none";return;
+  }
+  if(!LAST_VER_OK&&gap<=STALE_WARN_MS){chk.className="";chk.textContent="確認中…";bar.style.display="none";return;}
+  chk.className="ng";
+  chk.textContent=LAST_VER_OK?("最終確認 "+fmtAgo(Date.now()-LAST_VER_OK)):"未確認";
+  let when="";
+  if(LAST_UPDATED_AT){const d=new Date(LAST_UPDATED_AT);if(!isNaN(d.getTime())){const j=new Date(d.getTime()+9*3600*1000);when="（表示中のデータ："+(j.getUTCMonth()+1)+"/"+j.getUTCDate()+" "+String(j.getUTCHours()).padStart(2,"0")+":"+String(j.getUTCMinutes()).padStart(2,"0")+" 更新分）";}}
+  bar.textContent="⚠ 最新データを確認できていません"+when+(LAST_VER_ERR?" ["+LAST_VER_ERR+"]":"")+" ／ 右上の更新ボタンで再確認";
+  bar.style.display="block";
 }
 
 async function loadInitialData(){
@@ -815,15 +859,32 @@ async function loadInitialData(){
     const res=await fetch(DATA_JSON_URL,{cache:"no-cache"});
     if(!res.ok) throw new Error();
     const data=await res.json();
-    if(data&&Array.isArray(data.jobs)){ALL_JOBS=data.jobs;LAST_UPDATED_AT=data.updatedAt||null;renderAll();showUpdatedDate();lbDone();setTimeout(checkGasUpdate,100);}
+    if(data&&Array.isArray(data.jobs)){ALL_JOBS=data.jobs;LAST_UPDATED_AT=data.updatedAt||null;renderAll();showUpdatedDate();lbDone();checkGasUpdate();}
   }catch(e){await loadFromGAS();lbDone();}
   startAutoRefresh();
 }
-async function checkGasUpdate(){
+async function checkGasUpdate(force){
+  if(_verBusy) return; _verBusy=true;
   try{
-    const res=await fetch(GAS_API_URL,{cache:"no-store"});const data=await res.json();
-    if(data&&Array.isArray(data.jobs)&&data.jobs.length>0&&(!LAST_UPDATED_AT||data.updatedAt>LAST_UPDATED_AT)){ALL_JOBS=data.jobs;LAST_UPDATED_AT=data.updatedAt||null;renderAll();showUpdatedDate(true);}
-  }catch(e){}
+    const ctl=new AbortController();const to=setTimeout(()=>ctl.abort(),15000);
+    let v;
+    try{
+      const res=await fetch(GAS_API_URL+"?mode=ver&t="+Date.now(),{cache:"no-store",signal:ctl.signal});
+      if(!res.ok) throw new Error("HTTP "+res.status);
+      v=await res.json();
+    }finally{clearTimeout(to);}
+    if(!v||!v.updatedAt) throw new Error("verなし");   // 旧GAS(?mode=ver未対応)は全件が返るのでここで弾く
+    LAST_VER_OK=Date.now();LAST_VER_ERR="";
+    if(force||!LAST_UPDATED_AT||v.updatedAt>LAST_UPDATED_AT){
+      const r2=await fetch(GAS_API_URL+"?mode=full&t="+Date.now(),{cache:"no-store"});
+      if(!r2.ok) throw new Error("full HTTP "+r2.status);
+      const data=await r2.json();
+      if(data&&Array.isArray(data.jobs)&&data.jobs.length>0){ALL_JOBS=data.jobs;LAST_UPDATED_AT=data.updatedAt||v.updatedAt;renderAll();showUpdatedDate(true);}
+    }
+  }catch(e){
+    LAST_VER_ERR=(e&&e.name==="AbortError")?"タイムアウト":String((e&&e.message)||e).slice(0,40);
+    if(window.console) console.warn("[checkGasUpdate]",e);
+  }finally{_verBusy=false;renderFreshness();}
 }
 async function loadFromGAS(){
   try{const res=await fetch(GAS_API_URL+"?t="+Date.now(),{cache:"no-store"});const data=await res.json();if(data&&Array.isArray(data.jobs)){ALL_JOBS=data.jobs;LAST_UPDATED_AT=data.updatedAt||null;}}catch(e){ALL_JOBS=[];}
@@ -1186,9 +1247,9 @@ async function manualRefresh(){
   const btn=$("hdRefreshBtn"),label=$("hdRefreshLabel");
   btn.style.opacity=".6";btn.disabled=true;label.textContent="確認中…";lbStart();
   try{
-    const res=await fetch(GAS_API_URL+"?nocache=1&t="+Date.now(),{cache:"no-store"});
+    const res=await fetch(GAS_API_URL+"?mode=full&nocache=1&t="+Date.now(),{cache:"no-store"});
     const data=await res.json();
-    if(data&&Array.isArray(data.jobs)&&data.jobs.length>0){ALL_JOBS=data.jobs;LAST_UPDATED_AT=data.updatedAt||null;renderAll();showUpdatedDate(true);label.textContent="✅ 最新です";}
+    if(data&&Array.isArray(data.jobs)&&data.jobs.length>0){ALL_JOBS=data.jobs;LAST_UPDATED_AT=data.updatedAt||null;renderAll();showUpdatedDate(true);LAST_VER_OK=Date.now();LAST_VER_ERR="";renderFreshness();label.textContent="✅ 最新です";}
     else label.textContent="確認できません";
     sessionStorage.setItem("jc_last_check",String(Date.now()));
   }catch{label.textContent="確認できません";}
