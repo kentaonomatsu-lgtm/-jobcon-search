@@ -356,6 +356,8 @@ body.outs-mode .brand-ic{background:var(--outs);}
   .strip .v{font-size:15px;}
 }
 @media(max-width:480px){.hd-btn{padding:0 10px;font-size:12.5px;}header{gap:6px;}}
+.hear-body>.row.area-row{padding-top:14px;}
+.area-row .chip.sm{min-height:54px;}
 </style>
 </head>
 <body>
@@ -383,22 +385,17 @@ body.outs-mode .brand-ic{background:var(--outs);}
       </div>
       <div class="hear-sum" id="hearSum">条件なし</div>
       <div class="hear-body" id="hearBody">
-        <div class="presets">
-          <div class="row-t">ワンタップ</div>
-          <div class="chips c3">
-            <button class="chip pre" onclick="preset('dormAll')">寮あり<br>全国OK</button>
-            <button class="chip pre" onclick="preset('dormFree')">寮費無料<br>全国OK</button>
-            <button class="chip pre" onclick="preset('novice')">未経験<br>OK</button>
-          </div>
+        <div class="row area-row">
+          <div class="row-t"><span class="n">1</span>エリア<span class="note">地方を選ぶと その地方全体</span><button class="clr" onclick="clearArea()">クリア</button></div>
+          <div class="chips c3" id="regs"></div>
+          <div class="chips c4" id="prefs" style="margin-top:8px"></div>
         </div>
 
         <div class="row">
-          <div class="row-t"><span class="n">1</span>お住まい（コピペOK）<span class="note">近い順＋車の目安</span></div>
+          <div class="row-t"><span class="n">2</span>お住まい（コピペOK）<span class="note">近い順＋車の目安</span></div>
           <input id="addr" class="inp addr" type="search" placeholder="例：大分県大分市中央町1-1-1" autocomplete="off" autocapitalize="off"
             onpaste="var e=this;setTimeout(function(){smartPick(e.value,true);},0)" oninput="onAddrInput(this.value)" onkeydown="if(event.key==='Enter')smartPick(this.value,true)">
           <div class="msg" id="addrMsg"></div>
-          <div class="chips c1" style="margin-top:8px"><button class="chip" data-k="nation" data-v="1" onclick="tog('nation',1)" style="min-height:48px">全国どこでもOK</button></div>
-          <div class="ph">全国OKなら地域で絞りません（住所を入れると近い順は使えます）</div>
           <div class="here" id="here" hidden><b id="hereTxt"></b><button onclick="clearNear()">解除</button></div>
           <div class="radius" id="radiusBox" hidden>
             <div class="lab">移動手段と時間で絞る</div>
@@ -422,7 +419,18 @@ body.outs-mode .brand-ic{background:var(--outs);}
         </div>
 
         <div class="row">
-          <div class="row-t"><span class="n">2</span>年齢<button class="clr" onclick="setAge(null)">クリア</button></div>
+        <div class="presets" style="border:none;padding:0">
+          <div class="row-t">ワンタップ</div>
+          <div class="chips c3">
+            <button class="chip pre" onclick="preset('dormAll')">寮あり<br>全国OK</button>
+            <button class="chip pre" onclick="preset('dormFree')">寮費無料<br>全国OK</button>
+            <button class="chip pre" onclick="preset('novice')">未経験<br>OK</button>
+          </div>
+        </div>
+        </div>
+
+        <div class="row">
+          <div class="row-t"><span class="n">3</span>年齢<button class="clr" onclick="setAge(null)">クリア</button></div>
           <div class="stepper">
             <button class="sb" onclick="ageStep(-1)" aria-label="1歳下げる">−</button>
             <input class="inp age-sync" id="age" type="number" inputmode="numeric" placeholder="例 45" min="15" max="80" oninput="onAge(this.value)">
@@ -433,7 +441,7 @@ body.outs-mode .brand-ic{background:var(--outs);}
         </div>
 
         <div class="row">
-          <div class="row-t"><span class="n">3</span>性別</div>
+          <div class="row-t"><span class="n">4</span>性別</div>
           <div class="chips c2">
             <button class="chip" data-k="gender" data-v="男性" onclick="tog('gender','男性')">男性</button>
             <button class="chip" data-k="gender" data-v="女性" onclick="tog('gender','女性')">女性</button>
@@ -441,7 +449,7 @@ body.outs-mode .brand-ic{background:var(--outs);}
         </div>
 
         <div class="row">
-          <div class="row-t"><span class="n">4</span>希望の給与（月収）<button class="clr" onclick="setSal(0)">クリア</button></div>
+          <div class="row-t"><span class="n">5</span>希望の給与（月収）<button class="clr" onclick="setSal(0)">クリア</button></div>
           <div class="chips c5">
             <button class="chip" data-k="sal" data-v="20" onclick="tog('sal',20)">20万〜</button>
             <button class="chip" data-k="sal" data-v="25" onclick="tog('sal',25)">25万〜</button>
@@ -458,7 +466,7 @@ body.outs-mode .brand-ic{background:var(--outs);}
         </div>
 
         <div class="row">
-          <div class="row-t"><span class="n">5</span>寮・社宅</div>
+          <div class="row-t"><span class="n">6</span>寮・社宅</div>
           <div class="chips c3">
             <button class="chip" data-k="quick" data-v="dorm" onclick="tog('quick','dorm')">寮完備<i data-cnt="quick:dorm"></i></button>
             <button class="chip" data-k="quick" data-v="free" onclick="tog('quick','free')">寮費無料<i data-cnt="quick:free"></i></button>
@@ -467,7 +475,7 @@ body.outs-mode .brand-ic{background:var(--outs);}
         </div>
 
         <div class="row">
-          <div class="row-t"><span class="n">6</span>勤務時間帯<span class="note">複数選ぶと どれか</span></div>
+          <div class="row-t"><span class="n">7</span>勤務時間帯<span class="note">複数選ぶと どれか</span></div>
           <div class="chips c2">
             <button class="chip" data-k="shift" data-v="day" onclick="tog('shift','day')">日勤のみ<i data-cnt="shift:day"></i></button>
             <button class="chip" data-k="shift" data-v="night" onclick="tog('shift','night')">夜勤あり<i data-cnt="shift:night"></i></button>
@@ -477,12 +485,12 @@ body.outs-mode .brand-ic{background:var(--outs);}
         </div>
 
         <div class="row">
-          <div class="row-t"><span class="n">7</span>雇用形態<button class="clr" onclick="clearSet('emps')">クリア</button></div>
+          <div class="row-t"><span class="n">8</span>雇用形態<button class="clr" onclick="clearSet('emps')">クリア</button></div>
           <div class="chips c2" id="emps"></div>
         </div>
 
         <div class="row">
-          <div class="row-t"><span class="n">8</span>こだわり<button class="clr" onclick="clearSet('kws');clearSet('flags')">クリア</button></div>
+          <div class="row-t"><span class="n">9</span>こだわり<button class="clr" onclick="clearSet('kws');clearSet('flags')">クリア</button></div>
           <div class="chips c2">
             <button class="chip" data-k="kw2" data-v="novice" onclick="tog('kw2','novice')">未経験OK<i data-cnt="kw:novice"></i></button>
             <button class="chip" data-k="kw2" data-v="weekend" onclick="tog('kw2','weekend')">土日休み<i data-cnt="kw:weekend"></i></button>
@@ -496,7 +504,7 @@ body.outs-mode .brand-ic{background:var(--outs);}
         </div>
 
         <details class="more-det" id="moreDet">
-          <summary>さらに絞る（業種・会社・エリア）</summary>
+          <summary>さらに絞る（業種・会社）</summary>
           <div class="row">
             <div class="row-t">業種<button class="clr" onclick="clearSet('gys')">クリア</button></div>
             <div class="chips c2" id="gys"></div>
@@ -504,11 +512,6 @@ body.outs-mode .brand-ic{background:var(--outs);}
           <div class="row">
             <div class="row-t">求人会社<button class="clr" onclick="clearSet('cos')">クリア</button></div>
             <div class="chips c2 pcos" id="cos"></div>
-          </div>
-          <div class="row">
-            <div class="row-t">エリア（地方 → 都道府県）<button class="clr" onclick="clearArea()">クリア</button></div>
-            <div class="chips c2" id="regs"></div>
-            <div class="chips c3" id="prefs" style="margin-top:8px"></div>
           </div>
         </details>
 
@@ -959,6 +962,7 @@ function baseFilter(){
   state.quicks.forEach(q=>{r=r.filter(QUICK_F[q]);});
   if(state.shifts.size){const fs=[...state.shifts].map(s=>SHIFT_F[s]);r=r.filter(j=>fs.some(f=>f(j)));}
   if(state.prefs.size) r=r.filter(j=>state.prefs.has(j.pf));
+  else if(state.region&&REGIONS[state.region]){const rs=new Set(REGIONS[state.region]);r=r.filter(j=>rs.has(j.pf));}
   if(NEAR&&state.radius>0) r=r.filter(j=>{const n=nearOf(j);return n&&n.km<=300&&(state.mode==="train"?n.tmin:n.min)<=state.radius;});
   return r;
 }
@@ -1046,7 +1050,7 @@ function cardHtml(j,showOuts){
 
 /* ===== 描画 ===== */
 function emptyHtml(){
-  const hasF=state.kw||state.age!==null||state.gender||state.salMin>0||state.quicks.size||state.shifts.size||state.emps.size||state.cos.size||state.prefs.size||state.radius>0||state.kws.size||state.flags.size||state.gys.size||state.wt||state.nation||state.onlyStars;
+  const hasF=state.kw||state.age!==null||state.gender||state.salMin>0||state.quicks.size||state.shifts.size||state.emps.size||state.cos.size||state.prefs.size||state.region||state.radius>0||state.kws.size||state.flags.size||state.gys.size||state.wt||state.nation||state.onlyStars;
   return '<div class="empty"><b>該当する求人がありません</b>'+(hasF?'条件を1つはずすと見つかるかもしれません。<br>上の「適用中」の×で1つずつ外せます':'データを確認してください')+(hasF?'<br><button onclick="relaxAll()">条件をすべてはずす</button>':'')+'</div>';
 }
 function render(){
@@ -1139,6 +1143,7 @@ function summaryParts(){
   state.shifts.forEach(s=>a.push([SL[s],()=>tog("shift",s)]));
   state.emps.forEach(e=>a.push([e,()=>tog("emp",e)]));
   state.cos.forEach(c=>a.push([c.replace(/株式会社/g,""),()=>tog("co",c)]));
+  if(state.region&&!state.prefs.size) a.push([state.region,()=>tog("region",state.region)]);
   state.prefs.forEach(p=>a.push([p,()=>tog("pref",p)]));
   if(state.kw) a.push(["検索:"+state.kw,()=>{setKw("");$("kw").value="";}]);
   return a;
@@ -1176,7 +1181,7 @@ function tog(k,v){
   else if(k==="gender") state.gender=state.gender===v?"":v;
   else if(k==="sal") state.salMin=state.salMin===+v?0:+v;
   else if(k==="radius"){state.radius=state.radius===+v?0:+v;if(state.radius) state.nation=false;}
-  else if(k==="region"){state.region=state.region===v?"":v;renderArea();}
+  else if(k==="region"){state.region=state.region===v?"":v;state.prefs.clear();renderArea();}
   if(k==="pref"){if(state.prefs.size) state.nation=false;renderArea();}
   if(k==="region"&&state.region) state.nation=false;
   syncUI();apply();
@@ -1252,11 +1257,12 @@ function goResults(){$("hear").classList.add("closed");$("hearToggle").textConte
 
 /* ===== 動的パーツ（雇用・会社・エリア） ===== */
 function renderArea(){
-  $("regs").innerHTML=Object.keys(REGIONS).map(r=>{
+  $("regs").innerHTML='<button class="chip sm" data-k="nation" data-v="1" onclick="tog(\'nation\',1)">全国OK<i>'+ALL_JOBS.length.toLocaleString()+'</i></button>'+Object.keys(REGIONS).map(r=>{
     const set=new Set(REGIONS[r]);const c=ALL_JOBS.filter(j=>set.has(j.pf)).length;if(!c) return "";
     return '<button class="chip sm" data-k="region" data-v="'+escAttr(r)+'" onclick="tog(\'region\',\''+escAttr(r)+'\')">'+esc(r)+'<i>'+c+'</i></button>';
   }).join("");
   const pfs=state.region?REGIONS[state.region]:[];
+  $("prefs").style.display=pfs.length?"":"none";
   $("prefs").innerHTML=pfs.map(p=>{
     const c=ALL_JOBS.filter(j=>j.pf===p).length;if(!c) return "";
     return '<button class="chip sm" data-k="pref" data-v="'+escAttr(p)+'" onclick="tog(\'pref\',\''+escAttr(p)+'\')">'+esc(p)+'<i>'+c+'</i></button>';
