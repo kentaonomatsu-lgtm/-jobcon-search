@@ -6,7 +6,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="theme-color" content="#168a27">
+<meta name="theme-color" content="#12264a">
 <title>JCコールナビ｜ジョブコン求人 架電サポート</title>
 <style>
 :root{
@@ -275,6 +275,87 @@ body.noruby ruby{ruby-position:unset;}
   .cards{grid-template-columns:repeat(2,minmax(0,1fr));}
   .cards .empty,.cards .skel-card{grid-column:1/-1;}
 }
+/* ===== v10: シンプル・権威（濃紺 × 白 × グレー）===== */
+:root{--ink:#0f172a;--ink2:#334155;--sub:#64748b;--line:#e2e8f0;--line2:#cbd5e1;--bg:#f1f4f9;--gry:#f1f5f9;
+  --brand:#12264a;--brand-d:#0b1a33;--brand-bg:#eef3fa;--brand-line:#b9c6db;
+  --grn:#0b7a43;--grn-bg:#edf7f1;--grn-line:#b6dcc6;
+  --outs:#8a5a00;--outs-d:#5e3d00;--outs-bg:#fff6e0;--outs-line:#e6c27a;--outs-accent:#8a5a00;}
+body{background:var(--bg);color:var(--ink);}
+#loadbar{background:var(--brand);}
+header{border-bottom:1px solid var(--line2);box-shadow:0 1px 0 rgba(15,23,42,.04);}
+.brand-ic{background:var(--brand);border:none;border-radius:8px;font-style:normal;font-weight:800;letter-spacing:0;text-shadow:none;}
+body.outs-mode .brand-ic{background:var(--outs);}
+.brand-t b{font-style:normal;font-weight:800;color:var(--ink);}
+.brand-t b span{color:var(--ink);}
+.brand-t small{color:var(--sub);}
+.hd-search input:focus{border-color:var(--brand);box-shadow:0 0 0 3px rgba(18,38,74,.12);}
+.hd-btn.dark{background:var(--brand);border-color:var(--brand);color:#fff;}
+.hear{border:1px solid var(--line2);box-shadow:none;}
+.hear-hd{background:var(--brand);border-bottom:none;}
+.hear-next{background:#fff;color:var(--brand);border:none;}
+.hear-sum{background:var(--brand-bg);color:var(--ink);}
+.presets{border-bottom:1px solid var(--line);}
+.row{border-bottom:1px solid var(--line);}
+.row-t{color:var(--ink);}
+.row-t .n{transform:none;border-radius:50%;background:var(--brand);}
+.row-t .clr{color:var(--brand);}
+.chip{border:1.5px solid var(--line2);color:var(--ink);font-weight:700;}
+.chip.on{background:var(--brand);border-color:var(--brand);color:#fff;box-shadow:none;}
+.chip.on::after{color:#fff;}
+.chip.pre{background:var(--brand-bg);border-color:var(--brand);color:var(--brand);font-weight:800;}
+.chip.pre:active{background:var(--brand);color:#fff;}
+.inp.addr{background:#fff;border-color:var(--brand);}
+.here{background:var(--brand-bg);border-color:var(--brand-line);}
+.here b{color:var(--brand);}
+.here button{border-color:var(--brand-line);color:var(--brand);}
+.view.on{background:var(--brand);box-shadow:none;}
+.view.on.outs{background:var(--outs);}
+.cntline b{background:none;padding:0;}
+.af{border-color:var(--brand);color:var(--brand);}
+.af button{color:var(--brand);}
+.starbar{background:var(--brand-bg);border:1.5px solid var(--brand-line);}
+.starbar button{border-color:var(--brand);color:var(--brand);}
+.starbar button.on{background:var(--brand);color:#fff;}
+.bbar .b1{background:var(--brand);border:none;}
+.bbar .b2{border:2px solid var(--brand);color:var(--brand);}
+.go-res,.empty button{background:var(--brand);border:none;}
+/* カード */
+.card{border:1px solid var(--line2);}
+.card.t1{border-left:5px solid #0b7a43;}.card.t2{border-left:5px solid #b7791f;}.card.t3{border-left:5px solid #c2410c;}.card.t4{border-left:5px solid #94a3b8;}
+.card.outs-card{border-left:5px solid var(--outs);}
+.strip.nb-0,.strip.nb-1,.strip.nb-2,.strip.nb-3,.strip.nb-4,.strip.qb-out,.strip.qb-low,.strip.qb-mid,.strip.qb-full,.strip.qb-none{background:#f8fafc;border-bottom:1px solid var(--line);}
+.nb-0,.nb-4,.qb-none{color:var(--sub);}.nb-1,.qb-full{color:#0b7a43;}.nb-2,.qb-mid{color:#8a5a00;}.nb-3,.qb-low{color:#b54708;}
+.strip.qb-out{color:#b42318;background:#fef3f2;border-bottom-color:#fecdca;}
+.strip .v{font-size:15px;font-weight:800;}
+.strip small{font-weight:600;color:var(--sub);}
+.qgrp{background:#e2e8f0;}
+.outs-av{background:var(--outs-bg);color:var(--outs-d);border-bottom:2px solid var(--outs);}
+.outs-av em{color:var(--outs-d);}
+.outs-av span{background:var(--outs);color:#fff;}
+.c-co{color:var(--sub);}
+.sal,.sal.h{background:#fff;border:1.5px solid var(--line2);}
+.sal .t,.sal.h .t{background:var(--brand-bg);color:var(--brand);}
+.sal .n,.sal.h .n{color:var(--brand);}
+.pill,.pill.age{background:#f1f5f9;color:var(--ink2);}
+.pill.gen{background:#fff;color:var(--ink);border:1.5px solid var(--line2);}
+.pill.dorm{background:var(--grn-bg);color:#0b7a43;}
+.pill.free{background:#0b7a43;color:#fff;}
+.pill.sub{background:#fff;color:#0b7a43;border:1px solid #0b7a43;}
+.pill.bx{background:#fff6ed;color:#b54708;border:1px solid #fdba74;}
+.c-foot{grid-template-columns:repeat(3,minmax(0,1fr));}
+.btn{border:1.5px solid var(--line2);color:var(--ink);}
+.btn.go{background:var(--brand);border-color:var(--brand);color:#fff;}
+.btn.star.on{background:var(--brand-bg);border-color:var(--brand);color:var(--brand);}
+.btn.jn{width:100%;margin-bottom:8px;}
+.btn.jn .c{color:var(--brand);}
+.det .btn.jn{display:flex;}
+
+@media(max-width:640px){
+  .strip.nb-0,.strip.nb-1,.strip.nb-2,.strip.nb-3,.strip.nb-4{flex-direction:column;align-items:flex-start;gap:0;padding:6px 13px 8px;}
+  .strip.nb-0>span:first-child,.strip.nb-1>span:first-child,.strip.nb-2>span:first-child,.strip.nb-3>span:first-child,.strip.nb-4>span:first-child{font-size:11.5px;font-weight:700;color:var(--sub);}
+  .strip .v{font-size:15px;}
+}
+@media(max-width:480px){.hd-btn{padding:0 10px;font-size:12.5px;}header{gap:6px;}}
 </style>
 </head>
 <body>
@@ -320,13 +401,15 @@ body.noruby ruby{ruby-position:unset;}
           <div class="ph">全国OKなら地域で絞りません（住所を入れると近い順は使えます）</div>
           <div class="here" id="here" hidden><b id="hereTxt"></b><button onclick="clearNear()">解除</button></div>
           <div class="radius" id="radiusBox" hidden>
-            <div class="lab">車で何分まで？</div>
+            <div class="lab">移動手段と時間で絞る</div>
+            <div class="chips c2" style="margin-bottom:8px"><button class="chip sm" data-k="mode" data-v="car" onclick="tog('mode','car')">車</button><button class="chip sm" data-k="mode" data-v="train" onclick="tog('mode','train')">電車</button></div>
             <div class="chips c4">
               <button class="chip sm" data-k="radius" data-v="30" onclick="tog('radius',30)">〜30分</button>
               <button class="chip sm" data-k="radius" data-v="60" onclick="tog('radius',60)">〜60分</button>
               <button class="chip sm" data-k="radius" data-v="90" onclick="tog('radius',90)">〜90分</button>
               <button class="chip sm" data-k="radius" data-v="120" onclick="tog('radius',120)">〜2時間</button>
             </div>
+            <div class="ph">分数は直線距離からの目安です。実際の乗換・本数・渋滞は反映されません。</div>
           </div>
           <details class="manual" id="manual">
             <summary>住所がうまく入らないとき（手動で選ぶ）</summary>
@@ -505,7 +588,7 @@ const state={
   kw:"",age:null,gender:"",salMin:0,radius:0,
   prefs:new Set(),quicks:new Set(),shifts:new Set(),emps:new Set(),cos:new Set(),
   kws:new Set(),flags:new Set(),gys:new Set(),stars:new Set(),
-  wt:"",nation:false,onlyStars:false,
+  wt:"",mode:"car",nation:false,onlyStars:false,
   sort:"pri",region:""
 };
 const QUICK_F={dorm:j=>j.dorm==="1",free:j=>j.free===1,sub:j=>j.sub===1,bonus:j=>j.bx>0};
@@ -759,6 +842,10 @@ function carMin(km){
   let m=Math.round(road/sp*60+3);if(m>20) m=Math.round(m/5)*5;return m;
 }
 function fmtMin(m){if(m<60) return "約"+m+"分";const h=Math.floor(m/60),r=m%60;return "約"+h+"時間"+(r?r+"分":"");}
+function trainMin(km){
+  const rail=km*1.2,sp=rail<=10?22:rail<=30?30:rail<=80?40:rail<=200?60:85;
+  let m=Math.round(rail/sp*60+10);if(m>20) m=Math.round(m/5)*5;return m;
+}
 function rubyC(city,kana){return kana?'<ruby>'+esc(city)+'<rt>'+esc(kana)+'</rt></ruby>':esc(city);}
 function ctHtml(pf,ct){
   if(!ct) return "";
@@ -777,7 +864,7 @@ function nearOf(j){
   const g=geoOf(j.pf,j.ct);if(!g) return null;
   const same=g.pf===NEAR.pf&&(g.key===NEAR.key||(NEAR.par&&g.key.indexOf(NEAR.key)===0));
   const km=same?0:hav(NEAR.lat,NEAR.lng,g.lat,g.lng);
-  return {km:km,min:same?0:carMin(km),same:same};
+  return {km:km,min:same?0:carMin(km),tmin:same?0:trainMin(km),same:same};
 }
 function parseAddr(raw){
   let s=nGeo(raw).replace(/^(住所|所在地|現住所)[:：]?/,"").replace(/^〒?\d{3}[-‐‑–—−ー]?\d{4}/,"").replace(/^(住所|所在地|現住所)[:：]?/,"");
@@ -851,7 +938,7 @@ function nearBannerHtml(j){
   const n=nearOf(j);
   if(!n) return '<div class="strip nb-0"><span>'+rubyC(NEAR.city,NEAR.kana)+'から</span><span>距離不明</span></div>';
   const tier=(n.same||n.min<=30)?1:n.min<=60?2:n.min<=120?3:4;
-  const v=n.same?'同じ市区町村内':n.km>300?'遠方 <small>直線'+fmtKm(n.km)+'</small>':'車 '+fmtMin(n.min)+' <small>直線'+fmtKm(n.km)+'</small>';
+  const v=n.same?'同じ市区町村内':n.km>300?'遠方 <small>直線'+fmtKm(n.km)+'</small>':'車 '+fmtMin(n.min)+'　電車 '+fmtMin(n.tmin)+' <small>直線'+fmtKm(n.km)+'・目安</small>';
   return '<div class="strip nb-'+tier+'"><span>'+rubyC(NEAR.city,NEAR.kana)+'から</span><span class="v">'+v+'</span></div>';
 }
 
@@ -872,7 +959,7 @@ function baseFilter(){
   state.quicks.forEach(q=>{r=r.filter(QUICK_F[q]);});
   if(state.shifts.size){const fs=[...state.shifts].map(s=>SHIFT_F[s]);r=r.filter(j=>fs.some(f=>f(j)));}
   if(state.prefs.size) r=r.filter(j=>state.prefs.has(j.pf));
-  if(NEAR&&state.radius>0) r=r.filter(j=>{const n=nearOf(j);return n&&n.km<=300&&n.min<=state.radius;});
+  if(NEAR&&state.radius>0) r=r.filter(j=>{const n=nearOf(j);return n&&n.km<=300&&(state.mode==="train"?n.tmin:n.min)<=state.radius;});
   return r;
 }
 function sortJobs(r){
@@ -928,6 +1015,7 @@ function jobText(j){
 function cardHtml(j,showOuts){
   const meta=[j.gy,j.sk].filter(Boolean).map(escMark).join("　/　");
   const isO=isOutsJob(j);
+  const jnHit=!!(state.kw&&j.jn&&getPairs().some(q=>q.a&&normSearch(j.jn,true).includes(q.a)));
   const station=j.st?String(j.st).replace(/^.*「/,"「").slice(0,40):"";
   return '<div class="card'+tierOf(j)+(isO?' outs-card':'')+'">'
     +nearBannerHtml(j)
@@ -942,13 +1030,12 @@ function cardHtml(j,showOuts){
     +(meta?'<div class="c-meta">'+meta+'</div>':"")
     +'</div>'
     +'<div class="c-foot">'
-      +(j.jn?'<button class="btn jn" data-jn="'+escAttr(j.jn)+'" onclick="copyJn(this)" aria-label="仕事No. '+escAttr(j.jn)+' をコピー"><span class="l">仕事No.</span><span class="v">'+markText(j.jn,true)+'</span><span class="c">コピー</span></button>':"")
       +'<button class="btn star'+(state.stars.has(String(j.id))?' on':'')+'" data-sid="'+escAttr(String(j.id))+'" onclick="toggleStar(this.dataset.sid)">'+(state.stars.has(String(j.id))?'✓候補':'＋候補')+'</button>'
-      +'<button class="btn" onclick="copyJob(this)" data-jid="'+escAttr(String(j.id))+'">要点コピー</button>'
-      +'<button class="btn" onclick="toggleDet(this)" aria-expanded="false">詳細</button>'
+      +'<button class="btn" onclick="toggleDet(this)" aria-expanded="'+(jnHit?'true':'false')+'">'+(jnHit?'閉じる':'詳細')+'</button>'
       +(j.ur?'<a class="btn go" href="'+esc(j.ur)+'" target="_blank" rel="noopener">求人↗</a>':"")
     +'</div>'
-    +'<dl class="det">'
+    +'<dl class="det'+(jnHit?' open':'')+'">'
+      +(j.jn?'<button class="btn jn" data-jn="'+escAttr(j.jn)+'" onclick="copyJn(this)" aria-label="仕事No. '+escAttr(j.jn)+' をコピー"><span class="l">仕事No.</span><span class="v">'+markText(j.jn,true)+'</span><span class="c">コピー</span></button>':"")
       +(j.maker?'<dt>勤務先</dt><dd>'+esc(j.maker)+'</dd>':"")
       +(j.st?'<dt>最寄り駅・交通</dt><dd>'+esc(j.st)+'</dd>':"")
       +(j.ca?'<dt>仕事内容</dt><dd>'+esc(j.ca)+'</dd>':"")
@@ -1011,6 +1098,7 @@ function syncUI(){
     const k=el.dataset.k,v=el.dataset.v;let on=false;
     if(k==="gender") on=state.gender===v;
     else if(k==="nation") on=state.nation;
+    else if(k==="mode") on=state.mode===v;
     else if(k==="wt") on=state.wt===v;
     else if(k==="kw2") on=state.kws.has(v);
     else if(k==="flag") on=state.flags.has(v);
@@ -1043,7 +1131,7 @@ function summaryParts(){
   state.flags.forEach(k=>a.push(["枠切れを除く",()=>tog("flag",k)]));
   state.gys.forEach(g=>a.push([g,()=>tog("gy",g)]));
   if(state.onlyStars) a.push(["候補だけ",()=>toggleOnlyStars()]);
-  if(NEAR&&state.radius>0) a.push(["車"+(state.radius>=120?"2時間":state.radius+"分")+"圏内",()=>tog("radius",state.radius)]);
+  if(NEAR&&state.radius>0) a.push([(state.mode==="train"?"電車":"車")+(state.radius>=120?"2時間":state.radius+"分")+"圏内",()=>tog("radius",state.radius)]);
   if(state.age!==null) a.push([state.age+"歳",()=>setAge(null)]);
   if(state.gender) a.push([state.gender,()=>tog("gender",state.gender)]);
   if(state.salMin>0) a.push(["月収"+state.salMin+"万〜",()=>setSal(0)]);
@@ -1084,6 +1172,7 @@ function tog(k,v){
   if(S[k]) S[k].has(v)?S[k].delete(v):S[k].add(v);
   else if(k==="nation"){state.nation=!state.nation;if(state.nation){state.radius=0;state.prefs.clear();state.region="";renderArea();}}
   else if(k==="wt") state.wt=state.wt===v?"":v;
+  else if(k==="mode") state.mode=v;
   else if(k==="gender") state.gender=state.gender===v?"":v;
   else if(k==="sal") state.salMin=state.salMin===+v?0:+v;
   else if(k==="radius"){state.radius=state.radius===+v?0:+v;if(state.radius) state.nation=false;}
@@ -1115,7 +1204,6 @@ function _copy(t,msg){
   const fb=()=>{const ta=document.createElement("textarea");ta.value=t;ta.style.cssText="position:fixed;opacity:0;";document.body.appendChild(ta);ta.select();try{document.execCommand("copy");done();}catch(e){}document.body.removeChild(ta);};
   if(navigator.clipboard&&navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(done,fb); else fb();
 }
-function copyJob(btn){const j=ALL_JOBS.find(x=>String(x.id)===btn.dataset.jid);if(j) _copy(jobText(j),"要点をコピーしました");}
 function copyStars(){
   const js=ALL_JOBS.filter(j=>state.stars.has(String(j.id)));if(!js.length) return;
   _copy(js.map((j,i)=>"■候補"+(i+1)+"\n"+jobText(j)).join("\n\n"),"候補"+js.length+"件をコピーしました");
