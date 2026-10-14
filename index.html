@@ -80,13 +80,14 @@ body.outs-mode .brand-ic{background:linear-gradient(135deg,var(--outs),var(--out
 .row-t .n{width:20px;height:20px;border-radius:6px;transform:skewX(-8deg);background:var(--brand);color:#fff;font-size:11px;display:inline-flex;align-items:center;justify-content:center;flex:none;}
 .row-t .clr{margin-left:auto;font-size:12px;font-weight:700;color:var(--brand);text-decoration:underline;padding:4px 2px;}
 .row-t .note{font-size:11px;font-weight:700;color:var(--sub);}
-.chips{display:flex;flex-wrap:wrap;gap:7px;}
-.chip{min-height:42px;padding:0 14px;border:2px solid var(--line);background:#fff;border-radius:30px;font-size:14px;font-weight:800;color:var(--ink2);display:inline-flex;align-items:center;gap:6px;transition:background .1s,border-color .1s;}
-.chip i{font-style:normal;font-size:11px;font-weight:800;color:var(--sub);background:var(--gry);padding:1px 7px;border-radius:20px;}
-.chip.on{background:var(--brand);border-color:var(--ink);color:#fff;}
-.chip.on::before{content:"✓";font-weight:900;}
-.chip.on i{background:rgba(255,255,255,.25);color:#fff;}
-.chip.sm{min-height:36px;padding:0 11px;font-size:12.5px;}
+.chips{display:grid;grid-template-columns:repeat(var(--c,2),minmax(0,1fr));grid-auto-rows:1fr;gap:8px;}
+.chips.c1{--c:1;}.chips.c2{--c:2;}.chips.c3{--c:3;}.chips.c4{--c:4;}.chips.c5{--c:5;}
+.chip{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;width:100%;min-height:54px;padding:6px 8px;border:2px solid var(--line2);background:#fff;border-radius:12px;font-size:14px;font-weight:800;line-height:1.25;text-align:center;color:var(--ink);transition:background .1s,border-color .1s;}
+.chip i{font-style:normal;font-size:11px;font-weight:700;color:var(--sub);background:none;padding:0;}
+.chip.on{background:var(--brand);border-color:var(--ink);color:#fff;box-shadow:inset 0 -4px 0 var(--lime);}
+.chip.on::after{content:"✓";position:absolute;top:3px;right:7px;font-size:11px;font-weight:900;color:var(--yel);}
+.chip.on i{color:rgba(255,255,255,.85);}
+.chip.sm{min-height:48px;font-size:13px;}
 .inp{height:48px;width:100%;border:2px solid var(--line);border-radius:12px;padding:0 14px;font-size:16px;font-weight:700;background:#fff;}
 .inp:focus{outline:none;border-color:var(--brand);box-shadow:0 0 0 3px rgba(22,138,39,.12);}
 .inp.addr{border-color:var(--brand-line);background:var(--brand-bg);}
@@ -135,10 +136,10 @@ details.manual[open] summary::before{content:"▾ ";}
 .view.on.outs{background:var(--outs);}
 .view b{font-size:11px;font-weight:800;padding:1px 8px;border-radius:20px;background:rgba(0,0,0,.08);}
 .view.on b{background:rgba(255,255,255,.25);}
-.sortrow{display:flex;gap:6px;align-items:center;margin-top:8px;overflow-x:auto;scrollbar-width:none;}
+.sortrow{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(92px,1fr);gap:6px;margin-top:8px;overflow-x:auto;scrollbar-width:none;}
 .sortrow::-webkit-scrollbar{display:none;}
-.sortrow .lab{font-size:12px;font-weight:800;color:var(--sub);flex:none;}
-.sortrow .chip{min-height:36px;padding:0 12px;font-size:13px;flex:none;}
+.sortrow .lab{display:none;}
+.sortrow .chip{min-height:44px;padding:4px 6px;font-size:13px;}
 .sortrow .chip.dis{opacity:.45;}
 .cntline{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;margin:4px 2px 8px;font-size:13px;font-weight:700;color:var(--sub);}
 .cntline b{font-size:20px;color:var(--ink);font-weight:900;background:linear-gradient(transparent 62%,var(--yel) 62%);padding:0 3px;}
@@ -149,9 +150,9 @@ details.manual[open] summary::before{content:"▾ ";}
 .af button{color:var(--brand);font-size:17px;width:30px;height:30px;display:flex;align-items:center;justify-content:center;}
 
 /* ===== カード ===== */
-.cards{display:flex;flex-direction:column;gap:10px;}
+.cards{display:grid;grid-template-columns:minmax(0,1fr);gap:10px;}
 mark.hit{background:#fef08a;color:inherit;padding:0 1px;border-radius:2px;font-weight:800;}
-.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--sh);overflow:hidden;}
+.card{display:flex;flex-direction:column;background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--sh);overflow:hidden;}
 .card.outs-card{border-left:4px solid var(--outs);}
 .strip{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 13px;font-weight:900;font-size:13px;}
 .strip small{font-size:11px;font-weight:700;opacity:.85;}
@@ -167,14 +168,14 @@ mark.hit{background:#fef08a;color:inherit;padding:0 1px;border-radius:2px;font-w
 .outs-av{display:flex;align-items:center;gap:8px;background:linear-gradient(90deg,#1a3560,#1e4d8c);padding:8px 13px;border-bottom:3px solid var(--outs-accent);color:#fff;font-size:12.5px;font-weight:900;}
 .outs-av em{font-style:normal;color:var(--outs-accent);}
 .outs-av span{margin-left:auto;background:var(--outs-accent);color:#1a1a1a;font-size:10.5px;padding:3px 9px;border-radius:20px;}
-.c-body{padding:12px 14px 4px;}
+.c-body{padding:12px 14px 4px;flex:1;}
 .c-top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;}
 .c-l{min-width:0;flex:1;}
 .c-co{font-size:12px;font-weight:800;color:var(--sub);word-break:break-all;}
-.c-ti{font-size:15.5px;font-weight:900;line-height:1.4;margin-top:2px;word-break:break-all;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
-.c-loc{font-size:13px;font-weight:800;color:var(--ink2);margin-top:5px;}
+.c-ti{min-height:2.8em;font-size:15.5px;font-weight:900;line-height:1.4;margin-top:2px;word-break:break-all;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.c-loc{font-size:13px;font-weight:800;color:var(--ink2);margin-top:12px;}
 .c-loc small{font-weight:700;color:var(--sub);}
-.sal{flex:none;text-align:right;background:var(--grn-bg);border:1.5px solid var(--grn-line);border-radius:11px;padding:6px 11px;}
+.sal{flex:none;width:128px;text-align:center;background:var(--grn-bg);border:1.5px solid var(--grn-line);border-radius:11px;padding:6px 11px;}
 .sal .t{display:inline-block;font-size:10.5px;font-weight:900;color:#fff;background:var(--grn);padding:1px 7px;border-radius:5px;}
 .sal.h .t{background:var(--blue);}
 .sal.h{background:var(--blue-bg);border-color:#7dd3fc;}
@@ -190,15 +191,15 @@ mark.hit{background:#fef08a;color:inherit;padding:0 1px;border-radius:2px;font-w
 .pill.sub{background:#fef3c7;color:#92400e;border:1px solid #fcd34d;}
 .pill.bx{background:var(--or-bg);color:var(--or);border:1px solid var(--or-line);}
 .c-meta{font-size:11.5px;color:var(--sub);margin-top:7px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.c-foot{display:flex;gap:7px;align-items:center;padding:10px 14px 12px;flex-wrap:wrap;}
+.c-foot{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;padding:10px 14px 12px;}
 .btn{min-height:44px;padding:0 14px;border:1.5px solid var(--line2);background:#fff;border-radius:10px;font-size:13.5px;font-weight:800;color:var(--ink2);display:inline-flex;align-items:center;gap:6px;transition:background .12s;}
-.btn.jn{flex:1 1 100%;min-width:150px;justify-content:space-between;background:var(--gry);}
+.btn.jn{grid-column:1/-1;min-width:0;justify-content:space-between;background:var(--gry);}
 .btn.jn .l{font-size:10.5px;color:var(--sub);}
 .btn.jn .v{font-size:13px;word-break:break-all;text-align:left;flex:1;}
 .btn.jn .c{font-size:11px;color:var(--brand);font-weight:900;}
 .btn.ok{background:#059669;border-color:#059669;color:#fff;}
 .btn.ok .l,.btn.ok .c{color:#fff;}
-.c-foot .btn:not(.jn){flex:1;justify-content:center;}
+.c-foot .btn:not(.jn){justify-content:center;min-width:0;}
 .btn.go{background:var(--brand);border-color:var(--ink);color:#fff;}
 .det{display:none;padding:12px 14px;background:var(--gry);border-top:1px solid var(--line);font-size:13px;line-height:1.7;}
 .det.open{display:block;}
@@ -234,7 +235,7 @@ body.noruby rt{display:none;}
 body.noruby ruby{ruby-position:unset;}
 .hd-btn.off{opacity:.55;}
 .btn.star.on{background:var(--yel);border-color:var(--ink);color:var(--ink);}
-.c-foot .btn{padding:0 10px;}
+.c-foot .btn{padding:0 4px;}
 .starbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;background:#fff7c2;border:2px solid var(--ink);border-radius:12px;padding:8px 12px;margin-bottom:10px;font-weight:900;font-size:14px;}
 .starbar b{font-size:20px;}
 .starbar button{min-height:38px;padding:0 12px;border-radius:20px;border:1.5px solid var(--ink);background:#fff;font-size:13px;font-weight:900;color:var(--ink);}
@@ -251,19 +252,19 @@ body.noruby ruby{ruby-position:unset;}
   .hear-hd{padding:14px 16px;}.hear-hd b{font-size:17px;}.hear-hd .res strong{font-size:20px;}.hear-next{min-height:42px;font-size:14.5px;}
   .hear-body{padding:4px 16px 16px;}
   .row-t{font-size:15.5px;}.row-t .n{width:24px;height:24px;font-size:13px;}.row-t .note{font-size:12px;}
-  .chip{min-height:46px;font-size:15.5px;padding:0 16px;}.chip.sm{min-height:40px;font-size:14px;}.chip i{font-size:12px;}
+  .chip{min-height:58px;font-size:15.5px;}.chip.sm{min-height:52px;font-size:14.5px;}.chip i{font-size:12px;}
   .inp{height:52px;font-size:17px;}.hint,.ph{font-size:12.5px;}.msg{font-size:14px;}.here b{font-size:17px;}
   .views .view{min-height:52px;font-size:16px;}
-  .sortrow .chip{min-height:42px;font-size:14.5px;}
+  .sortrow .chip{min-height:50px;font-size:14.5px;}
   .cntline{font-size:15px;}.cntline b{font-size:26px;}
   .af{font-size:14px;min-height:36px;}
   .cards{gap:14px;}
   .card{border:1.5px solid var(--line2);box-shadow:var(--sh-md);}
   .strip{font-size:15px;padding:10px 18px;}.strip .v{font-size:20px;}.strip.q b{font-size:24px;}
   .c-body{padding:16px 18px 6px;}
-  .c-co{font-size:14px;}.c-ti{font-size:19px;line-height:1.45;-webkit-line-clamp:3;}
+  .c-co{font-size:14px;}.c-ti{font-size:19px;line-height:1.45;-webkit-line-clamp:2;min-height:2.9em;}
   .c-loc{font-size:16px;}.c-loc small{font-size:13.5px;}
-  .sal{padding:8px 16px;}.sal .t{font-size:12px;}.sal .n{font-size:32px;}.sal .n small{font-size:15px;}
+  .sal{padding:8px 10px;width:156px;}.sal .t{font-size:12px;}.sal .n{font-size:30px;}.sal .n small{font-size:15px;}
   .pill{font-size:14px;padding:5px 13px;}
   .c-meta{font-size:13.5px;}
   .c-foot{padding:12px 18px 16px;gap:9px;}
@@ -271,7 +272,7 @@ body.noruby ruby{ruby-position:unset;}
   .det{font-size:14.5px;padding:14px 18px;}
 }
 @media(min-width:1560px){
-  .cards{grid-template-columns:repeat(2,minmax(0,1fr));align-items:start;}
+  .cards{grid-template-columns:repeat(2,minmax(0,1fr));}
   .cards .empty,.cards .skel-card{grid-column:1/-1;}
 }
 </style>
@@ -303,10 +304,10 @@ body.noruby ruby{ruby-position:unset;}
       <div class="hear-body" id="hearBody">
         <div class="presets">
           <div class="row-t">ワンタップ</div>
-          <div class="chips">
-            <button class="chip pre" onclick="preset('dormAll')">寮あり・全国OK</button>
-            <button class="chip pre" onclick="preset('dormFree')">寮費無料・全国OK</button>
-            <button class="chip pre" onclick="preset('novice')">未経験OK</button>
+          <div class="chips c3">
+            <button class="chip pre" onclick="preset('dormAll')">寮あり<br>全国OK</button>
+            <button class="chip pre" onclick="preset('dormFree')">寮費無料<br>全国OK</button>
+            <button class="chip pre" onclick="preset('novice')">未経験<br>OK</button>
           </div>
         </div>
 
@@ -315,12 +316,12 @@ body.noruby ruby{ruby-position:unset;}
           <input id="addr" class="inp addr" type="search" placeholder="例：大分県大分市中央町1-1-1" autocomplete="off" autocapitalize="off"
             onpaste="var e=this;setTimeout(function(){smartPick(e.value,true);},0)" oninput="onAddrInput(this.value)" onkeydown="if(event.key==='Enter')smartPick(this.value,true)">
           <div class="msg" id="addrMsg"></div>
-          <div class="chips" style="margin-top:8px"><button class="chip" data-k="nation" data-v="1" onclick="tog('nation',1)">全国どこでもOK</button></div>
+          <div class="chips c1" style="margin-top:8px"><button class="chip" data-k="nation" data-v="1" onclick="tog('nation',1)" style="min-height:48px">全国どこでもOK</button></div>
           <div class="ph">全国OKなら地域で絞りません（住所を入れると近い順は使えます）</div>
           <div class="here" id="here" hidden><b id="hereTxt"></b><button onclick="clearNear()">解除</button></div>
           <div class="radius" id="radiusBox" hidden>
             <div class="lab">車で何分まで？</div>
-            <div class="chips">
+            <div class="chips c4">
               <button class="chip sm" data-k="radius" data-v="30" onclick="tog('radius',30)">〜30分</button>
               <button class="chip sm" data-k="radius" data-v="60" onclick="tog('radius',60)">〜60分</button>
               <button class="chip sm" data-k="radius" data-v="90" onclick="tog('radius',90)">〜90分</button>
@@ -350,7 +351,7 @@ body.noruby ruby{ruby-position:unset;}
 
         <div class="row">
           <div class="row-t"><span class="n">3</span>性別</div>
-          <div class="chips">
+          <div class="chips c2">
             <button class="chip" data-k="gender" data-v="男性" onclick="tog('gender','男性')">男性</button>
             <button class="chip" data-k="gender" data-v="女性" onclick="tog('gender','女性')">女性</button>
           </div>
@@ -358,14 +359,14 @@ body.noruby ruby{ruby-position:unset;}
 
         <div class="row">
           <div class="row-t"><span class="n">4</span>希望の給与（月収）<button class="clr" onclick="setSal(0)">クリア</button></div>
-          <div class="chips">
+          <div class="chips c5">
             <button class="chip" data-k="sal" data-v="20" onclick="tog('sal',20)">20万〜</button>
             <button class="chip" data-k="sal" data-v="25" onclick="tog('sal',25)">25万〜</button>
             <button class="chip" data-k="sal" data-v="30" onclick="tog('sal',30)">30万〜</button>
             <button class="chip" data-k="sal" data-v="35" onclick="tog('sal',35)">35万〜</button>
             <button class="chip" data-k="sal" data-v="40" onclick="tog('sal',40)">40万〜</button>
           </div>
-          <div class="chips" style="margin-top:8px">
+          <div class="chips c2" style="margin-top:8px">
             <button class="chip sm" data-k="wt" data-v="月給" onclick="tog('wt','月給')">月給の求人<i data-cnt="wt:月給"></i></button>
             <button class="chip sm" data-k="wt" data-v="時給" onclick="tog('wt','時給')">時給の求人<i data-cnt="wt:時給"></i></button>
           </div>
@@ -375,7 +376,7 @@ body.noruby ruby{ruby-position:unset;}
 
         <div class="row">
           <div class="row-t"><span class="n">5</span>寮・社宅</div>
-          <div class="chips">
+          <div class="chips c3">
             <button class="chip" data-k="quick" data-v="dorm" onclick="tog('quick','dorm')">寮完備<i data-cnt="quick:dorm"></i></button>
             <button class="chip" data-k="quick" data-v="free" onclick="tog('quick','free')">寮費無料<i data-cnt="quick:free"></i></button>
             <button class="chip" data-k="quick" data-v="sub" onclick="tog('quick','sub')">補助あり<i data-cnt="quick:sub"></i></button>
@@ -384,7 +385,7 @@ body.noruby ruby{ruby-position:unset;}
 
         <div class="row">
           <div class="row-t"><span class="n">6</span>勤務時間帯<span class="note">複数選ぶと どれか</span></div>
-          <div class="chips">
+          <div class="chips c2">
             <button class="chip" data-k="shift" data-v="day" onclick="tog('shift','day')">日勤のみ<i data-cnt="shift:day"></i></button>
             <button class="chip" data-k="shift" data-v="night" onclick="tog('shift','night')">夜勤あり<i data-cnt="shift:night"></i></button>
             <button class="chip" data-k="shift" data-v="s2" onclick="tog('shift','s2')">2交代<i data-cnt="shift:s2"></i></button>
@@ -394,12 +395,12 @@ body.noruby ruby{ruby-position:unset;}
 
         <div class="row">
           <div class="row-t"><span class="n">7</span>雇用形態<button class="clr" onclick="clearSet('emps')">クリア</button></div>
-          <div class="chips" id="emps"></div>
+          <div class="chips c2" id="emps"></div>
         </div>
 
         <div class="row">
           <div class="row-t"><span class="n">8</span>こだわり<button class="clr" onclick="clearSet('kws');clearSet('flags')">クリア</button></div>
-          <div class="chips">
+          <div class="chips c2">
             <button class="chip" data-k="kw2" data-v="novice" onclick="tog('kw2','novice')">未経験OK<i data-cnt="kw:novice"></i></button>
             <button class="chip" data-k="kw2" data-v="weekend" onclick="tog('kw2','weekend')">土日休み<i data-cnt="kw:weekend"></i></button>
             <button class="chip" data-k="kw2" data-v="high" onclick="tog('kw2','high')">高収入<i data-cnt="kw:high"></i></button>
@@ -415,16 +416,16 @@ body.noruby ruby{ruby-position:unset;}
           <summary>さらに絞る（業種・会社・エリア）</summary>
           <div class="row">
             <div class="row-t">業種<button class="clr" onclick="clearSet('gys')">クリア</button></div>
-            <div class="chips" id="gys"></div>
+            <div class="chips c2" id="gys"></div>
           </div>
           <div class="row">
             <div class="row-t">求人会社<button class="clr" onclick="clearSet('cos')">クリア</button></div>
-            <div class="chips pcos" id="cos"></div>
+            <div class="chips c2 pcos" id="cos"></div>
           </div>
           <div class="row">
             <div class="row-t">エリア（地方 → 都道府県）<button class="clr" onclick="clearArea()">クリア</button></div>
-            <div class="chips" id="regs"></div>
-            <div class="chips" id="prefs" style="margin-top:8px"></div>
+            <div class="chips c2" id="regs"></div>
+            <div class="chips c3" id="prefs" style="margin-top:8px"></div>
           </div>
         </details>
 
