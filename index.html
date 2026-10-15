@@ -513,6 +513,9 @@ html.bl-lock,html.bl-lock body{overflow:hidden;}
 .pr-row{display:inline-block;padding:1px 8px;border-radius:6px;background:var(--gry);font-weight:800;}
 .pr-row.hi{background:#fff7ed;color:#c2410c;}
 .pr-b.p4{background:var(--gry);color:#64748b;box-shadow:inset 0 0 0 1px #cbd5e1;}
+.c-note{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:4px 0 2px;font-size:12.5px;line-height:1.5;}
+.nt-tag{padding:1px 8px;border-radius:999px;background:#fef3c7;color:#92400e;font-weight:900;box-shadow:inset 0 0 0 1px #fcd34d;white-space:nowrap;}
+.nt-txt{font-weight:800;color:#b45309;}
 /* ===== 「ブラックリスト確認必要！」ポップアップ（対象4社を選んだとき） ===== */
 .bn-ov{position:fixed;inset:0;z-index:260;background:rgba(15,23,42,.62);display:flex;align-items:center;justify-content:center;padding:16px;}
 .bn-ov[hidden]{display:none;}
@@ -1273,6 +1276,19 @@ function prDetRow(j){
   const n=prNum(j);
   return '<dt>優先順位</dt><dd><span class="pr-row'+(n<4?' hi':'')+'">'+n+(n<4?'　（優先して案内）':'　（通常）')+'</span></dd>';
 }
+/* ===== 求人ごとの追記（案件IDで指定。データ元のスプレッドシートとは別に表示する）===== */
+const JOB_NOTES={
+  "818277":{tag:"10月度ボーナス",note:"フォークリフト免許あれば52歳まで可能"},
+  "818279":{tag:"10月度ボーナス",note:"フォークリフト免許あれば52歳まで可能"},
+  "818280":{tag:"10月度ボーナス",note:"フォークリフト免許あれば52歳まで可能"},
+  "818281":{tag:"10月度ボーナス",note:"フォークリフト免許あれば52歳まで可能"},
+  "818282":{tag:"10月度ボーナス",note:"フォークリフト免許あれば52歳まで可能"}
+};
+function noteHtml(j){
+  const n=JOB_NOTES[String(j&&j.id)];
+  if(!n) return "";
+  return '<div class="c-note"><span class="nt-tag">'+esc(n.tag)+'</span><span class="nt-txt">'+esc(n.note)+'</span></div>';
+}
 function cardHtml(j,showOuts){
   const meta=[j.gy,j.sk].filter(Boolean).map(escMark).join("　/　");
   const isO=isOutsJob(j);
@@ -1284,7 +1300,7 @@ function cardHtml(j,showOuts){
     +quotaHtml(j)
     +'<div class="c-body"><div class="c-top"><div class="c-l">'
       +'<div class="c-co">'+prBadge(j)+(window.blNeeds&&blNeeds(j.co)?'<span class="bn-bdg" title="送客前にブラックリスト確認が必要です">BL確認必要</span>':"")+coHtml(j.co)+'</div>'
-      +'<div class="c-ti">'+escMark(j.ti||j.sk||"")+'</div>'
+      +'<div class="c-ti">'+escMark(j.ti||j.sk||"")+'</div>'+noteHtml(j)
       +'<div class="c-loc">'+rubyP(j.pf)+' '+ctHtml(j.pf,j.ct)+(station?' <small>'+esc(station)+'</small>':'')+'</div>'
     +'</div>'+salHtml(j)+'</div>'
     +'<div class="pills">'+pillsHtml(j)+'</div>'
