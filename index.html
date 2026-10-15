@@ -342,7 +342,7 @@ body.outs-mode .brand-ic{background:var(--outs);}
 .pill.free{background:#0b7a43;color:#fff;}
 .pill.sub{background:#fff;color:#0b7a43;border:1px solid #0b7a43;}
 .pill.bx{background:#fff6ed;color:#b54708;border:1px solid #fdba74;}
-.c-foot{grid-template-columns:repeat(3,minmax(0,1fr));}
+.c-foot{grid-template-columns:1fr 1.6fr;}
 .btn{border:1.5px solid var(--line2);color:var(--ink);}
 .btn.go{background:var(--brand);border-color:var(--brand);color:#fff;}
 .btn.star.on{background:var(--brand-bg);border-color:var(--brand);color:var(--brand);}
@@ -360,8 +360,6 @@ body.outs-mode .brand-ic{background:var(--outs);}
 .area-row .chip.sm{min-height:54px;}
 .prb{display:inline-block;margin-right:8px;padding:2px 9px;border-radius:6px;font-size:12px;font-weight:800;line-height:1.5;background:var(--brand-bg);color:var(--brand);border:1px solid var(--brand-line);vertical-align:1px;}
 .prb.p1,.prb.p2,.prb.p3{background:var(--brand);color:#fff;border-color:var(--brand);}
-.focus-bn{background:#c8102e;color:#fff;font-weight:900;font-size:17px;letter-spacing:.08em;text-align:center;padding:7px 10px;}
-.card.focus-card{border:2px solid #c8102e;box-shadow:0 2px 14px rgba(200,16,46,.22);}
 .prrow{display:flex;align-items:center;gap:8px;margin-top:8px;flex-wrap:wrap;}
 .prrow b{font-size:13px;color:var(--brand);font-weight:800;}
 .prrow #pris2{display:grid;grid-template-columns:repeat(3,minmax(0,auto));gap:6px;}
@@ -515,7 +513,10 @@ body.outs-mode .brand-ic{background:var(--outs);}
             <button class="chip" data-k="kw2" data-v="appl" onclick="tog('kw2','appl')">家電付き<i data-cnt="kw:appl"></i></button>
             <button class="chip" data-k="kw2" data-v="soon" onclick="tog('kw2','soon')">即日・最短入社<i data-cnt="kw:soon"></i></button>
             <button class="chip" data-k="quick" data-v="bonus" onclick="tog('quick','bonus')">祝い金あり<i data-cnt="quick:bonus"></i></button>
-            <button class="chip" data-k="flag" data-v="focus" onclick="tog('flag','focus')">最注力のみ</button>
+            <button class="chip" data-k="kw2" data-v="senior" onclick="tog('kw2','senior')">50歳以上OK<i data-cnt="kw:senior"></i></button>
+            <button class="chip" data-k="kw2" data-v="hr15" onclick="tog('kw2','hr15')">時給1,500円以上<i data-cnt="kw:hr15"></i></button>
+            <button class="chip" data-k="kw2" data-v="eki10" onclick="tog('kw2','eki10')">駅徒歩10分以内<i data-cnt="kw:eki10"></i></button>
+            <button class="chip" data-k="kw2" data-v="room" onclick="tog('kw2','room')">個室寮（1R）<i data-cnt="kw:room"></i></button>
             <button class="chip" data-k="flag" data-v="slot" onclick="tog('flag','slot')">枠切れを除く</button>
           </div>
         </div>
@@ -554,12 +555,6 @@ body.outs-mode .brand-ic{background:var(--outs);}
         <button class="chip" data-k="sort" data-v="bonus" onclick="setSort('bonus')">祝い金順</button>
       </div>
       <div class="prrow"><b>優先順位で絞る</b><span id="pris2"></span><button class="prclr" onclick="clearSet('pris')">解除</button></div>
-    </div>
-    <div class="starbar" id="starbar" hidden>
-      <span>候補 <b id="starN">0</b>件</span>
-      <button id="starOnly" onclick="toggleOnlyStars()">候補だけ表示</button>
-      <button onclick="copyStars()">まとめてコピー</button>
-      <button onclick="clearStars()">クリア</button>
     </div>
     <div class="cntline"><span><b id="bc">-</b> / <span id="bt">-</span>件</span><span id="hdUpdated">読込中…</span></div>
     <div class="active-bar" id="active"></div>
@@ -609,8 +604,8 @@ let _refreshing=false, _currentView="list";
 const state={
   kw:"",age:null,gender:"",salMin:0,radius:0,
   prefs:new Set(),quicks:new Set(),shifts:new Set(),emps:new Set(),cos:new Set(),
-  kws:new Set(),flags:new Set(),gys:new Set(),pris:new Set(),stars:new Set(),
-  wt:"",mode:"car",nation:false,onlyStars:false,
+  kws:new Set(),flags:new Set(),gys:new Set(),pris:new Set(),
+  wt:"",mode:"car",nation:false,
   sort:"pri",region:""
 };
 const QUICK_F={dorm:j=>j.dorm==="1",free:j=>j.free===1,sub:j=>j.sub===1,bonus:j=>j.bx>0};
@@ -626,12 +621,14 @@ const KW_F={
   high:j=>/高収入/.test(txtOf(j)),
   car:j=>/車通勤|マイカー/.test(txtOf(j)),
   appl:j=>/家電/.test(txtOf(j)),
-  soon:j=>/即日|最短/.test(txtOf(j))
+  soon:j=>/即日|最短/.test(txtOf(j)),
+  senior:j=>(j.ag||0)>=50,
+  hr15:j=>j.wt==="時給"&&(j.hr||0)>=1500,
+  eki10:j=>{const m=String(j.st||"").match(/徒歩\s*(\d+)\s*分/);return !!m&&+m[1]<=10;},
+  room:j=>/1R|１R|ワンルーム|個室/.test(txtOf(j))
 };
-const FOCUS_CODES=['Acru1C','AEQE7C','AEQE1C','AAAN1C'];
-function isFocus(j){const t=j&&j.jn?String(j.jn):'';return FOCUS_CODES.some(c=>t.indexOf('《'+c+'》')>=0);}
-const FLAG_F={focus:isFocus,slot:j=>!(j.remain!==null&&j.remain!==undefined&&Number(j.remain)<=0)};
-const KL={novice:"未経験OK",weekend:"土日休み",high:"高収入",car:"車通勤OK",appl:"家電付き",soon:"即日・最短入社"};
+const FLAG_F={slot:j=>!(j.remain!==null&&j.remain!==undefined&&Number(j.remain)<=0)};
+const KL={novice:"未経験OK",weekend:"土日休み",high:"高収入",car:"車通勤OK",appl:"家電付き",soon:"即日・最短入社",senior:"50歳以上OK",hr15:"時給1,500円以上",eki10:"駅から徒歩10分以内",room:"個室寮（1R）"};
 const _tx=new WeakMap();
 function txtOf(j){let t=_tx.get(j);if(t===undefined){t=(j.ti||"")+" "+(j.sk||"")+" "+(j.st||"");_tx.set(j,t);}return t;}
 const KANA_CO={"UT":"ユーティー","綜合":"そうごう"};
@@ -977,7 +974,6 @@ function baseFilter(){
   if(state.gys.size)   r=r.filter(j=>state.gys.has(j.gy));
   state.kws.forEach(k=>{r=r.filter(KW_F[k]);});
   state.flags.forEach(k=>{r=r.filter(FLAG_F[k]);});
-  if(state.onlyStars)  r=r.filter(j=>state.stars.has(String(j.id)));
   if(state.age!==null) r=r.filter(j=>j.ag>=state.age);
   if(state.gender)     r=r.filter(j=>j.gn==="不問"||j.gn===state.gender);
   if(state.salMin>0)   r=r.filter(j=>salVal(j)>=state.salMin);
@@ -1001,7 +997,6 @@ function sortJobs(r){
   else if(m==="bonus") r.sort((a,b)=>(b.bx||0)-(a.bx||0));
   else if(m==='pri_l') r.sort((a,b)=>(+b.pr||0)-(+a.pr||0));
   else r.sort((a,b)=>(+a.pr||9)-(+b.pr||9));
-  r=r.map((j,i)=>[j,i]).sort((a,b)=>(isFocus(b[0])-isFocus(a[0]))||a[1]-b[1]).map(x=>x[0]);
   return r;
 }
 
@@ -1045,8 +1040,7 @@ function cardHtml(j,showOuts){
   const isO=isOutsJob(j);
   const jnHit=!!(state.kw&&j.jn&&getPairs().some(q=>q.a&&normSearch(j.jn,true).includes(q.a)));
   const station=j.st?String(j.st).replace(/^.*「/,"「").slice(0,40):"";
-  return '<div class="card'+tierOf(j)+(isO?' outs-card':'')+(isFocus(j)?' focus-card':'')+'">'
-    +(isFocus(j)?'<div class="focus-bn">最注力！！！</div>':'')
+  return '<div class="card'+tierOf(j)+(isO?' outs-card':'')+'">'
     +nearBannerHtml(j)
     +(showOuts&&isO?'<div class="outs-av"><em>アウトソーシング採用 可能！</em><span>事業部対象</span></div>':"")
     +quotaHtml(j)
@@ -1059,7 +1053,6 @@ function cardHtml(j,showOuts){
     +(meta?'<div class="c-meta">'+meta+'</div>':"")
     +'</div>'
     +'<div class="c-foot">'
-      +'<button class="btn star'+(state.stars.has(String(j.id))?' on':'')+'" data-sid="'+escAttr(String(j.id))+'" onclick="toggleStar(this.dataset.sid)">'+(state.stars.has(String(j.id))?'✓候補':'＋候補')+'</button>'
       +'<button class="btn" onclick="toggleDet(this)" aria-expanded="'+(jnHit?'true':'false')+'">'+(jnHit?'閉じる':'詳細')+'</button>'
       +(j.ur?'<a class="btn go" href="'+esc(j.ur)+'" target="_blank" rel="noopener">求人↗</a>':"")
     +'</div>'
@@ -1075,7 +1068,7 @@ function cardHtml(j,showOuts){
 
 /* ===== 描画 ===== */
 function emptyHtml(){
-  const hasF=state.kw||state.age!==null||state.gender||state.salMin>0||state.quicks.size||state.shifts.size||state.emps.size||state.cos.size||state.prefs.size||state.region||state.radius>0||state.kws.size||state.flags.size||state.gys.size||state.pris.size||state.wt||state.nation||state.onlyStars;
+  const hasF=state.kw||state.age!==null||state.gender||state.salMin>0||state.quicks.size||state.shifts.size||state.emps.size||state.cos.size||state.prefs.size||state.region||state.radius>0||state.kws.size||state.flags.size||state.gys.size||state.pris.size||state.wt||state.nation;
   return '<div class="empty"><b>該当する求人がありません</b>'+(hasF?'条件を1つはずすと見つかるかもしれません。<br>上の「適用中」の×で1つずつ外せます':'データを確認してください')+(hasF?'<br><button onclick="relaxAll()">条件をすべてはずす</button>':'')+'</div>';
 }
 function render(){
@@ -1149,7 +1142,6 @@ function syncUI(){
   const si=$("salIn");if(document.activeElement!==si) si.value=state.salMin;si.classList.toggle("set",state.salMin>0);
   $("here").hidden=!NEAR;$("radiusBox").hidden=!NEAR;
   if(NEAR) $("hereTxt").innerHTML="お住まい　"+rubyP(NEAR.pf)+" "+rubyC(NEAR.city,NEAR.kana);
-  updateStars();
   $("kwx").hidden=!state.kw;
 }
 function summaryParts(){
@@ -1158,10 +1150,9 @@ function summaryParts(){
   if(state.nation) a.push(["全国OK",()=>tog("nation",1)]);
   if(state.wt) a.push([state.wt+"の求人",()=>tog("wt",state.wt)]);
   state.kws.forEach(k=>a.push([KL[k],()=>tog("kw2",k)]));
-  state.flags.forEach(k=>a.push([k==="focus"?"最注力のみ":"枠切れを除く",()=>tog("flag",k)]));
+  state.flags.forEach(k=>a.push(["枠切れを除く",()=>tog("flag",k)]));
   state.pris.forEach(p=>a.push(["優先"+p+"位",()=>tog("pri",p)]));
   state.gys.forEach(g=>a.push([g,()=>tog("gy",g)]));
-  if(state.onlyStars) a.push(["候補だけ",()=>toggleOnlyStars()]);
   if(NEAR&&state.radius>0) a.push([(state.mode==="train"?"電車":"車")+(state.radius>=120?"2時間":state.radius+"分")+"圏内",()=>tog("radius",state.radius)]);
   if(state.age!==null) a.push([state.age+"歳",()=>setAge(null)]);
   if(state.gender) a.push([state.gender,()=>tog("gender",state.gender)]);
@@ -1221,24 +1212,10 @@ function preset(n){
   syncUI();apply();
 }
 function toggleRuby(){const off=document.body.classList.toggle("noruby");$("rubyBtn").classList.toggle("off",off);}
-function toggleStar(id){
-  state.stars.has(id)?state.stars.delete(id):state.stars.add(id);
-  document.querySelectorAll('[data-sid="'+CSS.escape(id)+'"]').forEach(b=>{const on=state.stars.has(id);b.classList.toggle("on",on);b.textContent=on?"✓候補":"＋候補";});
-  updateStars();
-}
-function updateStars(){
-  const n=state.stars.size;$("starbar").hidden=n===0&&!state.onlyStars;$("starN").textContent=n;$("starOnly").classList.toggle("on",state.onlyStars);
-}
-function toggleOnlyStars(){state.onlyStars=!state.onlyStars;apply();}
-function clearStars(){state.stars.clear();state.onlyStars=false;apply();}
 function _copy(t,msg){
   const done=()=>toast(msg);
   const fb=()=>{const ta=document.createElement("textarea");ta.value=t;ta.style.cssText="position:fixed;opacity:0;";document.body.appendChild(ta);ta.select();try{document.execCommand("copy");done();}catch(e){}document.body.removeChild(ta);};
   if(navigator.clipboard&&navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(done,fb); else fb();
-}
-function copyStars(){
-  const js=ALL_JOBS.filter(j=>state.stars.has(String(j.id)));if(!js.length) return;
-  _copy(js.map((j,i)=>"■候補"+(i+1)+"\n"+jobText(j)).join("\n\n"),"候補"+js.length+"件をコピーしました");
 }
 function clearSet(n){state[n].clear();syncUI();apply();}
 function clearArea(){state.prefs.clear();state.region="";renderArea();syncUI();apply();}
@@ -1255,11 +1232,11 @@ function relaxAll(){
   const keepNear=NEAR;
   state.kw="";state.age=null;state.gender="";state.salMin=0;state.radius=0;
   state.prefs.clear();state.quicks.clear();state.shifts.clear();state.emps.clear();state.cos.clear();state.region="";
-  state.kws.clear();state.flags.clear();state.gys.clear();state.pris.clear();state.wt="";state.nation=false;state.onlyStars=false;
+  state.kws.clear();state.flags.clear();state.gys.clear();state.pris.clear();state.wt="";state.nation=false;
   $("kw").value="";$("age").value="";renderArea();syncUI();apply();
 }
 function nextCaller(){
-  state.stars.clear();relaxAll();clearNear(true);state.sort="pri";
+  relaxAll();clearNear(true);state.sort="pri";
   $("addr").value="";addrSay("");$("manual").open=false;$("nsPf").value="";$("nsQ").value="";_ns.pf="";_ns.q="";nsRender();
   openHear();window.scrollTo({top:0,behavior:"smooth"});
   if(window.matchMedia&&window.matchMedia("(min-width:960px)").matches) $("addr").focus();
