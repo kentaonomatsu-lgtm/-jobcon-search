@@ -362,6 +362,13 @@ body.outs-mode .brand-ic{background:var(--outs);}
 .prb.p1,.prb.p2,.prb.p3{background:var(--brand);color:#fff;border-color:var(--brand);}
 .focus-bn{background:#c8102e;color:#fff;font-weight:900;font-size:17px;letter-spacing:.08em;text-align:center;padding:7px 10px;}
 .card.focus-card{border:2px solid #c8102e;box-shadow:0 2px 14px rgba(200,16,46,.22);}
+.prrow{display:flex;align-items:center;gap:8px;margin-top:8px;flex-wrap:wrap;}
+.prrow b{font-size:13px;color:var(--brand);font-weight:800;}
+.prrow #pris2{display:grid;grid-template-columns:repeat(3,minmax(0,auto));gap:6px;}
+.prrow .chip{flex-direction:row;gap:6px;white-space:nowrap;}
+.prrow .chip i{margin:0;}
+.prrow .chip{min-height:38px;padding:4px 12px;font-size:13px;}
+.prclr{background:none;border:0;color:var(--brand);font-size:12px;text-decoration:underline;cursor:pointer;padding:4px;}
 </style>
 </head>
 <body>
@@ -538,13 +545,15 @@ body.outs-mode .brand-ic{background:var(--outs);}
       </div>
       <div class="sortrow" id="sortrow">
         <span class="lab">並び順</span>
-        <button class="chip" data-k="sort" data-v="pri" onclick="setSort('pri')">優先順位順</button>
+        <button class="chip" data-k="sort" data-v="pri" onclick="setSort('pri')">優先順位<br>高い順</button>
+        <button class="chip" data-k="sort" data-v="pri_l" onclick="setSort('pri_l')">優先順位<br>低い順</button>
         <button class="chip" data-k="sort" data-v="near" onclick="setSort('near')">近い順</button>
         <button class="chip" data-k="sort" data-v="sal_h" onclick="setSort('sal_h')">給与が高い</button>
         <button class="chip" data-k="sort" data-v="sal_l" onclick="setSort('sal_l')">給与が低い</button>
         <button class="chip" data-k="sort" data-v="age_h" onclick="setSort('age_h')">年齢上限が高い</button>
         <button class="chip" data-k="sort" data-v="bonus" onclick="setSort('bonus')">祝い金順</button>
       </div>
+      <div class="prrow"><b>優先順位で絞る</b><span id="pris2"></span><button class="prclr" onclick="clearSet('pris')">解除</button></div>
     </div>
     <div class="starbar" id="starbar" hidden>
       <span>候補 <b id="starN">0</b>件</span>
@@ -990,6 +999,7 @@ function sortJobs(r){
   else if(m==="sal_h") r.sort((a,b)=>salVal(b)-salVal(a));
   else if(m==="sal_l") r.sort((a,b)=>salVal(a)-salVal(b));
   else if(m==="bonus") r.sort((a,b)=>(b.bx||0)-(a.bx||0));
+  else if(m==='pri_l') r.sort((a,b)=>(+b.pr||0)-(+a.pr||0));
   else r.sort((a,b)=>(+a.pr||9)-(+b.pr||9));
   r=r.map((j,i)=>[j,i]).sort((a,b)=>(isFocus(b[0])-isFocus(a[0]))||a[1]-b[1]).map(x=>x[0]);
   return r;
@@ -1291,6 +1301,8 @@ function renderDynamic(){
   const cos={};ALL_JOBS.forEach(j=>{if(j.co) cos[j.co]=(cos[j.co]||0)+1;});
   $("cos").innerHTML=Object.entries(cos).sort((a,b)=>b[1]-a[1]).map(([e,c])=>'<button class="chip sm" data-k="co" data-v="'+escAttr(e)+'" onclick="tog(\'co\',this.dataset.v)">'+esc(e.replace(/株式会社/g,""))+'<i>'+c+'</i></button>').join("");
   const prs={};ALL_JOBS.forEach(j=>{if(j.pr!==undefined&&j.pr!==null&&j.pr!=="") prs[String(j.pr)]=(prs[String(j.pr)]||0)+1;});
+  const prHtml=Object.keys(prs).sort((a,b)=>(+a)-(+b)).map(k=>'<button class="chip sm" data-k="pri" data-v="'+escAttr(k)+'" onclick="tog(\'pri\',this.dataset.v)">優先'+esc(k)+'位<i>'+prs[k].toLocaleString()+'</i></button>').join("");
+  if($("pris2")) $("pris2").innerHTML=prHtml;
   $("pris").innerHTML=Object.keys(prs).sort((a,b)=>(+a)-(+b)).map(k=>'<button class="chip sm" data-k="pri" data-v="'+escAttr(k)+'" onclick="tog(\'pri\',this.dataset.v)">優先'+esc(k)+'位<i>'+prs[k].toLocaleString()+'</i></button>').join("");
   const gys={};ALL_JOBS.forEach(j=>{if(j.gy) gys[j.gy]=(gys[j.gy]||0)+1;});
   $("gys").innerHTML=Object.entries(gys).sort((a,b)=>b[1]-a[1]).map(([e,c])=>'<button class="chip sm" data-k="gy" data-v="'+escAttr(e)+'" onclick="tog(\'gy\',this.dataset.v)">'+esc(e)+'<i>'+c+'</i></button>').join("");
