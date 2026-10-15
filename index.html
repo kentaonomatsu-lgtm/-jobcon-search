@@ -358,6 +358,8 @@ body.outs-mode .brand-ic{background:var(--outs);}
 @media(max-width:480px){.hd-btn{padding:0 10px;font-size:12.5px;}header{gap:6px;}}
 .hear-body>.row.area-row{padding-top:14px;}
 .area-row .chip.sm{min-height:54px;}
+.prb{display:inline-block;margin-right:8px;padding:2px 9px;border-radius:6px;font-size:12px;font-weight:800;line-height:1.5;background:var(--brand-bg);color:var(--brand);border:1px solid var(--brand-line);vertical-align:1px;}
+.prb.p1,.prb.p2,.prb.p3{background:var(--brand);color:#fff;border-color:var(--brand);}
 </style>
 </head>
 <body>
@@ -430,7 +432,12 @@ body.outs-mode .brand-ic{background:var(--outs);}
         </div>
 
         <div class="row">
-          <div class="row-t"><span class="n">3</span>年齢<button class="clr" onclick="setAge(null)">クリア</button></div>
+          <div class="row-t"><span class="n">3</span>優先順位<span class="note">数字が小さいほど優先</span><button class="clr" onclick="clearSet('pris')">クリア</button></div>
+          <div class="chips c4" id="pris"></div>
+        </div>
+
+        <div class="row">
+          <div class="row-t"><span class="n">4</span>年齢<button class="clr" onclick="setAge(null)">クリア</button></div>
           <div class="stepper">
             <button class="sb" onclick="ageStep(-1)" aria-label="1歳下げる">−</button>
             <input class="inp age-sync" id="age" type="number" inputmode="numeric" placeholder="例 45" min="15" max="80" oninput="onAge(this.value)">
@@ -441,7 +448,7 @@ body.outs-mode .brand-ic{background:var(--outs);}
         </div>
 
         <div class="row">
-          <div class="row-t"><span class="n">4</span>性別</div>
+          <div class="row-t"><span class="n">5</span>性別</div>
           <div class="chips c2">
             <button class="chip" data-k="gender" data-v="男性" onclick="tog('gender','男性')">男性</button>
             <button class="chip" data-k="gender" data-v="女性" onclick="tog('gender','女性')">女性</button>
@@ -449,7 +456,7 @@ body.outs-mode .brand-ic{background:var(--outs);}
         </div>
 
         <div class="row">
-          <div class="row-t"><span class="n">5</span>希望の給与（月収）<button class="clr" onclick="setSal(0)">クリア</button></div>
+          <div class="row-t"><span class="n">6</span>希望の給与（月収）<button class="clr" onclick="setSal(0)">クリア</button></div>
           <div class="chips c5">
             <button class="chip" data-k="sal" data-v="20" onclick="tog('sal',20)">20万〜</button>
             <button class="chip" data-k="sal" data-v="25" onclick="tog('sal',25)">25万〜</button>
@@ -466,7 +473,7 @@ body.outs-mode .brand-ic{background:var(--outs);}
         </div>
 
         <div class="row">
-          <div class="row-t"><span class="n">6</span>寮・社宅</div>
+          <div class="row-t"><span class="n">7</span>寮・社宅</div>
           <div class="chips c3">
             <button class="chip" data-k="quick" data-v="dorm" onclick="tog('quick','dorm')">寮完備<i data-cnt="quick:dorm"></i></button>
             <button class="chip" data-k="quick" data-v="free" onclick="tog('quick','free')">寮費無料<i data-cnt="quick:free"></i></button>
@@ -475,7 +482,7 @@ body.outs-mode .brand-ic{background:var(--outs);}
         </div>
 
         <div class="row">
-          <div class="row-t"><span class="n">7</span>勤務時間帯<span class="note">複数選ぶと どれか</span></div>
+          <div class="row-t"><span class="n">8</span>勤務時間帯<span class="note">複数選ぶと どれか</span></div>
           <div class="chips c2">
             <button class="chip" data-k="shift" data-v="day" onclick="tog('shift','day')">日勤のみ<i data-cnt="shift:day"></i></button>
             <button class="chip" data-k="shift" data-v="night" onclick="tog('shift','night')">夜勤あり<i data-cnt="shift:night"></i></button>
@@ -485,12 +492,12 @@ body.outs-mode .brand-ic{background:var(--outs);}
         </div>
 
         <div class="row">
-          <div class="row-t"><span class="n">8</span>雇用形態<button class="clr" onclick="clearSet('emps')">クリア</button></div>
+          <div class="row-t"><span class="n">9</span>雇用形態<button class="clr" onclick="clearSet('emps')">クリア</button></div>
           <div class="chips c2" id="emps"></div>
         </div>
 
         <div class="row">
-          <div class="row-t"><span class="n">9</span>こだわり<button class="clr" onclick="clearSet('kws');clearSet('flags')">クリア</button></div>
+          <div class="row-t"><span class="n">10</span>こだわり<button class="clr" onclick="clearSet('kws');clearSet('flags')">クリア</button></div>
           <div class="chips c2">
             <button class="chip" data-k="kw2" data-v="novice" onclick="tog('kw2','novice')">未経験OK<i data-cnt="kw:novice"></i></button>
             <button class="chip" data-k="kw2" data-v="weekend" onclick="tog('kw2','weekend')">土日休み<i data-cnt="kw:weekend"></i></button>
@@ -528,7 +535,7 @@ body.outs-mode .brand-ic{background:var(--outs);}
       </div>
       <div class="sortrow" id="sortrow">
         <span class="lab">並び順</span>
-        <button class="chip" data-k="sort" data-v="pri" onclick="setSort('pri')">おすすめ</button>
+        <button class="chip" data-k="sort" data-v="pri" onclick="setSort('pri')">優先順位順</button>
         <button class="chip" data-k="sort" data-v="near" onclick="setSort('near')">近い順</button>
         <button class="chip" data-k="sort" data-v="sal_h" onclick="setSort('sal_h')">給与が高い</button>
         <button class="chip" data-k="sort" data-v="sal_l" onclick="setSort('sal_l')">給与が低い</button>
@@ -590,7 +597,7 @@ let _refreshing=false, _currentView="list";
 const state={
   kw:"",age:null,gender:"",salMin:0,radius:0,
   prefs:new Set(),quicks:new Set(),shifts:new Set(),emps:new Set(),cos:new Set(),
-  kws:new Set(),flags:new Set(),gys:new Set(),stars:new Set(),
+  kws:new Set(),flags:new Set(),gys:new Set(),pris:new Set(),stars:new Set(),
   wt:"",mode:"car",nation:false,onlyStars:false,
   sort:"pri",region:""
 };
@@ -951,6 +958,7 @@ function baseFilter(){
   if(state.kw){const pairs=getPairs();if(pairs.length) r=r.filter(j=>kwMatch(j,pairs));}
   if(state.emps.size)  r=r.filter(j=>state.emps.has(j.emp));
   if(state.cos.size)   r=r.filter(j=>state.cos.has(j.co));
+  if(state.pris.size)  r=r.filter(j=>state.pris.has(String(j.pr)));
   if(state.wt)         r=r.filter(j=>j.wt===state.wt);
   if(state.gys.size)   r=r.filter(j=>state.gys.has(j.gy));
   state.kws.forEach(k=>{r=r.filter(KW_F[k]);});
@@ -1026,7 +1034,7 @@ function cardHtml(j,showOuts){
     +(showOuts&&isO?'<div class="outs-av"><em>アウトソーシング採用 可能！</em><span>事業部対象</span></div>':"")
     +quotaHtml(j)
     +'<div class="c-body"><div class="c-top"><div class="c-l">'
-      +'<div class="c-co">'+coHtml(j.co)+'</div>'
+      +'<div class="c-co"><span class="prb p'+esc(String(j.pr||0))+'">優先'+esc(j.pr||"－")+'位</span>'+coHtml(j.co)+'</div>'
       +'<div class="c-ti">'+escMark(j.ti||j.sk||"")+'</div>'
       +'<div class="c-loc">'+rubyP(j.pf)+' '+ctHtml(j.pf,j.ct)+(station?' <small>'+esc(station)+'</small>':'')+'</div>'
     +'</div>'+salHtml(j)+'</div>'
@@ -1050,7 +1058,7 @@ function cardHtml(j,showOuts){
 
 /* ===== 描画 ===== */
 function emptyHtml(){
-  const hasF=state.kw||state.age!==null||state.gender||state.salMin>0||state.quicks.size||state.shifts.size||state.emps.size||state.cos.size||state.prefs.size||state.region||state.radius>0||state.kws.size||state.flags.size||state.gys.size||state.wt||state.nation||state.onlyStars;
+  const hasF=state.kw||state.age!==null||state.gender||state.salMin>0||state.quicks.size||state.shifts.size||state.emps.size||state.cos.size||state.prefs.size||state.region||state.radius>0||state.kws.size||state.flags.size||state.gys.size||state.pris.size||state.wt||state.nation||state.onlyStars;
   return '<div class="empty"><b>該当する求人がありません</b>'+(hasF?'条件を1つはずすと見つかるかもしれません。<br>上の「適用中」の×で1つずつ外せます':'データを確認してください')+(hasF?'<br><button onclick="relaxAll()">条件をすべてはずす</button>':'')+'</div>';
 }
 function render(){
@@ -1107,6 +1115,7 @@ function syncUI(){
     else if(k==="kw2") on=state.kws.has(v);
     else if(k==="flag") on=state.flags.has(v);
     else if(k==="gy") on=state.gys.has(v);
+    else if(k==="pri") on=state.pris.has(v);
     else if(k==="sal") on=state.salMin===+v;
     else if(k==="radius") on=state.radius===+v;
     else if(k==="quick") on=state.quicks.has(v);
@@ -1133,6 +1142,7 @@ function summaryParts(){
   if(state.wt) a.push([state.wt+"の求人",()=>tog("wt",state.wt)]);
   state.kws.forEach(k=>a.push([KL[k],()=>tog("kw2",k)]));
   state.flags.forEach(k=>a.push(["枠切れを除く",()=>tog("flag",k)]));
+  state.pris.forEach(p=>a.push(["優先"+p+"位",()=>tog("pri",p)]));
   state.gys.forEach(g=>a.push([g,()=>tog("gy",g)]));
   if(state.onlyStars) a.push(["候補だけ",()=>toggleOnlyStars()]);
   if(NEAR&&state.radius>0) a.push([(state.mode==="train"?"電車":"車")+(state.radius>=120?"2時間":state.radius+"分")+"圏内",()=>tog("radius",state.radius)]);
@@ -1173,7 +1183,7 @@ function _applyNow(){
 }
 function tog(k,v){
   const S={quick:state.quicks,shift:state.shifts,emp:state.emps,co:state.cos,pref:state.prefs};
-  S.kw2=state.kws;S.flag=state.flags;S.gy=state.gys;
+  S.kw2=state.kws;S.flag=state.flags;S.gy=state.gys;S.pri=state.pris;
   if(S[k]) S[k].has(v)?S[k].delete(v):S[k].add(v);
   else if(k==="nation"){state.nation=!state.nation;if(state.nation){state.radius=0;state.prefs.clear();state.region="";renderArea();}}
   else if(k==="wt") state.wt=state.wt===v?"":v;
@@ -1228,7 +1238,7 @@ function relaxAll(){
   const keepNear=NEAR;
   state.kw="";state.age=null;state.gender="";state.salMin=0;state.radius=0;
   state.prefs.clear();state.quicks.clear();state.shifts.clear();state.emps.clear();state.cos.clear();state.region="";
-  state.kws.clear();state.flags.clear();state.gys.clear();state.wt="";state.nation=false;state.onlyStars=false;
+  state.kws.clear();state.flags.clear();state.gys.clear();state.pris.clear();state.wt="";state.nation=false;state.onlyStars=false;
   $("kw").value="";$("age").value="";renderArea();syncUI();apply();
 }
 function nextCaller(){
@@ -1273,6 +1283,8 @@ function renderDynamic(){
   $("emps").innerHTML=Object.entries(emps).sort((a,b)=>b[1]-a[1]).map(([e,c])=>'<button class="chip" data-k="emp" data-v="'+escAttr(e)+'" onclick="tog(\'emp\',this.dataset.v)">'+esc(e)+'<i>'+c+'</i></button>').join("");
   const cos={};ALL_JOBS.forEach(j=>{if(j.co) cos[j.co]=(cos[j.co]||0)+1;});
   $("cos").innerHTML=Object.entries(cos).sort((a,b)=>b[1]-a[1]).map(([e,c])=>'<button class="chip sm" data-k="co" data-v="'+escAttr(e)+'" onclick="tog(\'co\',this.dataset.v)">'+esc(e.replace(/株式会社/g,""))+'<i>'+c+'</i></button>').join("");
+  const prs={};ALL_JOBS.forEach(j=>{if(j.pr!==undefined&&j.pr!==null&&j.pr!=="") prs[String(j.pr)]=(prs[String(j.pr)]||0)+1;});
+  $("pris").innerHTML=Object.keys(prs).sort((a,b)=>(+a)-(+b)).map(k=>'<button class="chip sm" data-k="pri" data-v="'+escAttr(k)+'" onclick="tog(\'pri\',this.dataset.v)">優先'+esc(k)+'位<i>'+prs[k].toLocaleString()+'</i></button>').join("");
   const gys={};ALL_JOBS.forEach(j=>{if(j.gy) gys[j.gy]=(gys[j.gy]||0)+1;});
   $("gys").innerHTML=Object.entries(gys).sort((a,b)=>b[1]-a[1]).map(([e,c])=>'<button class="chip sm" data-k="gy" data-v="'+escAttr(e)+'" onclick="tog(\'gy\',this.dataset.v)">'+esc(e)+'<i>'+c+'</i></button>').join("");
   renderArea();fillStaticCounts();
