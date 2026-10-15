@@ -358,8 +358,138 @@ body.outs-mode .brand-ic{background:var(--outs);}
 @media(max-width:480px){.hd-btn{padding:0 10px;font-size:12.5px;}header{gap:6px;}}
 .hear-body>.row.area-row{padding-top:14px;}
 .area-row .chip.sm{min-height:54px;}
-.prb{display:inline-block;margin-right:8px;padding:2px 9px;border-radius:6px;font-size:12px;font-weight:800;line-height:1.5;background:var(--brand-bg);color:var(--brand);border:1px solid var(--brand-line);vertical-align:1px;}
-.prb.p1,.prb.p2,.prb.p3{background:var(--brand);color:#fff;border-color:var(--brand);}
+/* ===== ブラックリスト確認（送客可否チェック） ===== */
+.hd-btn.bl{color:var(--brand);border-color:var(--brand);}
+.hd-btn.bl svg{width:17px;height:17px;flex:none;}
+.hd-btn.bl .bl-lab-s{display:none;}
+@media(max-width:1180px){.hd-btn.bl .bl-lab-l{display:none;}.hd-btn.bl .bl-lab-s{display:inline;}}
+@media(max-width:640px){.hd-btn.bl{display:none;}}
+.bbar .b3{flex:none;width:64px;min-height:46px;border-radius:12px;border:2px solid var(--brand);background:#fff;color:var(--brand);font-size:10.5px;font-weight:900;line-height:1.15;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;padding:0;}
+.bbar .b3 svg{width:19px;height:19px;}
+
+html.bl-lock,html.bl-lock body{overflow:hidden;}
+.bl-ov{position:fixed;inset:0;z-index:250;background:rgba(15,23,42,.58);display:flex;justify-content:center;align-items:stretch;}
+.bl-dlg{background:var(--bg);width:100%;height:100%;display:flex;flex-direction:column;overflow:hidden;outline:none;}
+@media(min-width:900px){
+  .bl-ov{align-items:center;padding:24px;}
+  .bl-dlg{max-width:1100px;height:min(800px,100%);border-radius:18px;box-shadow:0 24px 60px rgba(15,23,42,.38);}
+}
+.bl-hd{flex:none;display:flex;align-items:center;gap:12px;padding:12px 14px 12px 16px;background:var(--brand);color:#fff;padding-top:max(12px,env(safe-area-inset-top));}
+.bl-hd-ic{flex:none;width:30px;height:30px;}
+.bl-hd-t{flex:1;min-width:0;}
+.bl-hd-t h2{font-size:18px;font-weight:900;line-height:1.2;letter-spacing:.01em;}
+.bl-hd-t p{font-size:12px;font-weight:600;opacity:.82;margin-top:1px;}
+.bl-x{flex:none;width:44px;height:44px;border-radius:50%;color:#fff;font-size:26px;line-height:1;display:flex;align-items:center;justify-content:center;}
+.bl-x:hover{background:rgba(255,255,255,.14);}
+
+.bl-bd{flex:1;min-height:0;overflow-y:auto;padding:12px;display:grid;grid-template-columns:minmax(0,1fr);gap:12px;align-content:start;-webkit-overflow-scrolling:touch;}
+@media(min-width:900px){
+  .bl-bd{grid-template-columns:400px minmax(0,1fr);grid-template-rows:minmax(0,1fr);padding:16px;gap:16px;overflow:hidden;align-content:stretch;}
+  .bl-in,.bl-out{overflow-y:auto;min-height:0;}
+}
+.bl-in{background:#fff;border:1px solid var(--line2);border-radius:14px;padding:14px;align-self:start;max-height:100%;}
+.bl-out{min-width:0;}
+
+.bl-tabs{display:flex;gap:4px;padding:4px;background:var(--gry);border-radius:12px;margin-bottom:14px;}
+.bl-tabs button{flex:1;min-height:42px;border-radius:9px;font-size:13.5px;font-weight:800;color:var(--ink2);}
+.bl-tabs button[aria-selected="true"]{background:#fff;color:var(--brand);box-shadow:var(--sh);}
+
+.bl-f{margin-bottom:12px;min-width:0;}
+.bl-f2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.bl-f label,.bl-seg legend,.bl-pasteL{display:block;font-size:13px;font-weight:800;color:var(--ink);margin-bottom:5px;}
+.bl-f label small{font-weight:700;color:var(--sub);margin-left:4px;font-size:11.5px;}
+.bl-f label em{font-style:normal;font-size:11px;font-weight:800;color:#8a5a00;background:var(--outs-bg);border:1px solid var(--outs-line);border-radius:10px;padding:1px 7px;margin-left:6px;}
+.bl-inp,.bl-ta{width:100%;border:2px solid var(--line);border-radius:12px;padding:0 14px;font-size:16px;font-weight:700;background:#fff;color:var(--ink);}
+.bl-inp{height:48px;}
+.bl-ta{padding:12px 14px;min-height:240px;line-height:1.55;font-weight:600;resize:vertical;font-family:inherit;}
+.bl-inp:focus,.bl-ta:focus{outline:none;border-color:var(--brand);box-shadow:0 0 0 3px rgba(18,38,74,.14);}
+.bl-inp.bad{border-color:#dc2626;background:#fef2f2;}
+.bl-note{font-size:12px;font-weight:700;color:var(--sub);margin-top:5px;min-height:1px;line-height:1.5;}
+.bl-note.warn{color:#b45309;}
+.bl-seg{border:0;padding:0;margin:0 0 12px;min-width:0;}
+.bl-segs{display:flex;gap:8px;}
+.bl-segs label{flex:1;position:relative;margin:0;font-weight:800;}
+.bl-segs input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;margin:0;}
+.bl-segs span{display:flex;align-items:center;justify-content:center;min-height:46px;border:1.5px solid var(--line2);border-radius:12px;font-size:14.5px;font-weight:800;color:var(--ink);background:#fff;}
+.bl-segs input:checked+span{background:var(--brand);border-color:var(--brand);color:#fff;}
+.bl-segs input:focus-visible+span{outline:3px solid #3b82f6;outline-offset:2px;}
+.bl-more,.bl-set{margin:2px 0 12px;border:1px dashed var(--line2);border-radius:12px;padding:0 12px;}
+.bl-more summary,.bl-set summary{cursor:pointer;font-size:13px;font-weight:800;color:var(--brand);min-height:44px;display:flex;align-items:center;}
+.bl-more[open],.bl-set[open]{padding-bottom:4px;}
+.bl-chk{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:var(--ink2);margin:2px 0 10px;min-height:36px;}
+.bl-chk input{width:20px;height:20px;}
+.bl-err{font-size:13.5px;font-weight:800;color:#b91c1c;margin:0 0 10px;line-height:1.5;}
+.bl-err:empty{display:none;}
+.bl-act{display:flex;gap:8px;position:sticky;bottom:0;background:#fff;padding:10px 0 2px;margin-top:6px;border-top:1px solid var(--line);}
+.bl-go{flex:1;min-height:52px;border-radius:12px;background:var(--brand);color:#fff;font-size:16px;font-weight:900;letter-spacing:.02em;}
+.bl-go:disabled{opacity:.55;cursor:default;}
+.bl-sub{min-height:52px;padding:0 18px;border-radius:12px;border:2px solid var(--line2);background:#fff;color:var(--ink2);font-size:14px;font-weight:800;}
+
+/* --- 結果 --- */
+.bl-idle{background:#fff;border:1px dashed var(--line2);border-radius:14px;padding:22px 18px;text-align:center;color:var(--ink2);}
+.bl-idle>svg{width:44px;height:44px;color:var(--brand-line);}
+.bl-idle h3{font-size:16px;font-weight:900;color:var(--ink);margin:8px 0 4px;}
+.bl-idle p{font-size:13px;font-weight:600;line-height:1.6;color:var(--sub);}
+.bl-legend{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:14px;}
+.bl-legend span{font-size:12.5px;font-weight:800;border-radius:20px;padding:4px 12px;border:1.5px solid;}
+.bl-legend .ok{color:#0b7a43;border-color:#b6dcc6;background:#edf7f1;}
+.bl-legend .rv{color:#92400e;border-color:#f3c98b;background:#fff7e6;}
+.bl-legend .ng{color:#b91c1c;border-color:#fca5a5;background:#fef2f2;}
+.bl-cfg{margin-top:14px;font-size:13px;font-weight:800;color:#b91c1c;background:#fef2f2;border:1px solid #fca5a5;border-radius:10px;padding:10px 12px;text-align:left;line-height:1.6;}
+
+.bl-wait{background:#fff;border:1px solid var(--line2);border-radius:14px;padding:26px 18px;text-align:center;}
+.bl-spin{width:38px;height:38px;border-radius:50%;border:4px solid var(--brand-bg);border-top-color:var(--brand);margin:0 auto 12px;animation:blSpin .8s linear infinite;}
+.bl-wait b{display:block;font-size:15px;color:var(--ink);}
+.bl-wait span{display:block;font-size:12.5px;font-weight:600;color:var(--sub);margin-top:4px;}
+@keyframes blSpin{to{transform:rotate(360deg);}}
+
+.bl-card{background:#fff;border:1px solid var(--line2);border-radius:14px;padding:12px;margin-bottom:12px;}
+.bl-person{font-size:12.5px;font-weight:900;color:var(--brand);margin:0 0 8px;}
+.bl-vd{display:flex;gap:14px;align-items:center;padding:14px 16px;border-radius:12px;border:2px solid;animation:blPop .18s ease-out;}
+.bl-vd .ic{flex:none;width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;}
+.bl-vd .ic svg{width:32px;height:32px;}
+.bl-vd h3{font-size:25px;font-weight:900;line-height:1.2;}
+.bl-vd p{font-size:14px;font-weight:700;margin-top:3px;line-height:1.55;}
+.bl-vd.ok{background:#edf7f1;border-color:#0b7a43;color:#064e2b;}.bl-vd.ok .ic{background:#0b7a43;}
+.bl-vd.rv{background:#fff7e6;border-color:#d97706;color:#7c3a00;}.bl-vd.rv .ic{background:#d97706;}
+.bl-vd.ng{background:#fef2f2;border-color:#dc2626;color:#7f1d1d;}.bl-vd.ng .ic{background:#dc2626;}
+.bl-vd.un{background:#f1f5f9;border-color:#94a3b8;color:#334155;}.bl-vd.un .ic{background:#64748b;}
+@keyframes blPop{from{transform:scale(.97);opacity:.4;}to{transform:none;opacity:1;}}
+@media(prefers-reduced-motion:reduce){.bl-vd{animation:none;}.bl-spin{animation-duration:2.4s;}}
+
+.bl-sec{margin-top:12px;}
+.bl-sec>h4{font-size:12.5px;font-weight:900;color:var(--ink2);margin-bottom:2px;letter-spacing:.02em;}
+.bl-hit{border:1px solid var(--line2);border-left:5px solid #dc2626;border-radius:10px;background:#fff;padding:10px 12px;margin-top:8px;}
+.bl-hit.rv{border-left-color:#d97706;}
+.bl-hit-hd{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.bl-tag{display:inline-block;font-size:12px;font-weight:900;color:#fff;background:var(--brand);border-radius:20px;padding:2px 10px;}
+.bl-sev{font-size:11.5px;font-weight:900;color:#b91c1c;}
+.bl-hit.rv .bl-sev{color:#92400e;}
+.bl-hit ul{margin:6px 0 0 18px;font-size:14px;font-weight:700;line-height:1.55;}
+.bl-hit dl{display:grid;grid-template-columns:auto 1fr;gap:2px 10px;font-size:12.5px;color:var(--ink2);margin-top:8px;padding-top:8px;border-top:1px dashed var(--line2);}
+.bl-hit dt{color:var(--sub);font-weight:700;}
+.bl-hit dd{font-weight:700;word-break:break-all;}
+.bl-hit dd.note{color:#b91c1c;}
+.bl-warn{background:#fffbeb;border:1px solid #fcd34d;border-radius:10px;padding:9px 12px;color:#7c3a00;font-size:13.5px;font-weight:700;margin-top:8px;}
+.bl-warn ul{margin:0 0 0 18px;line-height:1.6;}
+.bl-kv{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;font-size:13.5px;margin-top:8px;background:var(--gry);border-radius:10px;padding:10px 12px;}
+.bl-kv dt{color:var(--sub);font-weight:700;white-space:nowrap;}
+.bl-kv dd{font-weight:800;color:var(--ink);word-break:break-all;}
+.bl-kv dd.miss{color:#b45309;}
+.bl-kv small{font-weight:700;color:var(--sub);}
+.bl-foot{font-size:12px;font-weight:600;color:var(--sub);line-height:1.6;margin:2px 2px 10px;}
+.bl-acts{display:flex;gap:8px;flex-wrap:wrap;}
+.bl-acts button{flex:1 1 150px;min-height:48px;border-radius:12px;font-size:14px;font-weight:900;border:2px solid var(--brand);color:var(--brand);background:#fff;}
+.bl-acts button.pri{background:var(--brand);color:#fff;}
+.bl-ovl{font-size:13.5px;font-weight:800;color:var(--ink2);margin:0 0 8px;}
+@media(max-width:420px){.bl-vd h3{font-size:22px;}.bl-vd .ic{width:48px;height:48px;}.bl-vd .ic svg{width:28px;height:28px;}}
+/* ===== 優先順位の表記 ===== */
+.pr-b{display:inline-flex;align-items:center;gap:3px;margin-right:6px;padding:1px 8px;border-radius:999px;font-size:11.5px;font-weight:900;line-height:1.6;vertical-align:1px;white-space:nowrap;letter-spacing:.02em;}
+.pr-b.p1{background:#dc2626;color:#fff;}
+.pr-b.p2{background:#ea580c;color:#fff;}
+.pr-b.p3{background:#fef3c7;color:#92400e;box-shadow:inset 0 0 0 1px #fcd34d;}
+.pr-row{display:inline-block;padding:1px 8px;border-radius:6px;background:var(--gry);font-weight:800;}
+.pr-row.hi{background:#fff7ed;color:#c2410c;}
 </style>
 </head>
 <body>
@@ -373,6 +503,7 @@ body.outs-mode .brand-ic{background:var(--outs);}
   </div>
   <button class="hd-btn" id="rubyBtn" onclick="toggleRuby()" title="ふりがなの表示/非表示">あ<span class="lab">ふりがな</span></button>
   <button class="hd-btn" id="hdRefreshBtn" onclick="manualRefresh()"><span id="hdRefreshLabel">⟳ 更新</span></button>
+  <button class="hd-btn bl" id="blOpenBtn" type="button" onclick="openBL()" aria-label="ブラックリスト確認" title="送客してよい方かを確認する"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l7 3v5c0 5-3.2 8.4-7 10-3.8-1.6-7-5-7-10V6l7-3z"/><path d="M9 12l2 2 4-4"/></svg><span class="bl-lab-l">ブラックリスト確認</span><span class="bl-lab-s">BL確認</span></button>
   <a class="hd-btn dark" href="./script.html">スクリプト</a>
 </header>
 
@@ -432,12 +563,7 @@ body.outs-mode .brand-ic{background:var(--outs);}
         </div>
 
         <div class="row">
-          <div class="row-t"><span class="n">3</span>優先順位<span class="note">数字が小さいほど優先</span><button class="clr" onclick="clearSet('pris')">クリア</button></div>
-          <div class="chips c4" id="pris"></div>
-        </div>
-
-        <div class="row">
-          <div class="row-t"><span class="n">4</span>年齢<button class="clr" onclick="setAge(null)">クリア</button></div>
+          <div class="row-t"><span class="n">3</span>年齢<button class="clr" onclick="setAge(null)">クリア</button></div>
           <div class="stepper">
             <button class="sb" onclick="ageStep(-1)" aria-label="1歳下げる">−</button>
             <input class="inp age-sync" id="age" type="number" inputmode="numeric" placeholder="例 45" min="15" max="80" oninput="onAge(this.value)">
@@ -448,7 +574,7 @@ body.outs-mode .brand-ic{background:var(--outs);}
         </div>
 
         <div class="row">
-          <div class="row-t"><span class="n">5</span>性別</div>
+          <div class="row-t"><span class="n">4</span>性別</div>
           <div class="chips c2">
             <button class="chip" data-k="gender" data-v="男性" onclick="tog('gender','男性')">男性</button>
             <button class="chip" data-k="gender" data-v="女性" onclick="tog('gender','女性')">女性</button>
@@ -456,7 +582,7 @@ body.outs-mode .brand-ic{background:var(--outs);}
         </div>
 
         <div class="row">
-          <div class="row-t"><span class="n">6</span>希望の給与（月収）<button class="clr" onclick="setSal(0)">クリア</button></div>
+          <div class="row-t"><span class="n">5</span>希望の給与（月収）<button class="clr" onclick="setSal(0)">クリア</button></div>
           <div class="chips c5">
             <button class="chip" data-k="sal" data-v="20" onclick="tog('sal',20)">20万〜</button>
             <button class="chip" data-k="sal" data-v="25" onclick="tog('sal',25)">25万〜</button>
@@ -473,7 +599,7 @@ body.outs-mode .brand-ic{background:var(--outs);}
         </div>
 
         <div class="row">
-          <div class="row-t"><span class="n">7</span>寮・社宅</div>
+          <div class="row-t"><span class="n">6</span>寮・社宅</div>
           <div class="chips c3">
             <button class="chip" data-k="quick" data-v="dorm" onclick="tog('quick','dorm')">寮完備<i data-cnt="quick:dorm"></i></button>
             <button class="chip" data-k="quick" data-v="free" onclick="tog('quick','free')">寮費無料<i data-cnt="quick:free"></i></button>
@@ -482,7 +608,7 @@ body.outs-mode .brand-ic{background:var(--outs);}
         </div>
 
         <div class="row">
-          <div class="row-t"><span class="n">8</span>勤務時間帯<span class="note">複数選ぶと どれか</span></div>
+          <div class="row-t"><span class="n">7</span>勤務時間帯<span class="note">複数選ぶと どれか</span></div>
           <div class="chips c2">
             <button class="chip" data-k="shift" data-v="day" onclick="tog('shift','day')">日勤のみ<i data-cnt="shift:day"></i></button>
             <button class="chip" data-k="shift" data-v="night" onclick="tog('shift','night')">夜勤あり<i data-cnt="shift:night"></i></button>
@@ -492,12 +618,12 @@ body.outs-mode .brand-ic{background:var(--outs);}
         </div>
 
         <div class="row">
-          <div class="row-t"><span class="n">9</span>雇用形態<button class="clr" onclick="clearSet('emps')">クリア</button></div>
+          <div class="row-t"><span class="n">8</span>雇用形態<button class="clr" onclick="clearSet('emps')">クリア</button></div>
           <div class="chips c2" id="emps"></div>
         </div>
 
         <div class="row">
-          <div class="row-t"><span class="n">10</span>こだわり<button class="clr" onclick="clearSet('kws');clearSet('flags')">クリア</button></div>
+          <div class="row-t"><span class="n">9</span>こだわり<button class="clr" onclick="clearSet('kws');clearSet('flags')">クリア</button></div>
           <div class="chips c2">
             <button class="chip" data-k="kw2" data-v="novice" onclick="tog('kw2','novice')">未経験OK<i data-cnt="kw:novice"></i></button>
             <button class="chip" data-k="kw2" data-v="weekend" onclick="tog('kw2','weekend')">土日休み<i data-cnt="kw:weekend"></i></button>
@@ -535,7 +661,7 @@ body.outs-mode .brand-ic{background:var(--outs);}
       </div>
       <div class="sortrow" id="sortrow">
         <span class="lab">並び順</span>
-        <button class="chip" data-k="sort" data-v="pri" onclick="setSort('pri')">優先順位順</button>
+        <button class="chip" data-k="sort" data-v="pri" onclick="setSort('pri')">おすすめ</button>
         <button class="chip" data-k="sort" data-v="near" onclick="setSort('near')">近い順</button>
         <button class="chip" data-k="sort" data-v="sal_h" onclick="setSort('sal_h')">給与が高い</button>
         <button class="chip" data-k="sort" data-v="sal_l" onclick="setSort('sal_l')">給与が低い</button>
@@ -565,7 +691,81 @@ body.outs-mode .brand-ic{background:var(--outs);}
 <div class="bbar">
   <button class="b1" onclick="openHear()">条件を変える</button>
   <div class="cnt"><b id="bbc">-</b>件</div>
+  <button class="b3" type="button" onclick="openBL()" aria-label="ブラックリスト確認"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l7 3v5c0 5-3.2 8.4-7 10-3.8-1.6-7-5-7-10V6l7-3z"/><path d="M9 12l2 2 4-4"/></svg>BL確認</button>
   <button class="b2" onclick="nextCaller()">↺ 次の方へ</button>
+</div>
+<!-- ===== ブラックリスト確認（送客可否チェック）===== -->
+<div class="bl-ov" id="blOv" hidden>
+  <div class="bl-dlg" role="dialog" aria-modal="true" aria-labelledby="blTtl" tabindex="-1">
+    <div class="bl-hd">
+      <svg class="bl-hd-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l7 3v5c0 5-3.2 8.4-7 10-3.8-1.6-7-5-7-10V6l7-3z"/><path d="M9 12l2 2 4-4"/></svg>
+      <div class="bl-hd-t"><h2 id="blTtl">ブラックリスト確認</h2><p>送客してよい方かを、全マスタで一括照合します</p></div>
+      <button type="button" class="bl-x" id="blClose" aria-label="閉じる">×</button>
+    </div>
+    <div class="bl-bd">
+      <section class="bl-in" aria-label="確認する方の情報">
+        <div class="bl-tabs" role="tablist" aria-label="入力方法">
+          <button type="button" role="tab" id="blTabForm" aria-selected="true" aria-controls="blForm">入力して確認</button>
+          <button type="button" role="tab" id="blTabPaste" aria-selected="false" aria-controls="blPasteForm">応募フォーマットを貼る</button>
+        </div>
+
+        <form id="blForm" role="tabpanel" aria-labelledby="blTabForm" novalidate autocomplete="off">
+          <div class="bl-f2">
+            <div class="bl-f"><label for="blSei">セイ<small>フリガナ</small></label><input class="bl-inp" id="blSei" type="text" lang="ja" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="ヤマダ"></div>
+            <div class="bl-f"><label for="blMei">メイ<small>フリガナ</small></label><input class="bl-inp" id="blMei" type="text" lang="ja" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="タロウ"></div>
+          </div>
+          <div class="bl-f">
+            <label for="blTel">電話番号</label>
+            <input class="bl-inp" id="blTel" type="tel" inputmode="tel" autocomplete="off" placeholder="090-1234-5678">
+            <div class="bl-note" id="blTelNote"></div>
+          </div>
+          <div class="bl-f">
+            <label for="blBirth">生年月日<em>CDPの照合に必須</em></label>
+            <input class="bl-inp" id="blBirth" type="text" inputmode="text" autocomplete="off" placeholder="1990/04/15　（H2.4.15 も可）">
+            <div class="bl-note" id="blBirthNote"></div>
+          </div>
+          <fieldset class="bl-seg">
+            <legend>性別<small style="font-weight:700;color:var(--sub);margin-left:4px;font-size:11.5px">わかれば</small></legend>
+            <div class="bl-segs">
+              <label><input type="radio" name="blG" value="" checked><span>指定なし</span></label>
+              <label><input type="radio" name="blG" value="男"><span>男性</span></label>
+              <label><input type="radio" name="blG" value="女"><span>女性</span></label>
+            </div>
+          </fieldset>
+          <details class="bl-more" id="blMore">
+            <summary>漢字氏名・メールも入力する（任意）</summary>
+            <div class="bl-f"><label for="blKanji">漢字氏名<small>姓と名の間にスペース</small></label><input class="bl-inp" id="blKanji" type="text" lang="ja" autocomplete="off" placeholder="山田 太郎"></div>
+            <div class="bl-f"><label for="blMail">メールアドレス</label><input class="bl-inp" id="blMail" type="email" inputmode="email" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="example@mail.com"></div>
+          </details>
+          <div class="bl-err" id="blFormErr" role="alert"></div>
+          <div class="bl-act">
+            <button type="submit" class="bl-go" id="blGo">確認する</button>
+            <button type="button" class="bl-sub" id="blClr">クリア</button>
+          </div>
+        </form>
+
+        <form id="blPasteForm" role="tabpanel" aria-labelledby="blTabPaste" hidden novalidate>
+          <label class="bl-pasteL" for="blText">応募フォーマットをそのまま貼り付け（複数名OK）</label>
+          <textarea class="bl-ta" id="blText" spellcheck="false" placeholder="【応募フォーマット】&#10;■フリガナ：ヤマダ タロウ&#10;■電話番号：090-1234-5678&#10;■生年月日：1990年4月15日&#10;…"></textarea>
+          <div class="bl-note">〇×のチェック項目に不備があると「要確認」になります。</div>
+          <div class="bl-err" id="blPasteErr" role="alert"></div>
+          <div class="bl-act">
+            <button type="submit" class="bl-go" id="blGo2">確認する</button>
+            <button type="button" class="bl-sub" id="blClr2">クリア</button>
+          </div>
+        </form>
+
+        <details class="bl-set" id="blSet">
+          <summary>担当者名・パスコード</summary>
+          <div class="bl-f"><label for="blStaff">担当者名<small>確認履歴に残ります</small></label><input class="bl-inp" id="blStaff" type="text" autocomplete="off" placeholder="例：塚越"></div>
+          <div class="bl-f"><label for="blPass">パスコード<small>管理者から共有されたもの</small></label><input class="bl-inp" id="blPass" type="password" autocomplete="off" autocapitalize="off" spellcheck="false"></div>
+          <label class="bl-chk"><input type="checkbox" id="blRemember" checked>この端末に保存する（共用PCではオフに）</label>
+        </details>
+      </section>
+
+      <section class="bl-out" id="blOut" aria-live="polite" aria-label="判定結果"></section>
+    </div>
+  </div>
 </div>
 <div id="toast"></div>
 
@@ -573,6 +773,7 @@ body.outs-mode .brand-ic{background:var(--outs);}
 <script>
 const DATA_JSON_URL = "./data.json";
 const GAS_API_URL   = "https://script.google.com/macros/s/AKfycbyDO5dsR1BlXNIIOHTWR21NeVtD91sq-1HREiL9aVQmZZGc-9oK8rbLixZ6PmJAVyY7hw/exec";
+const BL_API_URL   = "";   // ← ブラックリスト確認（送客可否チェック）の GAS ウェブアプリ URL（…/exec）をここに貼る
 const PAGE_SIZE     = 50;
 const OUTS_COMPANY  = "トリプルエース株式会社";
 const OUTS_BUDGET   = 1;
@@ -597,7 +798,7 @@ let _refreshing=false, _currentView="list";
 const state={
   kw:"",age:null,gender:"",salMin:0,radius:0,
   prefs:new Set(),quicks:new Set(),shifts:new Set(),emps:new Set(),cos:new Set(),
-  kws:new Set(),flags:new Set(),gys:new Set(),pris:new Set(),stars:new Set(),
+  kws:new Set(),flags:new Set(),gys:new Set(),stars:new Set(),
   wt:"",mode:"car",nation:false,onlyStars:false,
   sort:"pri",region:""
 };
@@ -958,7 +1159,6 @@ function baseFilter(){
   if(state.kw){const pairs=getPairs();if(pairs.length) r=r.filter(j=>kwMatch(j,pairs));}
   if(state.emps.size)  r=r.filter(j=>state.emps.has(j.emp));
   if(state.cos.size)   r=r.filter(j=>state.cos.has(j.co));
-  if(state.pris.size)  r=r.filter(j=>state.pris.has(String(j.pr)));
   if(state.wt)         r=r.filter(j=>j.wt===state.wt);
   if(state.gys.size)   r=r.filter(j=>state.gys.has(j.gy));
   state.kws.forEach(k=>{r=r.filter(KW_F[k]);});
@@ -1024,6 +1224,17 @@ function jobText(j){
   const st=j.st?String(j.st).replace(/^.*「/,"「").slice(0,40):"";
   return ["【"+j.co+"】"+(j.ti||j.sk||""),"勤務地："+j.pf+(j.ct||"")+(st?"（"+st+"）":""),sal?"給与："+sal:"",dorm?"寮："+dorm:"",j.ag?"年齢：〜"+j.ag+"歳"+(j.gn&&j.gn!=="不問"?"／"+j.gn+"のみ":""):"",j.sf?"勤務："+j.sf:"",j.jn?"仕事No.："+j.jn:""].filter(Boolean).join("\n");
 }
+/* ===== 優先順位（データの pr 列。数字が小さいほど優先。4 は通常）===== */
+function prNum(j){const n=parseInt(j&&j.pr,10);return n>0?n:4;}
+function prBadge(j){
+  const n=prNum(j);
+  if(n>=4) return "";
+  return '<span class="pr-b p'+n+'" title="優先順位 '+n+'（数字が小さいほど優先）">優先'+n+'</span>';
+}
+function prDetRow(j){
+  const n=prNum(j);
+  return '<dt>優先順位</dt><dd><span class="pr-row'+(n<4?' hi':'')+'">'+n+(n<4?'　（優先して案内）':'　（通常）')+'</span></dd>';
+}
 function cardHtml(j,showOuts){
   const meta=[j.gy,j.sk].filter(Boolean).map(escMark).join("　/　");
   const isO=isOutsJob(j);
@@ -1034,7 +1245,7 @@ function cardHtml(j,showOuts){
     +(showOuts&&isO?'<div class="outs-av"><em>アウトソーシング採用 可能！</em><span>事業部対象</span></div>':"")
     +quotaHtml(j)
     +'<div class="c-body"><div class="c-top"><div class="c-l">'
-      +'<div class="c-co"><span class="prb p'+esc(String(j.pr||0))+'">優先'+esc(j.pr||"－")+'位</span>'+coHtml(j.co)+'</div>'
+      +'<div class="c-co">'+prBadge(j)+coHtml(j.co)+'</div>'
       +'<div class="c-ti">'+escMark(j.ti||j.sk||"")+'</div>'
       +'<div class="c-loc">'+rubyP(j.pf)+' '+ctHtml(j.pf,j.ct)+(station?' <small>'+esc(station)+'</small>':'')+'</div>'
     +'</div>'+salHtml(j)+'</div>'
@@ -1051,6 +1262,7 @@ function cardHtml(j,showOuts){
       +(j.maker?'<dt>勤務先</dt><dd>'+esc(j.maker)+'</dd>':"")
       +(j.st?'<dt>最寄り駅・交通</dt><dd>'+esc(j.st)+'</dd>':"")
       +(j.ca?'<dt>仕事内容</dt><dd>'+esc(j.ca)+'</dd>':"")
+      +prDetRow(j)
       +'<dt>案件ID / 仕事No.</dt><dd>#'+esc(j.id)+'　/　'+esc(j.jn||"－")+'</dd>'
       +'<button class="btn idc" onclick="copyId(this,\''+esc(j.id)+'\')">案件ID #'+esc(j.id)+' をコピー</button>'
     +'</dl></div>';
@@ -1058,7 +1270,7 @@ function cardHtml(j,showOuts){
 
 /* ===== 描画 ===== */
 function emptyHtml(){
-  const hasF=state.kw||state.age!==null||state.gender||state.salMin>0||state.quicks.size||state.shifts.size||state.emps.size||state.cos.size||state.prefs.size||state.region||state.radius>0||state.kws.size||state.flags.size||state.gys.size||state.pris.size||state.wt||state.nation||state.onlyStars;
+  const hasF=state.kw||state.age!==null||state.gender||state.salMin>0||state.quicks.size||state.shifts.size||state.emps.size||state.cos.size||state.prefs.size||state.region||state.radius>0||state.kws.size||state.flags.size||state.gys.size||state.wt||state.nation||state.onlyStars;
   return '<div class="empty"><b>該当する求人がありません</b>'+(hasF?'条件を1つはずすと見つかるかもしれません。<br>上の「適用中」の×で1つずつ外せます':'データを確認してください')+(hasF?'<br><button onclick="relaxAll()">条件をすべてはずす</button>':'')+'</div>';
 }
 function render(){
@@ -1115,7 +1327,6 @@ function syncUI(){
     else if(k==="kw2") on=state.kws.has(v);
     else if(k==="flag") on=state.flags.has(v);
     else if(k==="gy") on=state.gys.has(v);
-    else if(k==="pri") on=state.pris.has(v);
     else if(k==="sal") on=state.salMin===+v;
     else if(k==="radius") on=state.radius===+v;
     else if(k==="quick") on=state.quicks.has(v);
@@ -1142,7 +1353,6 @@ function summaryParts(){
   if(state.wt) a.push([state.wt+"の求人",()=>tog("wt",state.wt)]);
   state.kws.forEach(k=>a.push([KL[k],()=>tog("kw2",k)]));
   state.flags.forEach(k=>a.push(["枠切れを除く",()=>tog("flag",k)]));
-  state.pris.forEach(p=>a.push(["優先"+p+"位",()=>tog("pri",p)]));
   state.gys.forEach(g=>a.push([g,()=>tog("gy",g)]));
   if(state.onlyStars) a.push(["候補だけ",()=>toggleOnlyStars()]);
   if(NEAR&&state.radius>0) a.push([(state.mode==="train"?"電車":"車")+(state.radius>=120?"2時間":state.radius+"分")+"圏内",()=>tog("radius",state.radius)]);
@@ -1183,7 +1393,7 @@ function _applyNow(){
 }
 function tog(k,v){
   const S={quick:state.quicks,shift:state.shifts,emp:state.emps,co:state.cos,pref:state.prefs};
-  S.kw2=state.kws;S.flag=state.flags;S.gy=state.gys;S.pri=state.pris;
+  S.kw2=state.kws;S.flag=state.flags;S.gy=state.gys;
   if(S[k]) S[k].has(v)?S[k].delete(v):S[k].add(v);
   else if(k==="nation"){state.nation=!state.nation;if(state.nation){state.radius=0;state.prefs.clear();state.region="";renderArea();}}
   else if(k==="wt") state.wt=state.wt===v?"":v;
@@ -1238,10 +1448,12 @@ function relaxAll(){
   const keepNear=NEAR;
   state.kw="";state.age=null;state.gender="";state.salMin=0;state.radius=0;
   state.prefs.clear();state.quicks.clear();state.shifts.clear();state.emps.clear();state.cos.clear();state.region="";
-  state.kws.clear();state.flags.clear();state.gys.clear();state.pris.clear();state.wt="";state.nation=false;state.onlyStars=false;
+  state.kws.clear();state.flags.clear();state.gys.clear();state.wt="";state.nation=false;state.onlyStars=false;
   $("kw").value="";$("age").value="";renderArea();syncUI();apply();
 }
 function nextCaller(){
+  /* ブラックリスト確認の入力と結果も消す */
+  if(window.blReset) blReset(true);
   state.stars.clear();relaxAll();clearNear(true);state.sort="pri";
   $("addr").value="";addrSay("");$("manual").open=false;$("nsPf").value="";$("nsQ").value="";_ns.pf="";_ns.q="";nsRender();
   openHear();window.scrollTo({top:0,behavior:"smooth"});
@@ -1283,8 +1495,6 @@ function renderDynamic(){
   $("emps").innerHTML=Object.entries(emps).sort((a,b)=>b[1]-a[1]).map(([e,c])=>'<button class="chip" data-k="emp" data-v="'+escAttr(e)+'" onclick="tog(\'emp\',this.dataset.v)">'+esc(e)+'<i>'+c+'</i></button>').join("");
   const cos={};ALL_JOBS.forEach(j=>{if(j.co) cos[j.co]=(cos[j.co]||0)+1;});
   $("cos").innerHTML=Object.entries(cos).sort((a,b)=>b[1]-a[1]).map(([e,c])=>'<button class="chip sm" data-k="co" data-v="'+escAttr(e)+'" onclick="tog(\'co\',this.dataset.v)">'+esc(e.replace(/株式会社/g,""))+'<i>'+c+'</i></button>').join("");
-  const prs={};ALL_JOBS.forEach(j=>{if(j.pr!==undefined&&j.pr!==null&&j.pr!=="") prs[String(j.pr)]=(prs[String(j.pr)]||0)+1;});
-  $("pris").innerHTML=Object.keys(prs).sort((a,b)=>(+a)-(+b)).map(k=>'<button class="chip sm" data-k="pri" data-v="'+escAttr(k)+'" onclick="tog(\'pri\',this.dataset.v)">優先'+esc(k)+'位<i>'+prs[k].toLocaleString()+'</i></button>').join("");
   const gys={};ALL_JOBS.forEach(j=>{if(j.gy) gys[j.gy]=(gys[j.gy]||0)+1;});
   $("gys").innerHTML=Object.entries(gys).sort((a,b)=>b[1]-a[1]).map(([e,c])=>'<button class="chip sm" data-k="gy" data-v="'+escAttr(e)+'" onclick="tog(\'gy\',this.dataset.v)">'+esc(e)+'<i>'+c+'</i></button>').join("");
   renderArea();fillStaticCounts();
@@ -1301,6 +1511,423 @@ function renderAll(){renderDynamic();_applyNow();}
 })();
 registerSW();
 loadInitialData();
+</script>
+<script>
+/* ===== ブラックリスト確認（送客可否チェック）=====
+   架電担当が氏名・電話などを入力 → GAS Web API（BL_API_URL）で4マスタを照合 → 〇／△／✕ を表示。
+   マスタはブラウザに渡さない（判定結果だけが返る）。外部ファイル・ライブラリには依存しない。 */
+(function () {
+  'use strict';
+
+  var API = (typeof BL_API_URL !== 'undefined' && BL_API_URL) ? String(BL_API_URL) : '';
+  var TIMEOUT_MS = 45000;
+  var LS = { staff: 'jc_bl_staff', pass: 'jc_bl_pass', rem: 'jc_bl_rem' };
+
+  var $ = function (id) { return document.getElementById(id); };
+  var ov = $('blOv');
+  if (!ov) return;
+
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+  function lsGet(k) { try { return localStorage.getItem(k) || ''; } catch (e) { return ''; } }
+  function lsSet(k, v) { try { localStorage.setItem(k, v); } catch (e) { /* 保存できなくても動く */ } }
+  function lsDel(k) { try { localStorage.removeItem(k); } catch (e) { /* noop */ } }
+  function clean(s) { return String(s == null ? '' : s).replace(/[\r\n\t]+/g, ' ').replace(/\s+/g, ' ').trim(); }
+
+  var ICON = {
+    shield: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l7 3v5c0 5-3.2 8.4-7 10-3.8-1.6-7-5-7-10V6l7-3z"/><path d="M9 12l2 2 4-4"/></svg>',
+    ok: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="7.5"/></svg>',
+    rv: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4.5L2.8 20h18.4L12 4.5z"/><path d="M12 10v4.5M12 17.6v.01"/></svg>',
+    ng: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>',
+    un: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 6.5v7M12 17.4v.01"/></svg>'
+  };
+
+  // 判定の見せ方（〇／△／✕ は色だけに頼らず、記号・文字でも区別できるようにする）
+  var LV = {
+    OK: { cls: 'ok', icon: 'ok', mark: '〇', title: '送客OK', sub: '照合した全マスタに一致はありませんでした。' },
+    NG: { cls: 'ng', icon: 'ng', mark: '✕', title: '送客不可', sub: 'ブラックリストに一致しました。登録・送客はしないでください。' },
+    REVIEW: { cls: 'rv', icon: 'rv', mark: '△', title: '要確認', sub: '' },
+    UNKNOWN: { cls: 'un', icon: 'un', mark: '？', title: '判定できません', sub: 'フリガナ・電話番号を読み取れませんでした。入力を確認してください。' }
+  };
+  var REVIEW_SUB = {
+    hit: '一致の可能性があります。下の内容を確認し、判断に迷うときは送客せず管理者に確認してください。',
+    format: 'マスタに一致はありませんでしたが、入力に確認事項があります。足りない項目を入れて、もう一度確認してください。'
+  };
+
+  var busy = false, ctl = null, abortWhy = '', lastFocus = null, lastRes = null, reqSeq = 0;
+
+  /* ---------- 表示・設定 ---------- */
+  function setTab(name) {
+    var paste = name === 'paste';
+    $('blTabForm').setAttribute('aria-selected', paste ? 'false' : 'true');
+    $('blTabPaste').setAttribute('aria-selected', paste ? 'true' : 'false');
+    $('blForm').hidden = paste;
+    $('blPasteForm').hidden = !paste;
+  }
+
+  function loadSettings() {
+    $('blStaff').value = lsGet(LS.staff);
+    var rem = lsGet(LS.rem) !== '0';
+    $('blRemember').checked = rem;
+    if (rem && !$('blPass').value) $('blPass').value = lsGet(LS.pass);
+  }
+  function saveSettings() {
+    var rem = $('blRemember').checked;
+    lsSet(LS.rem, rem ? '1' : '0');
+    if (rem) { lsSet(LS.staff, clean($('blStaff').value)); lsSet(LS.pass, $('blPass').value.trim()); }
+    else { lsDel(LS.staff); lsDel(LS.pass); }
+  }
+
+  function idleHtml() {
+    var cfg = API ? '' :
+      '<div class="bl-cfg">このページはまだブラックリスト確認のAPIにつながっていません。管理者に、index.html の BL_API_URL の設定を依頼してください。</div>';
+    return '<div class="bl-idle">' + ICON.shield +
+      '<h3>ここに判定が出ます</h3>' +
+      '<p>フリガナと電話番号（できれば生年月日も）を入れて<br>「確認する」を押してください。</p>' +
+      '<div class="bl-legend"><span class="ok">〇 送客OK</span><span class="rv">△ 要確認</span><span class="ng">✕ 送客不可</span></div>' +
+      cfg + '</div>';
+  }
+  function setOut(html) { $('blOut').innerHTML = html; }
+
+  function open() {
+    lastFocus = document.activeElement;
+    ov.hidden = false;
+    document.documentElement.classList.add('bl-lock');
+    loadSettings();
+    if (!lastRes && !busy) setOut(idleHtml());
+    $('blGo').disabled = $('blGo2').disabled = busy || !API;
+    var needPass = !$('blPass').value.trim();
+    if (needPass) $('blSet').open = true;
+    setTimeout(function () {
+      var t = needPass ? $('blPass') : (!$('blForm').hidden ? $('blSei') : $('blText'));
+      try { t.focus(); } catch (e) { /* noop */ }
+    }, 40);
+  }
+
+  function close() {
+    if (ctl) { abortWhy = 'user'; try { ctl.abort(); } catch (e) { /* noop */ } }
+    ov.hidden = true;
+    document.documentElement.classList.remove('bl-lock');
+    if (lastFocus && lastFocus.focus) { try { lastFocus.focus(); } catch (e) { /* noop */ } }
+  }
+
+  // 「次の方」：入力と結果を消す（担当者名・パスコードは残す）。index.html の nextCaller からも呼ばれる
+  function reset(full) {
+    ['blSei', 'blMei', 'blTel', 'blBirth', 'blKanji', 'blMail'].forEach(function (id) { $(id).value = ''; $(id).classList.remove('bad'); });
+    $('blText').value = '';
+    var g = document.querySelector('input[name="blG"][value=""]'); if (g) g.checked = true;
+    $('blTelNote').textContent = ''; $('blBirthNote').textContent = '';
+    $('blFormErr').textContent = ''; $('blPasteErr').textContent = '';
+    $('blMore').open = false;
+    lastRes = null;
+    setOut(idleHtml());
+    if (!full && !ov.hidden) { setTab('form'); try { $('blSei').focus(); } catch (e) { /* noop */ } }
+  }
+
+  /* ---------- 入力の補助 ---------- */
+  function hira2kata(s) { return s.replace(/[ぁ-ゖ]/g, function (c) { return String.fromCharCode(c.charCodeAt(0) + 0x60); }); }
+  function kanaBlur(e) { var v = clean(e.target.value); e.target.value = hira2kata(v); e.target.classList.remove('bad'); }
+
+  // 生年月日のプレビュー（照合そのものはサーバー側）。西暦・和暦・8桁に対応
+  function parseBirth(s) {
+    var t = String(s || '').normalize('NFKC'), m, y, mo, d;
+    m = t.match(/(令和|平成|昭和|大正|[RHST])\s*(\d{1,2}|元)\s*年?\s*[.\/\-]?\s*(\d{1,2})\s*[月.\/\-]\s*(\d{1,2})/);
+    if (m) {
+      var base = { '令和': 2018, R: 2018, '平成': 1988, H: 1988, '昭和': 1925, S: 1925, '大正': 1911, T: 1911 }[m[1]];
+      y = base + (m[2] === '元' ? 1 : parseInt(m[2], 10)); mo = +m[3]; d = +m[4];
+    } else if ((m = t.match(/(\d{4})\s*[年\/.\-]\s*(\d{1,2})\s*[月\/.\-]\s*(\d{1,2})/))) { y = +m[1]; mo = +m[2]; d = +m[3]; }
+    else if ((m = t.trim().match(/^(\d{4})(\d{2})(\d{2})$/))) { y = +m[1]; mo = +m[2]; d = +m[3]; }
+    else return null;
+    var dt = new Date(y, mo - 1, d);
+    if (y < 1900 || y > 2100 || dt.getFullYear() !== y || dt.getMonth() !== mo - 1 || dt.getDate() !== d) return null;
+    return { y: y, m: mo, d: d };
+  }
+  function ageOf(b) {
+    var n = new Date(), a = n.getFullYear() - b.y;
+    if (n.getMonth() + 1 < b.m || (n.getMonth() + 1 === b.m && n.getDate() < b.d)) a--;
+    return a;
+  }
+  function fmtBirth(b) { return b.y + '年' + b.m + '月' + b.d + '日（満' + ageOf(b) + '歳）'; }
+  function fmtBirthN(n) {
+    if (!/^\d{8}$/.test(n || '')) return '';
+    var y = +n.slice(0, 4), m = +n.slice(4, 6), d = +n.slice(6, 8), dt = new Date(y, m - 1, d);
+    if (dt.getFullYear() !== y || dt.getMonth() !== m - 1 || dt.getDate() !== d) return y + '/' + m + '/' + d + '（存在しない日付です。入力を確認）';
+    return fmtBirth({ y: y, m: m, d: d });
+  }
+  function fmtPhone(n) {
+    var d = String(n || '').replace(/\D/g, '');
+    return d.length === 11 ? d.slice(0, 3) + '-' + d.slice(3, 7) + '-' + d.slice(7) : d;
+  }
+
+  function telNote() {
+    var v = $('blTel').value, el = $('blTelNote');
+    if (!clean(v)) { el.textContent = ''; el.className = 'bl-note'; return; }
+    var n = v.normalize('NFKC').replace(/\D/g, '').length;
+    var ok = n === 10 || n === 11;
+    el.textContent = n + '桁' + (ok ? '' : '（10〜11桁のはずです。入力ミスがないか確認してください）');
+    el.className = 'bl-note' + (ok ? '' : ' warn');
+  }
+  function birthNote() {
+    var v = clean($('blBirth').value), el = $('blBirthNote');
+    if (!v) { el.textContent = ''; el.className = 'bl-note'; return; }
+    var b = parseBirth(v);
+    el.textContent = b ? '→ ' + fmtBirth(b) : '読み取れません（例：1990/04/15、H2.4.15）';
+    el.className = 'bl-note' + (b ? '' : ' warn');
+  }
+
+  /* ---------- 送信内容 ---------- */
+  function gender() { var r = document.querySelector('input[name="blG"]:checked'); return r ? r.value : ''; }
+
+  function buildFormText() {
+    var L = [], v;
+    if ((v = clean($('blKanji').value))) L.push('■名前：' + v);
+    if ((v = clean($('blSei').value))) L.push('■セイ：' + v);
+    if ((v = clean($('blMei').value))) L.push('■メイ：' + v);
+    if ((v = clean($('blTel').value))) L.push('■電話番号：' + v);
+    if ((v = clean($('blBirth').value))) L.push('■生年月日：' + v);
+    if ((v = gender())) L.push('■性別：' + v);
+    if ((v = clean($('blMail').value))) L.push('■メールアドレス：' + v);
+    return L.join('\n');
+  }
+
+  var CJK = /[一-鿿々〆]/;
+  function validateForm() {
+    var sei = clean($('blSei').value), mei = clean($('blMei').value), tel = clean($('blTel').value), kj = clean($('blKanji').value);
+    if (!sei && !mei && !tel && !kj) return { msg: 'フリガナか電話番号のどちらかは入力してください。', id: 'blSei' };
+    if (CJK.test(sei) || CJK.test(mei)) {
+      return { msg: 'セイ・メイはカタカナ（ひらがなも可）で入力してください。漢字は「任意」欄に入れられます。', id: CJK.test(sei) ? 'blSei' : 'blMei' };
+    }
+    return null;
+  }
+
+  /* ---------- 通信 ---------- */
+  function call(payload) {
+    ctl = new AbortController();
+    abortWhy = '';
+    var timer = setTimeout(function () { abortWhy = 'timeout'; ctl.abort(); }, TIMEOUT_MS);
+    // text/plain で送る（プリフライトを避ける。GAS Web アプリの定石）
+    return fetch(API, {
+      method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify(payload), signal: ctl.signal, cache: 'no-store', redirect: 'follow'
+    }).then(function (res) {
+      if (!res.ok) throw { code: 'HTTP', status: res.status };
+      return res.text();
+    }).then(function (t) {
+      try { return JSON.parse(t); } catch (e) { throw { code: 'PARSE' }; }
+    }).then(function (j) { clearTimeout(timer); ctl = null; return j; },
+      function (e) { clearTimeout(timer); ctl = null; throw e; });
+  }
+
+  function setBusy(b) {
+    busy = b;
+    $('blGo').disabled = $('blGo2').disabled = b || !API;
+    $('blGo').textContent = $('blGo2').textContent = b ? '照合中…' : '確認する';
+  }
+
+  function submit(mode) {
+    if (busy) return;
+    var text, errEl = mode === 'paste' ? $('blPasteErr') : $('blFormErr');
+    errEl.textContent = '';
+    if (!API) { setOut(idleHtml()); return; }
+    if (mode === 'paste') {
+      text = $('blText').value;
+      if (!text.trim()) { errEl.textContent = '応募フォーマットを貼り付けてください。'; $('blText').focus(); return; }
+    } else {
+      var bad = validateForm();
+      if (bad) { errEl.textContent = bad.msg; $(bad.id).classList.add('bad'); $(bad.id).focus(); return; }
+      text = buildFormText();
+    }
+    var pass = $('blPass').value.trim();
+    if (!pass) {
+      $('blSet').open = true; $('blPass').focus();
+      errEl.textContent = 'パスコードを入力してください（管理者から共有されています）。';
+      return;
+    }
+    saveSettings();
+    var my = ++reqSeq;
+    setBusy(true);
+    setOut('<div class="bl-wait"><div class="bl-spin" aria-hidden="true"></div><b>マスタを照合しています…</b><span>通常は数秒、混み合うときは20秒ほどかかります。</span></div>');
+    scrollOut();
+    call({ passcode: pass, staff: clean($('blStaff').value), mode: mode === 'paste' ? 'paste' : 'form', text: text })
+      .then(function (j) { if (my === reqSeq) { setBusy(false); onResult(j); } })
+      .catch(function (e) {
+        if (my !== reqSeq) return;
+        setBusy(false);
+        if (abortWhy === 'user') { setOut(idleHtml()); return; }
+        onFail(e);
+      });
+  }
+
+  function scrollOut() {
+    var o = $('blOut');
+    if (o && o.scrollIntoView && window.matchMedia && !window.matchMedia('(min-width:900px)').matches) {
+      try { o.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch (e) { /* noop */ }
+    }
+  }
+
+  /* ---------- 結果の表示 ---------- */
+  function errHtml(title, msg, retry) {
+    return '<div class="bl-card"><div class="bl-vd un"><div class="ic">' + ICON.un + '</div><div><h3>' + esc(title) + '</h3><p>' + esc(msg) +
+      '<br><b>この画面の結果は使わないでください。</b></p></div></div>' +
+      '<div class="bl-acts" style="margin-top:12px">' + (retry ? '<button type="button" class="pri" data-bl="retry">もう一度確認する</button>' : '') +
+      '</div></div>';
+  }
+
+  function onFail(e) {
+    var title = '判定できません', msg;
+    if (abortWhy === 'timeout') msg = '時間がかかりすぎました。通信状況を確認して、もう一度お試しください。';
+    else if (e && e.code === 'HTTP') msg = 'サーバーに接続できませんでした（' + e.status + '）。時間をおいてもう一度お試しください。';
+    else if (e && e.code === 'PARSE') msg = 'サーバーからの応答を読み取れませんでした。管理者に連絡してください。';
+    else msg = '通信に失敗しました。ネット接続を確認して、もう一度お試しください。';
+    setOut(errHtml(title, msg, true));
+    scrollOut();
+  }
+
+  function onResult(j) {
+    if (!j || j.ok !== true) {
+      var code = j && j.code, msg = (j && j.message) || '原因不明のエラーです。';
+      if (code === 'AUTH' || code === 'SETUP') { lsDel(LS.pass); $('blPass').value = ''; $('blSet').open = true; setOut(errHtml('パスコードを確認してください', msg, false)); $('blPass').focus(); }
+      else setOut(errHtml('判定できません', msg, code !== 'LOCKED'));
+      scrollOut();
+      return;
+    }
+    lastRes = j;
+    setOut(resultHtml(j));
+    scrollOut();
+  }
+
+  function kvRow(label, valHtml, miss) { return '<dt>' + esc(label) + '</dt><dd' + (miss ? ' class="miss"' : '') + '>' + valHtml + '</dd>'; }
+
+  function personHtml(p, idx, multi) {
+    var lv = LV[p.level] || LV.UNKNOWN;
+    var sub = lv.sub;
+    if (p.level === 'REVIEW') sub = REVIEW_SUB[p.reviewKind === 'hit' ? 'hit' : 'format'];
+    var h = '<div class="bl-card">';
+    if (multi) h += '<div class="bl-person">' + (idx + 1) + '人目：' + esc([p.read.name, p.read.kana].filter(Boolean).join(' / ') || '（氏名なし）') + '</div>';
+    h += '<div class="bl-vd ' + lv.cls + '"><div class="ic">' + ICON[lv.icon] + '</div><div><h3>' + esc(lv.mark + ' ' + lv.title) + '</h3><p>' + esc(sub) + '</p></div></div>';
+
+    if (p.hits && p.hits.length) {
+      h += '<div class="bl-sec"><h4>一致した内容（' + p.hitTotal + '件' + (p.hitTotal > p.hits.length ? '・上位' + p.hits.length + '件を表示' : '') + '）</h4>';
+      p.hits.forEach(function (x) {
+        var sev = x.blocks ? '送客不可の一致' : '要目視';
+        h += '<div class="bl-hit' + (x.blocks ? '' : ' rv') + '"><div class="bl-hit-hd"><span class="bl-tag">' + esc(x.master) + '</span><span class="bl-sev">' + sev + '</span></div><ul>' +
+          x.reasons.map(function (r) { return '<li>' + esc(r) + '</li>'; }).join('') + '</ul><dl>';
+        if (x.kana) h += '<dt>マスタの氏名</dt><dd>' + esc(x.kana) + '</dd>';
+        if (x.phone) h += '<dt>マスタの電話</dt><dd>' + esc(x.phone) + '</dd>';
+        if (x.birth) h += '<dt>マスタの生年月日</dt><dd>' + esc(x.birth) + '</dd>';
+        if (x.imported) h += '<dt>取込日</dt><dd>' + esc(x.imported) + '</dd>';
+        if (x.note) h += '<dt>備考</dt><dd class="note">' + esc(x.note) + '</dd>';
+        h += '</dl></div>';
+      });
+      h += '</div>';
+    }
+
+    if (p.warns && p.warns.length) {
+      h += '<div class="bl-sec"><h4>入力の確認</h4><div class="bl-warn"><ul>' + p.warns.map(function (w) { return '<li>' + esc(w) + '</li>'; }).join('') + '</ul></div></div>';
+    }
+
+    var r = p.read || {};
+    h += '<div class="bl-sec"><h4>照合に使った値（聞き間違い・入力ミスがないか確認）</h4><dl class="bl-kv">';
+    h += kvRow('フリガナ', r.kana ? esc(r.kana) : '—', !r.kana);
+    if (r.name) h += kvRow('漢字氏名', esc(r.name));
+    h += kvRow('電話番号', r.phonesN && r.phonesN.length ? r.phonesN.map(function (n) { return esc(fmtPhone(n)); }).join('<br>') : '—', !(r.phonesN && r.phonesN.length));
+    var bd = fmtBirthN(r.birthN);
+    h += kvRow('生年月日', bd ? esc(bd) : '—<br><small>未入力・読取不可のため、CDPは照合できていません</small>', !bd);
+    if (r.gender) h += kvRow('性別', esc(r.gender));
+    if (r.email) h += kvRow('メール', esc(r.email));
+    h += '</dl></div></div>';
+    return h;
+  }
+
+  function resultHtml(j) {
+    var multi = j.people.length > 1, h = '';
+    if (multi) {
+      var lv = LV[j.level] || LV.UNKNOWN;
+      h += '<p class="bl-ovl">' + j.people.length + '名を確認しました。いちばん厳しい判定：<b>' + esc(lv.mark + ' ' + lv.title) + '</b>' +
+        (j.truncated ? '（人数が多いため先頭の分だけ判定しました。残りは分けて確認してください）' : '') + '</p>';
+    }
+    j.people.forEach(function (p, i) { h += personHtml(p, i, multi); });
+    var ms = (j.masters || []).map(function (m) { return esc(m.label) + ' ' + Number(m.rows).toLocaleString() + '件'; }).join(' ／ ');
+    h += '<p class="bl-foot">判定時刻 ' + esc((j.checkedAt || '').slice(11, 16)) + '　照合したマスタ：' + (ms || '—') +
+      '<br>マスタの更新は、最大で数分遅れて反映されます。</p>';
+    h += '<div class="bl-acts"><button type="button" class="pri" data-bl="next">次の方をチェック</button>' +
+      '<button type="button" data-bl="edit">入力を直して再確認</button>' +
+      '<button type="button" data-bl="copy">結果をコピー</button></div>';
+    return h;
+  }
+
+  function summaryText(j) {
+    var L = ['【ブラックリスト確認】' + (j.checkedAt || '')];
+    j.people.forEach(function (p, i) {
+      var r = p.read || {}, lv = LV[p.level] || LV.UNKNOWN;
+      L.push((j.people.length > 1 ? (i + 1) + '人目　' : '') + '判定：' + lv.mark + ' ' + lv.title);
+      L.push('氏名：' + ([r.name, r.kana].filter(Boolean).join(' / ') || '—'));
+      L.push('TEL：' + ((r.phones || []).join(' / ') || '—') + '　生年月日：' + (r.birth || '—'));
+      if (p.hits && p.hits.length) L.push('理由：' + p.hits.map(function (h) { return '【' + h.master + '】' + h.reasons.join('・'); }).join(' ／ '));
+      if (p.warns && p.warns.length) L.push('確認事項：' + p.warns.join(' ／ '));
+    });
+    var st = clean($('blStaff').value);
+    if (st) L.push('担当：' + st);
+    return L.join('\n');
+  }
+
+  function copyText(t) {
+    var done = function () { toastMsg('結果をコピーしました'); };
+    var fb = function () {
+      var ta = document.createElement('textarea');
+      ta.value = t; ta.style.cssText = 'position:fixed;opacity:0;'; document.body.appendChild(ta); ta.select();
+      try { document.execCommand('copy'); done(); } catch (e) { /* noop */ }
+      document.body.removeChild(ta);
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(done, fb); else fb();
+  }
+  function toastMsg(m) { if (typeof toast === 'function') toast(m); }
+
+  /* ---------- イベント ---------- */
+  $('blClose').addEventListener('click', close);
+  $('blTabForm').addEventListener('click', function () { setTab('form'); });
+  $('blTabPaste').addEventListener('click', function () { setTab('paste'); });
+  $('blForm').addEventListener('submit', function (e) { e.preventDefault(); submit('form'); });
+  $('blPasteForm').addEventListener('submit', function (e) { e.preventDefault(); submit('paste'); });
+  $('blClr').addEventListener('click', function () { reset(false); });
+  $('blClr2').addEventListener('click', function () { reset(false); });
+  $('blSei').addEventListener('blur', kanaBlur);
+  $('blMei').addEventListener('blur', kanaBlur);
+  $('blTel').addEventListener('input', telNote);
+  $('blBirth').addEventListener('input', birthNote);
+  ['blSei', 'blMei', 'blTel', 'blBirth'].forEach(function (id) { $(id).addEventListener('input', function () { $(id).classList.remove('bad'); }); });
+
+  $('blOut').addEventListener('click', function (e) {
+    var b = e.target.closest ? e.target.closest('[data-bl]') : null;
+    if (!b) return;
+    var act = b.getAttribute('data-bl');
+    if (act === 'next') reset(false);
+    else if (act === 'edit') { try { (!$('blPasteForm').hidden ? $('blText') : $('blSei')).focus(); } catch (x) { /* noop */ } }
+    else if (act === 'copy' && lastRes) copyText(summaryText(lastRes));
+    else if (act === 'retry') submit(!$('blPasteForm').hidden ? 'paste' : 'form');
+  });
+
+  // Esc で閉じる／Tab をダイアログ内に閉じ込める
+  ov.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') { e.preventDefault(); close(); return; }
+    if (e.key !== 'Tab') return;
+    var f = Array.prototype.filter.call(ov.querySelectorAll('button,[href],input,textarea,select,summary,[tabindex]:not([tabindex="-1"])'), function (el) {
+      return !el.disabled && !el.closest('[hidden]') && el.offsetParent !== null && el.type !== 'hidden';
+    });
+    if (!f.length) return;
+    var first = f[0], last = f[f.length - 1];
+    if (e.shiftKey && (document.activeElement === first || document.activeElement === ov.firstElementChild)) { e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+  });
+
+  window.openBL = open;
+  window.closeBL = close;
+  window.blReset = reset;
+  setOut(idleHtml());
+})();
 </script>
 </body>
 </html>
