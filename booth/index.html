@@ -1,0 +1,486 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex,nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ブース＆プレディクティブ ワンタップ</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: 固定ヘッダー(状況サマリー) + タブ + スクロールするスタッフ一覧 + 画面下の一括操作バー */
+:root{
+  --bg:#f6f5f4; --surface:#ffffff; --surface2:#efeded; --fg:#1a1a1a; --muted:#6b6767; --line:#e1dedd;
+  --accent:#b11f35; --accent-fg:#ffffff; --accent-soft:#f8e3e6;
+  --on:#1f8a4c; --on-soft:#dff2e6; --warn:#b26a00; --warn-soft:#fbefd5;
+  --sans:"Noto Sans JP",system-ui,-apple-system,"Hiragino Sans","Yu Gothic",sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#141212; --surface:#1e1b1b; --surface2:#2a2626; --fg:#f0eded; --muted:#a09a9a; --line:#352f2f;
+  --accent:#e0475c; --accent-fg:#1a0a0d; --accent-soft:#3a1a20;
+  --on:#4cc785; --on-soft:#173324; --warn:#e5a63d; --warn-soft:#352a12; color-scheme:dark;}}
+:root[data-theme="dark"]{
+  --bg:#141212; --surface:#1e1b1b; --surface2:#2a2626; --fg:#f0eded; --muted:#a09a9a; --line:#352f2f;
+  --accent:#e0475c; --accent-fg:#1a0a0d; --accent-soft:#3a1a20;
+  --on:#4cc785; --on-soft:#173324; --warn:#e5a63d; --warn-soft:#352a12; color-scheme:dark;}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--fg);font:15px/1.5 var(--sans);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 120px;-webkit-tap-highlight-color:transparent}
+.wrap{max-width:720px;margin:0 auto}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+[hidden]{display:none!important}
+.mono{font-family:var(--mono);font-size:12.5px}
+
+/* login */
+.login{padding-top:max(48px,env(safe-area-inset-top,0px));display:grid;gap:14px}
+.login h1{font-size:22px;margin:0 0 2px;letter-spacing:.01em}
+.login p{margin:0;color:var(--muted);font-size:13px}
+.field{display:grid;gap:5px}
+.field label{font-size:12px;color:var(--muted);letter-spacing:.04em}
+.field input{height:46px;border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:0 12px;width:100%}
+.btn{height:48px;border-radius:10px;border:1px solid var(--line);background:var(--surface);padding:0 18px;font-weight:700}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-fg)}
+.btn.ghost{background:transparent}
+.btn:disabled{opacity:.5}
+.err{background:var(--accent-soft);color:var(--accent);border-radius:8px;padding:10px 12px;font-size:13px}
+
+/* header */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);padding-top:10px}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+.bar{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.bar h1{font-size:16px;margin:0}
+.bar .acts{display:flex;gap:6px}
+.icon{height:36px;padding:0 12px;border:1px solid var(--line);background:var(--surface);border-radius:8px;font-size:13px}
+.tabs{display:grid;grid-template-columns:1fr 1fr;gap:0;margin-top:10px;background:var(--surface2);border-radius:10px;padding:3px}
+.tabs button{border:0;background:transparent;height:40px;border-radius:8px;font-weight:700;color:var(--muted)}
+.tabs button[aria-selected="true"]{background:var(--surface);color:var(--fg);box-shadow:0 1px 2px rgba(0,0,0,.12)}
+.sum{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 0}
+.chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:3px 11px;font-size:12.5px;white-space:nowrap}
+.chip b{font-variant-numeric:tabular-nums}
+.chip.warn{background:var(--warn-soft);color:var(--warn);border-color:transparent}
+.tools{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0;align-items:center}
+.seg{display:inline-flex;background:var(--surface2);border-radius:8px;padding:2px}
+.seg button{border:0;background:transparent;height:32px;padding:0 11px;border-radius:6px;font-size:13px;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--fg);font-weight:700}
+.search{flex:1;min-width:130px;height:36px;border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:0 10px}
+select.search{flex:1 1 100%}
+.presets{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.presets .chip{cursor:pointer}
+
+/* list */
+.list{display:grid;gap:6px}
+.row{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:8px 8px 8px 12px;min-height:60px}
+.row .info{min-width:0}
+.row .name{font-weight:700;overflow-wrap:anywhere}
+.row .meta{color:var(--muted);font-size:12px;overflow-wrap:anywhere}
+.row .meta .booth{color:var(--on);font-weight:500}
+.row.sel{border-color:var(--accent)}
+.row input[type=checkbox]{width:22px;height:22px;accent-color:var(--accent)}
+.sw{position:relative;width:66px;height:44px;border-radius:999px;border:0;background:var(--surface2);flex:none;transition:background .15s}
+.sw::after{content:"";position:absolute;top:5px;left:5px;width:34px;height:34px;border-radius:50%;background:var(--surface);box-shadow:0 1px 3px rgba(0,0,0,.35);transition:transform .15s}
+.sw[aria-checked="true"]{background:var(--on)}
+.sw[aria-checked="true"]::after{transform:translateX(22px)}
+.adm{display:grid;gap:8px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin:10px 0}
+.adm a{color:var(--accent);font-weight:700;text-decoration:none;overflow-wrap:anywhere}
+.adm .cred{display:flex;gap:8px;flex-wrap:wrap}
+.adm .cred button{height:34px;border:1px solid var(--line);background:var(--surface2);border-radius:8px;padding:0 10px;font-size:12.5px}
+.empty{padding:28px 8px;text-align:center;color:var(--muted)}
+
+/* bottom action bar */
+.dock{position:fixed;left:0;right:0;bottom:0;z-index:6;background:var(--surface);border-top:1px solid var(--line);padding:10px max(16px,env(safe-area-inset-left,0px)) calc(10px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+.dock .in{max-width:720px;margin:0 auto;display:grid;gap:8px}
+.dock .info{font-size:12.5px;color:var(--muted);display:flex;justify-content:space-between;gap:8px}
+.dock .two{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.btn.on{background:var(--on);border-color:var(--on);color:#fff}
+.btn.off{background:var(--surface);border-color:var(--accent);color:var(--accent)}
+
+/* confirm sheet + toast + busy */
+.scrim{position:fixed;inset:0;z-index:20;background:rgba(0,0,0,.5);display:flex;align-items:flex-end;justify-content:center}
+.sheet{width:100%;max-width:560px;background:var(--surface);border-radius:16px 16px 0 0;padding:18px 16px calc(18px + env(safe-area-inset-bottom,0px));display:grid;gap:12px;max-height:80%;overflow:auto}
+.sheet h2{margin:0;font-size:17px}
+.sheet .names{font-size:13px;color:var(--muted);max-height:120px;overflow:auto;overflow-wrap:anywhere}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(150px + env(safe-area-inset-bottom,0px));z-index:30;background:var(--fg);color:var(--bg);padding:10px 16px;border-radius:10px;font-size:13.5px;max-width:90%;box-shadow:0 4px 18px rgba(0,0,0,.3)}
+.toast.bad{background:var(--accent);color:var(--accent-fg)}
+.busy{position:fixed;inset:0;z-index:25;background:rgba(0,0,0,.25);display:grid;place-items:center}
+.busy i{width:34px;height:34px;border-radius:50%;border:4px solid var(--surface);border-top-color:var(--accent);animation:sp .8s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.busy i{animation:none}.sw,.sw::after{transition:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- ログイン -->
+<section id="login" class="login" hidden>
+  <div>
+    <h1>ブース＆プレディクティブ ワンタップ</h1>
+    <p>リスナビ管理者でログインすると、ブース割当とプレディクティブコール割当を1タップで切り替えられます。パスワードは保存しません。</p>
+  </div>
+  <form id="loginForm" class="login" style="padding:0" autocomplete="on">
+    <div class="field"><label for="lUrl">管理者ログイン画面のURL</label><input id="lUrl" type="url" inputmode="url" placeholder="https://lisnavi.com/alegria001/…/admin/login"></div>
+    <div class="field"><label for="lId">管理者ログインID</label><input id="lId" autocomplete="username" autocapitalize="off" required></div>
+    <div class="field"><label for="lPw">パスワード</label><input id="lPw" type="password" autocomplete="current-password" required></div>
+    <div id="lErr" class="err" hidden></div>
+    <button class="btn primary" id="lGo" type="submit">ログイン</button>
+  </form>
+  <div class="adm" id="admLogin"></div>
+</section>
+
+<!-- メイン -->
+<section id="main" hidden>
+  <div class="top">
+    <div class="bar">
+      <h1>リスナビ ワンタップ</h1>
+      <div class="acts"><button class="icon" id="bReload">更新</button><button class="icon" id="bOut">ログアウト</button></div>
+    </div>
+    <div class="tabs" role="tablist">
+      <button role="tab" id="tabBooth" aria-selected="true">ブース割当</button>
+      <button role="tab" id="tabPred" aria-selected="false">プレディクティブブース</button>
+    </div>
+    <div class="sum" id="sum"></div>
+  </div>
+
+  <div class="adm" id="admMain"></div>
+  <div class="tools" id="tools"></div>
+  <div class="presets" id="presets"></div>
+  <div class="list" id="list"></div>
+</section>
+</div>
+
+<div class="dock" id="dock" hidden><div class="in">
+  <div class="info"><span id="dockInfo"></span><button class="icon" id="bAll" style="height:28px">表示中を全選択</button></div>
+  <div class="two"><button class="btn on" id="bOn"></button><button class="btn off" id="bOff"></button></div>
+</div></div>
+<div id="layer"></div>
+
+<script>
+(()=>{
+const BASE="https://lisnavi.com";
+const DEF={dbName:"alegria001",tenantUlId:"01K7NH0N5MCETXGG713R5MP6NR",loginId:"alegria001"};
+const CONTRACT_BOOTHS=15, PRED_BOOTHS=6;
+const ADMIN_URL="https://lisnavi.com/alegria001/01K7NH0N5MCETXGG713R5MP6NR/admin/list-search?project-id=1&searchMode=normal";
+const $=s=>document.querySelector(s);
+const store={
+  get(k,d){try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch(e){return d}},
+  set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}},
+  del(k){try{localStorage.removeItem(k)}catch(e){}}
+};
+const S={
+  auth:store.get("lnv.auth",null),
+  tab:store.get("lnv.tab","booth"),          // booth | pred
+  target:store.get("lnv.target","staff"),    // staff | admin
+  filter:"all", q:"",
+  sel:new Set(store.get("lnv.sel",[])),
+  presets:store.get("lnv.presets",[]),
+  staffs:[],admins:[],booths:[],groups:{},predStaffs:[],predSum:{contractedBoothCount:6,unassignedBoothCount:null}
+};
+
+/* ---------- API ---------- */
+class ApiErr extends Error{constructor(m,st){super(m);this.status=st}}
+async function api(path,{method="GET",body,auth=true}={}){
+  const h={Accept:"application/json"};
+  if(body!==undefined)h["Content-Type"]="application/json";
+  if(auth){h.Authorization="Bearer "+S.auth.token;h["X-Tenant-Db-Name"]=S.auth.dbName}
+  let r;
+  try{r=await fetch(BASE+path,{method,headers:h,body:body!==undefined?JSON.stringify(body):undefined})}
+  catch(e){throw new ApiErr("通信できません。ネットワークを確認してください。",0)}
+  let j=null;try{j=await r.json()}catch(e){}
+  if(r.status===401){doLogout(true);throw new ApiErr("ログインの有効期限が切れました。もう一度ログインしてください。",401)}
+  if(!r.ok||(j&&j.status===false)){
+    const m=(j&&(j.message||(j.data&&j.data.message)))||("エラー "+r.status);
+    throw new ApiErr(m,r.status);
+  }
+  return j;
+}
+async function login(loginId,password,dbName,tenantUlId){
+  const j=await api("/api/admin/login",{method:"POST",auth:false,body:{loginId,password,dbName,tenantUlId}});
+  let t=j.token||(j.data&&j.data.token)||"";
+  t=String(t).replace(/^Bearer\s+/i,"");
+  if(!t)throw new ApiErr("トークンを取得できませんでした。",0);
+  return t;
+}
+
+/* ---------- data ---------- */
+async function loadCore(){
+  const [st,ad,bo,gr,pj]=await Promise.all([
+    api("/api/admin/staff-settings"),api("/api/admin/admin-booth-assignments"),
+    api("/api/booths"),api("/api/staff-groups").catch(()=>({data:[]})),Promise.resolve({data:[]})
+  ]);
+  S.staffs=(st.data||[]).slice().sort((a,b)=>(a.order??a.id)-(b.order??b.id));
+  S.admins=ad.data||[];
+  S.booths=(bo.data||[]).slice().sort((a,b)=>a.id-b.id);
+  S.groups=Object.fromEntries((gr.data||[]).map(g=>[g.id,g.name]));
+  }
+async function loadPred(){
+  const [a,b]=await Promise.all([api("/api/admin/predictive-booth/staffs"),api("/api/admin/predictive-booth/booth-count-summary").catch(()=>null)]);
+  S.predStaffs=(a.data||[]).map(r=>{const st=S.staffs.find(x=>x.id===r.id)||{};return {...r,groupId:st.groupId}});
+  if(b&&b.data)S.predSum=b.data;
+}
+const boothById=id=>S.booths.find(b=>b.id===id);
+const usedBoothIds=()=>new Set([...S.staffs,...S.admins].map(x=>x.boothId).filter(v=>v!=null));
+const freeBooths=()=>{const u=usedBoothIds();return S.booths.filter(b=>!u.has(b.id))};
+
+/* ---------- UI helpers ---------- */
+function toast(msg,bad){
+  const old=$("#toast");if(old)old.remove();
+  const d=document.createElement("div");d.id="toast";d.className="toast"+(bad?" bad":"");d.textContent=msg;
+  $("#layer").appendChild(d);setTimeout(()=>d.remove(),bad?6000:2600);
+}
+let busyN=0;
+function busy(on){
+  busyN+=on?1:-1;
+  const ex=$("#busy");
+  if(busyN>0&&!ex){const d=document.createElement("div");d.id="busy";d.className="busy";d.innerHTML="<i></i>";$("#layer").appendChild(d)}
+  if(busyN<=0&&ex){ex.remove();busyN=0}
+}
+function confirmSheet({title,names,okLabel,danger}){
+  return new Promise(res=>{
+    const sc=document.createElement("div");sc.className="scrim";
+    sc.innerHTML=`<div class="sheet" role="dialog" aria-modal="true"><h2></h2><div class="names"></div><button class="btn primary" id="cOk"></button><button class="btn ghost" id="cNo">キャンセル</button></div>`;
+    sc.querySelector("h2").textContent=title;sc.querySelector(".names").textContent=names;
+    const ok=sc.querySelector("#cOk");ok.textContent=okLabel;if(danger)ok.style.background="var(--on)",ok.style.borderColor="var(--on)",ok.style.color="#fff";
+    const done=v=>{sc.remove();res(v)};
+    ok.onclick=()=>done(true);sc.querySelector("#cNo").onclick=()=>done(false);
+    sc.addEventListener("click",e=>{if(e.target===sc)done(false)});
+    $("#layer").appendChild(sc);ok.focus();
+  });
+}
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+function saveSel(){store.set("lnv.sel",[...S.sel])}
+
+/* ---------- view model ---------- */
+// 現在タブ・対象に応じた行を返す
+function rows(){
+  let src;
+  if(S.tab==="booth")src=S.target==="staff"?S.staffs:S.admins;
+  else src=S.predStaffs;
+  const key=S.tab==="booth"?(r=>r.boothId!=null):(r=>r.predictiveBoothId!=null);
+  const q=S.q.trim().toLowerCase();
+  return src.filter(r=>{
+    if(S.filter==="on"&&!key(r))return false;
+    if(S.filter==="off"&&key(r))return false;
+    if(q&&!(`${r.name} ${r.loginId||""} ${S.groups[r.groupId]||""}`.toLowerCase().includes(q)))return false;
+    return true;
+  }).map(r=>({...r,_on:key(r)}));
+}
+const kind=()=>S.tab==="booth"?(S.target==="staff"?"staff":"admin"):"pred";
+
+/* ---------- render ---------- */
+function render(){
+  const authed=!!S.auth;
+  $("#login").hidden=authed;$("#main").hidden=!authed;$("#dock").hidden=!authed;
+  if(!authed)return;
+  $("#tabBooth").setAttribute("aria-selected",S.tab==="booth");
+  $("#tabPred").setAttribute("aria-selected",S.tab==="pred");
+
+  // summary
+  const sum=$("#sum");
+  if(S.tab==="booth"){
+    const free=freeBooths().length;
+    const as=S.staffs.filter(x=>x.boothId!=null).length, aa=S.admins.filter(x=>x.boothId!=null).length;
+    sum.innerHTML=`<span class="chip">契約ブース <b>${S.booths.length||CONTRACT_BOOTHS}</b></span>
+      <span class="chip">プレディクティブブース <b>${PRED_BOOTHS}</b></span>
+      <span class="chip ${free===0?"warn":""}">未割当ブース <b>${free}</b></span>
+      <span class="chip">スタッフ割当 <b>${as}/${S.staffs.length}</b></span>
+      <span class="chip">管理者割当 <b>${aa}/${S.admins.length}</b></span>`;
+  }else{
+    const cb=S.predSum.contractedBoothCount??PRED_BOOTHS, ub=S.predSum.unassignedBoothCount;
+    sum.innerHTML=`<span class="chip">プレディクティブブース <b>${cb}</b></span><span class="chip ${ub===0?"warn":""}">未割当 <b>${ub==null?"-":ub}</b></span><span class="chip">対象(通常ブース割当済み) <b>${S.predStaffs.length}</b></span>`;
+  }
+
+  // tools
+  const t=$("#tools");
+  let h="";
+  if(S.tab==="booth")h+=`<div class="seg" id="segTarget"><button data-v="staff" aria-pressed="${S.target==="staff"}">スタッフ</button><button data-v="admin" aria-pressed="${S.target==="admin"}">管理者</button></div>`;
+  const lbl=["すべて","割当済み","未割当"];
+  h+=`<div class="seg" id="segFilter">${[["all",lbl[0]],["on",lbl[1]],["off",lbl[2]]].map(([v,l])=>`<button data-v="${v}" aria-pressed="${S.filter===v}">${l}</button>`).join("")}</div>
+      <input class="search" id="q" type="search" placeholder="名前・IDで検索" value="${esc(S.q)}">`;
+  t.innerHTML=h;
+
+  // presets (選択セット)
+  const pr=$("#presets");
+  pr.innerHTML=S.presets.map((p,i)=>`<span class="chip" data-p="${i}" role="button" tabindex="0">${esc(p.name)} <b>${p.ids.length}</b></span>`).join("")
+    +`<span class="chip" id="pSave" role="button" tabindex="0">＋ 今の選択を保存</span>`
+    +(S.presets.length?`<span class="chip" id="pDel" role="button" tabindex="0">セット削除</span>`:"")
+    +(S.sel.size?`<span class="chip" id="pClr" role="button" tabindex="0">選択解除</span>`:"");
+
+  // list
+  const rs=rows(), k=kind();
+  const L=$("#list");
+  if(!rs.length)L.innerHTML=`<div class="empty">該当する対象がありません</div>`;
+  else L.innerHTML=rs.map(r=>{
+    const b=r.boothId!=null?boothById(r.boothId):null;
+    const meta=k==="pred"
+      ? `${esc(S.groups[r.groupId]||"")} <span class="mono">${esc(r.loginId||"")}</span> ${r.predictiveBoothId!=null?`<span class="booth mono">プレディクティブ ${r.predictiveBoothId}</span>`:"<span>未割当</span>"}`
+      : `${k==="staff"?esc(S.groups[r.groupId]||"")+" ":""}<span class="mono">${esc(r.loginId||"")}</span> ${b?`<span class="booth mono">ブース ${esc(b.sipId)}</span>`:`<span>未割当</span>`}`;
+    return `<div class="row ${S.sel.has(r.id)?"sel":""}" data-id="${r.id}">
+      <input type="checkbox" aria-label="選択" ${S.sel.has(r.id)?"checked":""}>
+      <div class="info"><div class="name">${esc(r.name)}</div><div class="meta">${meta}</div></div>
+      <button class="sw" role="switch" aria-checked="${r._on}" aria-label="${esc(r.name)}を${r._on?"解除":"割当"}"></button></div>`;
+  }).join("");
+
+  // dock
+  const n=S.sel.size;
+  $("#dockInfo").textContent=n?`${n}人を選択中`:`未選択のときは表示中の${rs.length}人が対象`;
+  $("#bOn").textContent="一括割当";
+  $("#bOff").textContent="一括解除";
+}
+
+/* ---------- actions ---------- */
+function targets(){
+  const rs=rows();
+  return S.sel.size?rs.filter(r=>S.sel.has(r.id)):rs;
+}
+async function refresh(quiet){
+  busy(true);
+  try{await loadCore();if(S.tab==="pred")await loadPred();render()}
+  catch(e){toast(e.message,true)}
+  finally{busy(false)}
+}
+
+// ブース: 割当 / 解除（rowsは対象行）
+async function boothApply(list,assign){
+  const k=kind(); // staff | admin
+  let payload=[];
+  if(assign){
+    const free=freeBooths();
+    const need=list.filter(r=>r.boothId==null);
+    if(!need.length){toast("すべて割当済みです");return}
+    if(need.length>free.length){toast(`空きブースが足りません（必要${need.length} / 空き${free.length}）。解除してから割り当ててください。`,true);return}
+    payload=need.map(r=>({id:r.id})); // 割当はidだけ送る。空きブースはリスナビ側が自動で当てる（実機で確認済み）
+  }else{
+    payload=list.filter(r=>r.boothId!=null).map(r=>({id:r.id,boothId:r.boothId}));
+    if(!payload.length){toast("すべて未割当です");return}
+  }
+  busy(true);
+  try{
+    const path=k==="staff"?"/api/staff-booth":"/api/admin-booths";
+    const key=k==="staff"?"staffBoothAssignment":"adminBoothAssignment";
+    const j=await api(path,{method:"POST",body:{[key]:payload}});
+    const failed=j&&j.data&&j.data.failedUnassignStaffNames;
+    await loadCore();render();
+    // 送信後に取り直した状態で、本当に反映されたかを確認する
+    const pool=k==="staff"?S.staffs:S.admins;
+    const miss=payload.filter(x=>{const r=pool.find(y=>y.id===x.id);const has=r&&r.boothId!=null;return assign?!has:has});
+    if(failed&&failed.length)toast("解除できませんでした（通話中など）: "+failed.join("、"),true);
+    else if(miss.length)toast(`${miss.length}件が反映されませんでした: `+miss.map(x=>(pool.find(y=>y.id===x.id)||{}).name).join("、")+`。リスナビの画面で確認してください`,true);
+    else toast((assign?"割当":"解除")+"が完了しました（"+payload.length+"件）");
+  }catch(e){toast(e.message,true)}
+  finally{busy(false)}
+}
+// プレディクティブブース: 割当 / 解除（キーは通常ブースID。割当はboothIdだけ、解除はboothId+predictiveBoothIdを送る）
+async function predApply(list,on){
+  busy(true);
+  try{
+    await loadPred();
+    const cur=Object.fromEntries(S.predStaffs.map(r=>[r.id,r]));
+    const tg=list.map(r=>cur[r.id]).filter(Boolean);
+    const payload=on?tg.filter(r=>r.predictiveBoothId==null).map(r=>({boothId:r.boothId}))
+                    :tg.filter(r=>r.predictiveBoothId!=null).map(r=>({boothId:r.boothId,predictiveBoothId:r.predictiveBoothId}));
+    if(!payload.length){render();toast(on?"すべて割当済みです":"すべて未割当です");return}
+    const free=S.predSum.unassignedBoothCount;
+    if(on&&free!=null&&payload.length>free){render();toast(`プレディクティブブースの空きが足りません（必要${payload.length} / 空き${free}）。先に解除してください。`,true);return}
+    const j=await api("/api/admin/predictive-booth/staff-assignment",{method:"POST",body:payload});
+    await loadPred();render();
+    const now=Object.fromEntries(S.predStaffs.map(r=>[r.id,r]));
+    const bad=tg.filter(r=>{const n=now[r.id];const has=n&&n.predictiveBoothId!=null;return on?!has:has});
+    if(bad.length)toast(`${bad.length}件が反映されませんでした: `+bad.map(r=>r.name).join("、")+"。リスナビの画面で確認してください",true);
+    else toast("プレディクティブブースを"+(on?"割当":"解除")+"しました（"+payload.length+"件）");
+  }catch(e){toast(e.message,true)}
+  finally{busy(false)}
+}
+async function bulk(on){
+  const list=targets();
+  if(!list.length){toast("対象がいません");return}
+  const word=on?"割当":"解除";
+  const where=S.tab==="booth"?(S.target==="staff"?"スタッフ":"管理者"):"プレディクティブブース";
+  const ok=await confirmSheet({title:`${list.length}人を${word}します`,names:`${where}\n`+list.map(r=>r.name).join("、"),okLabel:`${word}する`,danger:on});
+  if(!ok)return;
+  if(S.tab==="booth")await boothApply(list,on);else await predApply(list,on);
+}
+async function toggleOne(id){
+  const r=rows().find(x=>x.id===id)||(S.tab==="booth"?(S.target==="staff"?S.staffs:S.admins):S.predStaffs).map(x=>({...x,_on:S.tab==="booth"?x.boothId!=null:x.predictiveBoothId!=null})).find(x=>x.id===id);
+  if(!r)return;
+  if(S.tab==="booth")await boothApply([r],!r._on);else await predApply([r],!r._on);
+}
+
+/* ---------- events ---------- */
+document.addEventListener("click",e=>{
+  const t=e.target;
+  if(t.closest("#segTarget button")){S.target=t.closest("button").dataset.v;store.set("lnv.target",S.target);S.sel.clear();saveSel();render();return}
+  if(t.closest("#segFilter button")){S.filter=t.closest("button").dataset.v;render();return}
+  const sw=t.closest(".sw");if(sw){toggleOne(Number(sw.closest(".row").dataset.id));return}
+  const row=t.closest(".row");
+  if(row){const id=Number(row.dataset.id);S.sel.has(id)?S.sel.delete(id):S.sel.add(id);saveSel();render();return}
+  const pc=t.closest("[data-p]");
+  if(pc){const p=S.presets[Number(pc.dataset.p)];S.sel=new Set(p.ids);saveSel();render();toast(`「${p.name}」を選択しました`);return}
+  if(t.closest("#pClr")){S.sel.clear();saveSel();render();return}
+  if(t.closest("#pDel")){S.presets=[];store.set("lnv.presets",S.presets);render();return}
+  if(t.closest("#pSave")){
+    if(!S.sel.size){toast("先にスタッフを選択してください",true);return}
+    savePresetSheet();return}
+});
+function savePresetSheet(){
+  const sc=document.createElement("div");sc.className="scrim";
+  sc.innerHTML=`<div class="sheet"><h2>選択セットを保存</h2><div class="names">${S.sel.size}人を、あとから1タップで選べます（例: 午前シフト）</div><div class="field"><label for="pn">セット名</label><input id="pn" style="height:46px;border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:0 12px" maxlength="20"></div><button class="btn primary" id="pok">保存</button><button class="btn ghost" id="pno">キャンセル</button></div>`;
+  $("#layer").appendChild(sc);const inp=sc.querySelector("#pn");inp.focus();
+  const go=()=>{const n=inp.value.trim();if(!n)return;S.presets.push({name:n,ids:[...S.sel]});store.set("lnv.presets",S.presets);sc.remove();render()};
+  sc.querySelector("#pok").onclick=go;sc.querySelector("#pno").onclick=()=>sc.remove();
+  inp.addEventListener("keydown",e=>{if(e.key==="Enter")go()});
+}
+document.addEventListener("input",e=>{if(e.target.id==="q"){S.q=e.target.value;const pos=e.target.selectionStart;render();const q=$("#q");q.focus();try{q.setSelectionRange(pos,pos)}catch(_){}}});
+$("#tabBooth").onclick=()=>setTab("booth");
+$("#tabPred").onclick=()=>setTab("pred");
+async function setTab(t){S.tab=t;store.set("lnv.tab",t);S.filter="all";S.sel.clear();saveSel();render();if(t==="pred")await refresh()}
+$("#bReload").onclick=()=>refresh();
+$("#bOut").onclick=()=>doLogout(false);
+$("#bOn").onclick=()=>bulk(true);
+$("#bOff").onclick=()=>bulk(false);
+$("#bAll").onclick=()=>{rows().forEach(r=>S.sel.add(r.id));saveSel();render()};
+
+/* ---------- login ---------- */
+function parseUrl(u){
+  const m=String(u).match(/lisnavi\.com\/([^\/]+)\/([^\/]+)\/admin/);
+  return m?{dbName:m[1],tenantUlId:m[2]}:null;
+}
+$("#loginForm").addEventListener("submit",async e=>{
+  e.preventDefault();
+  const err=$("#lErr");err.hidden=true;
+  const p=parseUrl($("#lUrl").value)||DEF;
+  const id=$("#lId").value.trim(), pw=$("#lPw").value;
+  $("#lGo").disabled=true;
+  try{
+    const token=await login(id,pw,p.dbName,p.tenantUlId);
+    S.auth={token,dbName:p.dbName,tenantUlId:p.tenantUlId,loginId:id};
+    store.set("lnv.auth",S.auth);store.set("lnv.url",$("#lUrl").value);
+    await refresh();
+  }catch(x){err.textContent=x.message;err.hidden=false}
+  finally{$("#lGo").disabled=false}
+});
+function doLogout(expired){
+  S.auth=null;store.del("lnv.auth");render();
+  if(expired){const err=$("#lErr");err.textContent="ログインの有効期限が切れました。もう一度ログインしてください。";err.hidden=false}
+}
+
+/* ---------- 管理者画面リンク ---------- */
+function admHtml(){return `<div>リスナビ 管理者画面</div><a href="${ADMIN_URL}" target="_blank" rel="noopener">管理者画面を開く（案件1・リスト検索）</a>
+  <div class="cred"><button data-copy="id">ログインID: ${esc(DEF.loginId)} をコピー</button></div>`}
+function renderAdm(){["#admLogin","#admMain"].forEach(s=>{const el=$(s);if(el)el.innerHTML=admHtml()})}
+document.addEventListener("click",async e=>{
+  const b=e.target.closest("[data-copy]");if(!b)return;
+  const v=DEF.loginId;
+  try{await navigator.clipboard.writeText(v);toast("コピーしました")}catch(x){toast("コピーできませんでした。手入力してください",true)}
+});
+
+/* ---------- boot ---------- */
+$("#lUrl").value=store.get("lnv.url",`${BASE}/${DEF.dbName}/${DEF.tenantUlId}/admin/login`);
+const last=store.get("lnv.auth",null);$("#lId").value=(last&&last.loginId)||DEF.loginId;
+renderAdm();render();
+if(S.auth)refresh();
+})();
+</script>
+</body>
+</html>
