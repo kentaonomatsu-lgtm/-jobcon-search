@@ -7,11 +7,10 @@
 <meta name="theme-color" content="#f2f2f7">
 <title>ブース＆プレディクティブ ワンタップ</title>
 <style>
-/* 見慣れたiPhone「設定」アプリ風: 大きな見出し / 角丸の白いリスト / 緑のスイッチ / 下のタブバー */
 :root{
 --bg:#f2f2f7; --cell:#ffffff; --fill:#e9e9ee; --fg:#111114; --sub:#6e6e76; --sep:#e3e3e8;
 --blue:#0a74ff; --green:#30b455; --green-soft:#e1f5e7; --red:#d92d3f; --red-soft:#fde8ea; --amber:#b86e00; --amber-soft:#fdf0d7;
---brand:#b11f35; --tab:58px;
+--brand:#b11f35; --tab:0px; --accent:#0a74ff; --accent-soft:#e3efff;
 --font:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Hiragino Kaku Gothic ProN","Noto Sans JP","Yu Gothic",system-ui,sans-serif;
 color-scheme:light;
 }
@@ -23,6 +22,8 @@ color-scheme:light;
 --blue:#4096ff; --green:#34c759; --green-soft:#12301c; --red:#ff6b78; --red-soft:#3a1a1e; --amber:#f0b24a; --amber-soft:#3a2d12; --brand:#ff5a70; color-scheme:dark;}
 *{box-sizing:border-box}
 html,body{margin:0}
+body[data-mode="pred"]{--accent:#8a3ffc;--accent-soft:#f0e6ff}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) body{--accent-soft:#16253d}:root:not([data-theme="light"]) body[data-mode="pred"]{--accent:#b78bff;--accent-soft:#2a1b45}}
 body{background:var(--bg);color:var(--fg);font:16px/1.45 var(--font);-webkit-tap-highlight-color:transparent;
 padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
 padding-block:0 calc(var(--tab) + 150px)}
@@ -32,7 +33,6 @@ button{cursor:pointer;-webkit-appearance:none;appearance:none}
 :focus-visible{outline:2px solid var(--blue);outline-offset:2px}
 [hidden]{display:none!important}
 .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px}
-/* ===== ログイン ===== */
 .login{padding-top:max(56px,env(safe-area-inset-top,0px));display:grid;gap:20px}
 .logo{width:64px;height:64px;border-radius:16px;background:var(--brand);color:#fff;display:grid;place-items:center;font-weight:800;font-size:22px;letter-spacing:-.02em}
 .login h1{margin:0;font-size:28px;line-height:1.2;letter-spacing:-.01em}
@@ -46,53 +46,62 @@ button{cursor:pointer;-webkit-appearance:none;appearance:none}
 .bigbtn:disabled{opacity:.5}
 .err{background:var(--red-soft);color:var(--red);border-radius:12px;padding:12px 14px;font-size:14px}
 .note{font-size:12.5px;color:var(--sub);padding:0 4px}
-/* ===== ヘッダー ===== */
-.nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:8;background:var(--bg);padding:10px 0 6px}
+.nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:8;background:var(--bg);padding:10px 0 2px}
 body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:20;background:var(--bg)}
 .navrow{display:flex;align-items:center;justify-content:space-between;min-height:36px}
 .navrow .lk{border:0;background:transparent;color:var(--blue);font-size:16px;padding:6px 2px}
 .navrow .lk.muted{color:var(--sub)}
-.title{font-size:34px;font-weight:800;letter-spacing:-.02em;line-height:1.15;margin:2px 0 10px}
-/* ===== 状況カード ===== */
-.status{background:var(--cell);border-radius:16px;padding:16px;display:grid;gap:12px;margin-bottom:14px}
+.modes{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:4px 0 12px}
+.mode{border:2px solid var(--sep);background:var(--cell);border-radius:16px;padding:10px 12px;text-align:left;display:grid;gap:2px;color:var(--sub);min-height:68px}
+.mode .m1{font-size:12px;font-weight:700}
+.mode .m2{font-size:17px;font-weight:800;color:var(--fg);line-height:1.2}
+.mode .m3{font-size:12.5px}
+.mode[aria-selected="true"]{border-color:var(--c);background:var(--c);color:#fff}
+.mode[aria-selected="true"] .m2{color:#fff}
+#tabBooth{--c:#0a74ff}#tabPred{--c:#8a3ffc}
+.sync{display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--sub);margin:0 0 10px}
+.sync i{width:8px;height:8px;border-radius:50%;background:var(--green);flex:none}
+.sync.err i{background:var(--red)}.sync.spin i{animation:pl 1s infinite}
+@keyframes pl{50%{opacity:.25}}
+.tag.new{background:var(--accent);color:#fff;margin-left:6px}
+.title{display:none}
+.status{background:var(--cell);border-top:5px solid var(--accent);border-radius:16px;padding:16px;display:grid;gap:12px;margin-bottom:14px}
 .big{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
 .big b{font-size:40px;line-height:1;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
 .big span{color:var(--sub);font-size:15px}
-.big em{font-style:normal;margin-left:auto;font-weight:700;border-radius:999px;padding:3px 12px;font-size:14px;background:var(--green-soft);color:var(--green)}
+.big b{color:var(--accent)}.big em{font-style:normal;margin-left:auto;font-weight:700;border-radius:999px;padding:3px 12px;font-size:14px;background:var(--green-soft);color:var(--green)}
 .big em.full{background:var(--amber-soft);color:var(--amber)}
 .slots{display:flex;gap:5px;flex-wrap:wrap}
 .slot{width:22px;height:22px;border-radius:6px;background:var(--fill)}
-.slot.used{background:var(--green)}
+.slot.used{background:var(--accent)}
 .facts{display:flex;gap:6px 16px;flex-wrap:wrap;color:var(--sub);font-size:13.5px}
 .facts b{color:var(--fg);font-variant-numeric:tabular-nums}
-/* ===== 絞り込み ===== */
 .seg{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;background:var(--fill);border-radius:10px;padding:2px;margin-bottom:10px}
 .seg button{border:0;background:transparent;height:34px;border-radius:8px;font-size:14px;color:var(--fg)}
-.seg button[aria-pressed="true"]{background:var(--cell);font-weight:700;box-shadow:0 1px 3px rgba(0,0,0,.14)}
+.seg button[aria-pressed="true"]{color:var(--accent);background:var(--cell);font-weight:700;box-shadow:0 1px 3px rgba(0,0,0,.14)}
 .search{position:relative;margin-bottom:12px}
 .search input{width:100%;height:38px;border:0;border-radius:10px;background:var(--fill);padding:0 12px;font-size:16px;outline:0}
 .search input::placeholder{color:var(--sub)}
 .sets{display:flex;gap:8px;flex-wrap:wrap;margin:-2px 0 12px}
 .pill{border:0;background:var(--cell);border-radius:999px;padding:6px 14px;font-size:14px;color:var(--blue)}
 .pill b{color:var(--sub);font-weight:500;margin-left:4px}
-/* ===== スタッフ一覧 ===== */
 .list{background:var(--cell);border-radius:16px;overflow:hidden}
 .row{display:flex;align-items:center;gap:12px;padding:10px 12px 10px 14px;min-height:66px;border-bottom:1px solid var(--sep);position:relative}
 .row:last-child{border-bottom:0}
 .row .chk{width:26px;height:26px;border-radius:50%;border:2px solid var(--sep);flex:none;display:grid;place-items:center;color:#fff;font-size:15px;line-height:1}
-.row.sel .chk{background:var(--blue);border-color:var(--blue)}
-.row.sel{background:color-mix(in srgb,var(--blue) 8%,var(--cell))}
+.row.sel .chk{background:var(--accent);border-color:var(--accent)}
+.row.sel{background:color-mix(in srgb,var(--accent) 9%,var(--cell))}
 .av{width:42px;height:42px;border-radius:50%;flex:none;display:grid;place-items:center;color:#fff;font-weight:700;font-size:17px}
 .info{min-width:0;flex:1}
 .nm{font-weight:600;font-size:16.5px;overflow-wrap:anywhere;line-height:1.3}
 .sb{color:var(--sub);font-size:12.5px;overflow-wrap:anywhere;margin-top:1px}
 .tag{display:inline-block;margin-top:4px;font-size:12px;font-weight:700;border-radius:6px;padding:1px 8px;background:var(--fill);color:var(--sub)}
-.tag.on{background:var(--green-soft);color:var(--green)}
+.tag.on{background:var(--accent-soft);color:var(--accent)}
 .sw{position:relative;width:60px;height:36px;border-radius:999px;border:0;background:#c7c7cc;flex:none;transition:background .18s;padding:0}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .sw{background:#48484a}}
 :root[data-theme="dark"] .sw{background:#48484a}
 .sw::after{content:"";position:absolute;top:3px;left:3px;width:30px;height:30px;border-radius:50%;background:#fff;box-shadow:0 2px 5px rgba(0,0,0,.3);transition:transform .18s}
-.sw[aria-checked="true"]{background:var(--green)}
+.sw[aria-checked="true"]{background:var(--accent)}
 .sw[aria-checked="true"]::after{transform:translateX(24px)}
 .empty{padding:34px 12px;text-align:center;color:var(--sub)}
 .linkcard{margin-top:18px}
@@ -101,21 +110,19 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .lrow:last-child{border-bottom:0}
 .lrow .chev{color:var(--sub)}
 .lrow small{display:block;color:var(--sub);font-size:12.5px}
-/* ===== 下部: 選択バー + タブバー ===== */
 .dock{position:fixed;left:0;right:0;bottom:calc(var(--tab) + env(safe-area-inset-bottom,0px));z-index:9;padding:10px max(16px,env(safe-area-inset-left,0px));background:color-mix(in srgb,var(--cell) 92%,transparent);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-top:1px solid var(--sep)}
 .dock .in{max-width:640px;margin:0 auto;display:grid;gap:8px}
 .dock .cnt{display:flex;justify-content:space-between;align-items:center;font-size:14px;color:var(--sub)}
 .dock .cnt button{border:0;background:transparent;color:var(--blue);font-size:14px;padding:4px 0}
 .dock .two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .act{height:50px;border-radius:14px;border:0;font-weight:700;font-size:16px}
-.act.assign{background:var(--green);color:#fff}
+.act.assign{background:var(--accent);color:#fff}
 .act.release{background:var(--red-soft);color:var(--red)}
 .act:disabled{opacity:.4}
 .tabbar{position:fixed;left:0;right:0;bottom:0;z-index:10;height:calc(var(--tab) + env(safe-area-inset-bottom,0px));padding:0 max(0px,env(safe-area-inset-left,0px)) env(safe-area-inset-bottom,0px);background:color-mix(in srgb,var(--cell) 94%,transparent);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-top:1px solid var(--sep);display:grid;grid-template-columns:1fr 1fr}
 .tabbar button{border:0;background:transparent;display:grid;justify-items:center;align-content:center;gap:2px;color:var(--sub);font-size:11.5px;font-weight:600}
 .tabbar button[aria-selected="true"]{color:var(--blue)}
 .tabbar svg{width:26px;height:26px}
-/* ===== シート・トースト・読込 ===== */
 .scrim{position:fixed;inset:0;z-index:40;background:rgba(0,0,0,.4);display:flex;align-items:flex-end;justify-content:center}
 .sheet{width:100%;max-width:520px;margin:8px;margin-bottom:calc(8px + env(safe-area-inset-bottom,0px));display:grid;gap:8px}
 .sheet .box{background:var(--cell);border-radius:16px;padding:18px 16px 14px;display:grid;gap:8px;text-align:center}
@@ -135,7 +142,6 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 </head>
 <body>
 <div class="wrap">
-<!-- ログイン -->
 <section id="login" class="login" hidden>
 <div>
 <div class="logo">LN</div>
@@ -156,15 +162,15 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 </form>
 <div class="group linkcard" id="admLogin"></div>
 </section>
-<!-- メイン -->
 <section id="main" hidden>
 <div class="nav">
 <div class="navrow">
 <button class="lk muted" id="bOut">ログアウト</button>
 <div style="display:flex;gap:16px"><button class="lk" id="bReload">更新</button><button class="lk" id="bEdit">選択</button></div>
 </div>
+<div class="modes" role="tablist"><button class="mode" id="tabBooth" role="tab"><span class="m1">① 通常</span><span class="m2">契約ブース</span><span class="m3" id="m3b"></span></button><button class="mode" id="tabPred" role="tab"><span class="m1">② 自動発信</span><span class="m2">プレディクティブ</span><span class="m3" id="m3p"></span></button></div>
 </div>
-<div class="title" id="title">ブース割当</div>
+<div class="sync" id="sync"><i></i><span id="syncTx">同期中…</span></div>
 <div class="status" id="status"></div>
 <div id="segTargetWrap"></div>
 <div class="seg" id="segFilter"></div>
@@ -178,14 +184,6 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 <div class="cnt"><span id="dockInfo"></span><button id="bAll">すべて選択</button></div>
 <div class="two"><button class="act assign" id="bOn">割当</button><button class="act release" id="bOff">解除</button></div>
 </div></div>
-<nav class="tabbar" id="tabbar" hidden>
-<button id="tabBooth" role="tab" aria-selected="true">
-<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="3.5" width="7" height="7" rx="2"/><rect x="13.5" y="3.5" width="7" height="7" rx="2"/><rect x="3.5" y="13.5" width="7" height="7" rx="2"/><rect x="13.5" y="13.5" width="7" height="7" rx="2"/></svg>
-ブース割当</button>
-<button id="tabPred" role="tab" aria-selected="false">
-<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"/></svg>
-プレディクティブ</button>
-</nav>
 <div id="layer"></div>
 <script>
 (()=>{
@@ -204,11 +202,10 @@ auth:store.get("lnv.auth",null),
 tab:store.get("lnv.tab","booth"),
 target:store.get("lnv.target","staff"),
 filter:"all",q:"",edit:false,
-sel:new Set(),
+sel:new Set(),fresh:new Set(),known:null,lastSync:0,syncErr:"",
 presets:store.get("lnv.presets",[]),
 staffs:[],admins:[],booths:[],groups:{},predStaffs:[],predSum:{contractedBoothCount:PRED_BOOTHS,unassignedBoothCount:null}
 };
-/* ---------- API ---------- */
 class ApiErr extends Error{constructor(m,st){super(m);this.status=st}}
 async function api(path,{method="GET",body,auth=true}={}){
 const h={Accept:"application/json"};
@@ -232,7 +229,6 @@ t=String(t).replace(/^Bearer\s+/i,"");
 if(!t)throw new ApiErr("トークンを取得できませんでした。",0);
 return t;
 }
-/* ---------- data ---------- */
 async function loadCore(){
 const [st,ad,bo,gr]=await Promise.all([
 api("/api/admin/staff-settings"),api("/api/admin/admin-booth-assignments"),
@@ -251,7 +247,6 @@ if(b&&b.data)S.predSum=b.data;
 const boothById=id=>S.booths.find(b=>b.id===id);
 const usedBoothIds=()=>new Set([...S.staffs,...S.admins].map(x=>x.boothId).filter(v=>v!=null));
 const freeBooths=()=>{const u=usedBoothIds();return S.booths.filter(b=>!u.has(b.id))};
-/* ---------- UI helpers ---------- */
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 function toast(msg,bad){
 const old=$("#toast");if(old)old.remove();
@@ -278,7 +273,6 @@ $("#layer").appendChild(sc);ok.focus();
 });
 }
 const hue=id=>(Number(id)*47)%360;
-/* ---------- view model ---------- */
 function rows(){
 let src;
 if(S.tab==="booth")src=S.target==="staff"?S.staffs:S.admins;else src=S.predStaffs;
@@ -292,19 +286,19 @@ return true;
 }).map(r=>({...r,_on:key(r)}));
 }
 const kind=()=>S.tab==="booth"?(S.target==="staff"?"staff":"admin"):"pred";
-/* ---------- render ---------- */
 function slotsHtml(total,used){
 let h="";for(let i=0;i<total;i++)h+=`<i class="slot ${i<used?"used":""}"></i>`;return h;
 }
 function render(){
 const authed=!!S.auth;
-$("#login").hidden=authed;$("#main").hidden=!authed;$("#tabbar").hidden=!authed;
+$("#login").hidden=authed;$("#main").hidden=!authed;document.body.dataset.mode=S.tab;
 if(!authed){$("#dock").hidden=true;return}
 $("#tabBooth").setAttribute("aria-selected",S.tab==="booth");
 $("#tabPred").setAttribute("aria-selected",S.tab==="pred");
-$("#title").textContent=S.tab==="booth"?"ブース割当":"プレディクティブ";
+{const tb=S.booths.length||CONTRACT_BOOTHS,ub=usedBoothIds().size,tp=S.predSum.contractedBoothCount??PRED_BOOTHS,un=S.predSum.unassignedBoothCount,
+up=un==null?S.predStaffs.filter(r=>r.predictiveBoothId!=null).length:Math.max(tp-un,0);
+$("#m3b").textContent=`${ub}/${tb} 使用中`;$("#m3p").textContent=`${up}/${tp} 使用中`}
 $("#bEdit").textContent=S.edit?"完了":"選択";
-// 状況カード
 const st=$("#status");
 if(S.tab==="booth"){
 const total=S.booths.length||CONTRACT_BOOTHS, used=usedBoothIds().size, free=Math.max(total-used,0);
@@ -319,16 +313,13 @@ st.innerHTML=`<div class="big"><b>${used}</b><span>/ ${total} プレディクテ
 <div class="slots" aria-hidden="true">${slotsHtml(total,used)}</div>
 <div class="facts"><span>対象は通常ブースを持つスタッフ <b>${S.predStaffs.length}人</b></span></div>`;
 }
-// 絞り込み
 $("#segTargetWrap").innerHTML=S.tab==="booth"
 ?`<div class="seg" id="segTarget"><button data-v="staff" aria-pressed="${S.target==="staff"}">スタッフ</button><button data-v="admin" aria-pressed="${S.target==="admin"}">管理者</button></div>`:"";
 $("#segFilter").innerHTML=[["all","すべて"],["on","割当済み"],["off","未割当"]].map(([v,l])=>`<button data-v="${v}" aria-pressed="${S.filter===v}">${l}</button>`).join("");
-// 選択セット(選択モードのときだけ)
 $("#presets").innerHTML=S.edit
 ? S.presets.map((p,i)=>`<button class="pill" data-p="${i}">${esc(p.name)}<b>${p.ids.length}</b></button>`).join("")
 +`<button class="pill" id="pSave">＋ 今の選択を保存</button>`+(S.presets.length?`<button class="pill" id="pDel" style="color:var(--red)">セットを削除</button>`:"")
 : "";
-// 一覧
 const rs=rows(), k=kind(), L=$("#list");
 if(!rs.length)L.innerHTML=`<div class="empty">該当する人がいません</div>`;
 else L.innerHTML=rs.map(r=>{
@@ -340,10 +331,9 @@ else tag=b?`<span class="tag on">ブース ${esc(b.sipId)}</span>`:`<span class=
 return `<div class="row ${S.sel.has(r.id)?"sel":""}" data-id="${r.id}">
 ${S.edit?`<span class="chk" aria-hidden="true">${S.sel.has(r.id)?"✓":""}</span>`:""}
 <span class="av" style="background:hsl(${hue(r.id)} 45% 48%)" aria-hidden="true">${esc([...String(r.name).trim()][0]||"?")}</span>
-<div class="info"><div class="nm">${esc(r.name)}</div><div class="sb">${esc(g)}${g?" ・ ":""}ID ${esc(r.loginId||"")}</div>${tag}</div>
+<div class="info"><div class="nm">${esc(r.name)}${S.fresh.has(r.id)?`<span class="tag new">NEW</span>`:""}</div><div class="sb">${esc(g)}${g?" ・ ":""}ID ${esc(r.loginId||"")}</div>${tag}</div>
 <button class="sw" role="switch" aria-checked="${r._on}" aria-label="${esc(r.name)}を${r._on?"解除":"割当"}"></button></div>`;
 }).join("");
-// 下の選択バー
 const dock=$("#dock");dock.hidden=!S.edit;
 const n=S.sel.size;
 $("#dockInfo").textContent=n?`${n}人を選択中`:"人をタップして選択";
@@ -356,14 +346,38 @@ const html=`<a class="lrow" href="${ADMIN_URL}" target="_blank" rel="noopener"><
 <button class="lrow" data-copy="id"><span>ログインIDをコピー<small>${esc(DEF.loginId)}</small></span><span class="chev">⧉</span></button>`;
 $("#admLogin").innerHTML=html;$("#admMainBox").innerHTML=html;
 }
-/* ---------- actions ---------- */
 function targets(){return rows().filter(r=>S.sel.has(r.id))}
-async function refresh(){
-busy(true);
-try{await loadCore();if(S.tab==="pred")await loadPred();render()}
-catch(e){toast(e.message,true)}
-finally{busy(false)}
+function idsOf(){return new Set([...S.staffs.map(x=>"s"+x.id),...S.admins.map(x=>"a"+x.id)])}
+function syncUi(spin){
+const el=$("#sync");if(!el)return;
+el.className="sync"+(S.syncErr?" err":"")+(spin?" spin":"");
+const t=S.lastSync?new Date(S.lastSync).toLocaleTimeString("ja-JP",{hour:"2-digit",minute:"2-digit",second:"2-digit"}):"--";
+$("#syncTx").textContent=S.syncErr?("同期できません: "+S.syncErr):(spin?"リスナビと同期中…":`リスナビと自動同期中（${t} 更新・20秒ごと）`);
 }
+let syncing=false;
+async function refresh(quiet){
+if(syncing||!S.auth)return;
+syncing=true;if(!quiet)busy(true);syncUi(true);
+try{
+await loadCore();if(S.tab==="pred")await loadPred();
+const now=idsOf();
+if(S.known){
+const add=[...now].filter(x=>!S.known.has(x)),del=[...S.known].filter(x=>!now.has(x));
+add.forEach(x=>S.fresh.add(Number(x.slice(1))));
+if(add.length||del.length)toast(`スタッフ同期: 追加${add.length}件 / 削除${del.length}件`);
+}
+S.known=now;
+const live=new Set([...S.staffs,...S.admins,...S.predStaffs].map(x=>x.id));
+[...S.sel].forEach(id=>{if(!live.has(id))S.sel.delete(id)});
+S.lastSync=Date.now();S.syncErr="";
+const y=window.scrollY;render();window.scrollTo(0,y);
+}catch(e){S.syncErr=e.message;if(!quiet)toast(e.message,true)}
+finally{syncing=false;if(!quiet)busy(false);syncUi(false)}
+}
+setInterval(()=>{if(S.auth&&!document.hidden&&!busyN&&!document.querySelector(".scrim"))refresh(true)},20000);
+document.addEventListener("visibilitychange",()=>{if(!document.hidden&&S.auth)refresh(true)});
+window.addEventListener("focus",()=>{if(S.auth)refresh(true)});
+window.addEventListener("online",()=>{if(S.auth)refresh(true)});
 async function boothApply(list,assign){
 const k=kind();
 let payload=[];
@@ -428,7 +442,6 @@ const x=pool.find(x=>x.id===id);if(!x)return;
 const r={...x,_on:S.tab==="booth"?x.boothId!=null:x.predictiveBoothId!=null};
 if(S.tab==="booth")await boothApply([r],!r._on);else await predApply([r],!r._on);
 }
-/* ---------- events ---------- */
 document.addEventListener("click",e=>{
 const t=e.target;
 if(t.closest("#segTarget button")){S.target=t.closest("button").dataset.v;store.set("lnv.target",S.target);S.sel.clear();render();return}
@@ -456,14 +469,13 @@ $("#q").addEventListener("input",e=>{S.q=e.target.value;renderListOnly()});
 function renderListOnly(){const y=window.scrollY;render();window.scrollTo(0,y)}
 $("#tabBooth").onclick=()=>setTab("booth");
 $("#tabPred").onclick=()=>setTab("pred");
-async function setTab(t){if(S.tab===t)return;S.tab=t;store.set("lnv.tab",t);S.filter="all";S.sel.clear();render();window.scrollTo(0,0);if(t==="pred")await refresh()}
-$("#bReload").onclick=()=>refresh();
+async function setTab(t){if(S.tab===t)return;S.tab=t;store.set("lnv.tab",t);S.filter="all";S.sel.clear();render();window.scrollTo(0,0);S.syncErr="";await refresh(true)}
+$("#bReload").onclick=()=>refresh(false);
 $("#bOut").onclick=()=>doLogout(false);
 $("#bEdit").onclick=()=>{S.edit=!S.edit;if(!S.edit)S.sel.clear();render()};
 $("#bOn").onclick=()=>bulk(true);
 $("#bOff").onclick=()=>bulk(false);
 $("#bAll").onclick=()=>{rows().forEach(r=>S.sel.add(r.id));render()};
-/* ---------- login ---------- */
 function parseUrl(u){const m=String(u).match(/lisnavi\.com\/([^\/]+)\/([^\/]+)\/admin/);return m?{dbName:m[1],tenantUlId:m[2]}:null}
 $("#loginForm").addEventListener("submit",async e=>{
 e.preventDefault();
@@ -483,7 +495,6 @@ function doLogout(expired){
 S.auth=null;store.del("lnv.auth");S.edit=false;S.sel.clear();render();
 if(expired){const err=$("#lErr");err.textContent="ログインの有効期限が切れました。もう一度ログインしてください。";err.hidden=false}
 }
-/* ---------- boot ---------- */
 $("#lUrl").value=store.get("lnv.url",`${BASE}/${DEF.dbName}/${DEF.tenantUlId}/admin/login`);
 const last=store.get("lnv.auth",null);
 $("#lId").value=(last&&last.loginId)||DEF.loginId;
