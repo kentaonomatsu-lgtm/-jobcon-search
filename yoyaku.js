@@ -28,6 +28,9 @@
       '.yk-head{display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px}' +
       '.yk-badge b{font-weight:700;background:#14518f;color:#fff;border-radius:4px;padding:0 6px}' +
       '.yk-head span{white-space:nowrap}' +
+      '.yk-toggle{width:100%;border:0;background:none;color:inherit;font:inherit;text-align:left;cursor:pointer;padding:0}' +
+      '.yk-cnt{font-weight:700}.yk-car{margin-left:auto;font-size:11.5px;opacity:.85}' +
+      '.yk-body[hidden]{display:none}' +
       '.yk-done{color:#1b7a3d;font-weight:600;font-style:normal}' +
       '.yk-day{margin-top:5px;padding-top:4px;border-top:1px dashed #b9d3ee}' +
       '.yk-d{font-weight:700}' +
@@ -73,16 +76,27 @@
     return box;
   }
 
-  /* 詳細: jobs[id] = [{d,r,n,t,o}] */
-  function detailBadge(rows) {
+  /* 詳細: jobs[id] = [{d,r,n,t,o}]。見出し1行（件数・直近日）→ クリックで日付別の一覧を開く */
+  var openIds = {};
+  function detailBadge(rows, id) {
     var box = el('div', 'yk-badge');
     var reg = rows.filter(function (x) { return x.r; }).length;
+    var first = rows.map(function (x) { return x.d; }).sort()[0];
+    var open = !!openIds[id];
     box.title = '予約アポ 計' + rows.length + '件（うち登録済' + reg + '件）';
-    var head = el('div', 'yk-head');
+
+    var head = el('button', 'yk-head yk-toggle');
+    head.type = 'button';
+    head.setAttribute('aria-expanded', open ? 'true' : 'false');
     head.appendChild(el('b', '', '予約アポ'));
-    head.appendChild(el('span', '', rows.length + '件' + (reg ? '（登録済' + reg + '）' : '')));
+    head.appendChild(el('span', 'yk-cnt', rows.length + '件'));
+    head.appendChild(el('span', '', '直近 ' + md(first)));
+    if (reg) head.appendChild(el('i', 'yk-done', '登録済' + reg));
+    head.appendChild(el('span', 'yk-car', open ? '閉じる ▴' : '電話・担当を見る ▾'));
     box.appendChild(head);
 
+    var body = el('div', 'yk-body');
+    body.hidden = !open;
     var days = {}, order = [];
     rows.forEach(function (x) {
       if (!days[x.d]) { days[x.d] = []; order.push(x.d); }
@@ -107,7 +121,16 @@
         if (x.r) row.appendChild(el('i', 'yk-done', '登録済'));
         day.appendChild(row);
       });
-      box.appendChild(day);
+      body.appendChild(day);
+    });
+    box.appendChild(body);
+
+    head.addEventListener('click', function () {
+      var now = body.hidden;
+      body.hidden = !now;
+      openIds[id] = now;
+      head.setAttribute('aria-expanded', now ? 'true' : 'false');
+      head.lastChild.textContent = now ? '閉じる ▴' : '電話・担当を見る ▾';
     });
     return box;
   }
@@ -125,7 +148,7 @@
       var sig = (data.full ? 'F' : 'C') + JSON.stringify(v);
       if (old && old.getAttribute('data-sig') === sig) continue;
       if (old) old.remove();
-      var b = data.full ? detailBadge(v) : countsBadge(v);
+      var b = data.full ? detailBadge(v, id) : countsBadge(v);
       b.setAttribute('data-sig', sig);
       var anchor = c.querySelector('.strip') || c.querySelector('.c-body');
       if (anchor && anchor.parentNode) anchor.parentNode.insertBefore(b, anchor.nextSibling);
