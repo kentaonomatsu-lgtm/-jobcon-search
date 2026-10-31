@@ -84,7 +84,7 @@ button.go:disabled{opacity:.6;cursor:default}
   }
   function show(html){document.open();document.write(html);document.close();addBoothBtn();addYoyaku()}
   /* 予約アポ連携(./yoyaku.js)を、ログイン後に読み込む */
-  function addYoyaku(){try{var s=document.createElement('script');s.src='./yoyaku.js?v=2';document.head.appendChild(s)}catch(e){}}
+  function addYoyaku(){try{var s=document.createElement('script');s.src='./yoyaku.js?v=3';document.head.appendChild(s)}catch(e){}}
   /* ブース割当ツール(./booth/)への入口を、ログイン後のヘッダーに追加 */
   function addBoothBtn(){var n=0,tm=setInterval(function(){var lo=document.getElementById('hdLogout');if(lo&&!document.getElementById('boothBtn')){lo.insertAdjacentHTML('beforebegin','<button class="hd-btn bl" id="boothBtn" type="button" onclick="window.open(\'./booth/\',\'_blank\',\'noopener\')" aria-label="ブース割当" title="リスナビのブース割当・プレディクティブ割当を開く">🎧 ブース割当</button>');clearInterval(tm)}else if(++n>100){clearInterval(tm)}},100)}
   function fatal(e){
