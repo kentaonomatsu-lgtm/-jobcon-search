@@ -216,3 +216,37 @@
   var root = document.getElementById('results') || document.body;
   new MutationObserver(schedule).observe(root, { childList: true, subtree: true });
 })();
+/**
+ * JCコールナビ ─ 給与表記の補正
+ * 日給の求人（例：日給11,900円・月収例32.4万円）が「時給 11,900円」と表示されるのを防ぐ。
+ *   時給が5,000円以上 ＝ 日給の数字が時給欄に入っている → タイトルの「月収例◯◯万円」を使い、月収表示にする。
+ *   タイトルに月収例が無いものは、誤った金額を出さないため触らない。
+ * 読み込み元: index.html のログイン後フック addYoyaku()
+ * 失敗時は何もしない（ナビ本体の動作には影響しない）。
+ */
+(function () {
+  'use strict';
+  var LIMIT = 5000;
+
+  function fix(jobs) {
+    var n = 0;
+    if (!Array.isArray(jobs)) return n;
+    jobs.forEach(function (j) {
+      if (!j || j.wt !== '時給' || !(j.hr >= LIMIT)) return;
+      var m = /月収例?\s*([0-9]+(?:\.[0-9]+)?)\s*万円/.exec(String(j.ti || ''));
+      if (!m) return;
+      j.wt = '月給'; j.sl = parseFloat(m[1]); j.hr = 0; n++;
+    });
+    return n;
+  }
+
+  try {
+    if (typeof jcPatch === 'function' && !jcPatch._salfix) {
+      var orig = jcPatch;
+      var wrapped = function (jobs) { var r = orig.apply(this, arguments); fix(r); return r; };
+      wrapped._salfix = 1;
+      window.jcPatch = wrapped;
+    }
+    if (typeof ALL_JOBS !== 'undefined' && fix(ALL_JOBS) && typeof renderAll === 'function') renderAll();
+  } catch (e) { /* ignore */ }
+})();
