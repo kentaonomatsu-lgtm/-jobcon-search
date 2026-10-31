@@ -11,7 +11,7 @@
   if (window.__yoyakuLoaded) return;
   window.__yoyakuLoaded = true;
 
-  var ENDPOINT = '__YOYAKU_ENDPOINT__';
+  var ENDPOINT = 'https://script.google.com/macros/s/AKfycbzxIznPtNktwcHEzC8Leq7ophpyV2veI63qFhWNanjnAI7JJ5A9Jg1Fj1qabsCnAeI0fA/exec';
   var REFRESH_MS = 5 * 60 * 1000;   // 5分ごとに再取得
   var MAX_DATES = 3;                // バッジに出す日付の最大数
   var data = null;
