@@ -149,8 +149,37 @@
           W('dup2', '同じ求職者が' + md(h.date) + 'に別案件へ送客済みです。3日以上あけるため、最短' + md(new Date(new Date(h.date).getTime() + 3 * 86400000)) + '以降の登録です');
       });
     }
+    /* 台帳（過去の請求除外）・氏名ベースの長期履歴（GAS側で氏名ハッシュ化して渡す。ナビ側では未使用） */
+    var nk = ctx.nk, ck = coKey(f.co);
+    if (nk && ctx.ledger && ctx.ledger[nk]) {
+      var dptDone = false, pastDone = false;
+      ctx.ledger[nk].forEach(function (e) {
+        var sameCo = ck && e.co && (ck.indexOf(e.co) >= 0 || e.co.indexOf(ck) >= 0);
+        if (e.c === 'dpt' && !dptDone) { dptDone = true; N('dpt', 'DPT就業中・DPT登録済みの求職者です（' + e.d + 'の応募で除外）。案内NGです'); }
+        else if (e.c === 'bl' && sameCo) N('bl', nf(f.co) + 'のブラックリスト登録者です（' + e.d + 'の応募で除外）。案内NGです');
+        else if (e.c !== 'dpt' && !pastDone) { pastDone = true; W('past', '過去に請求除外歴があります（' + e.d + 'の応募・' + e.l + '）。同じ案内の繰り返しに注意'); }
+      });
+    }
+    var nh = ctx.nameHist || [];
+    if (nh.length) {
+      var same = nh.filter(function (h) { return h.co && ck && h.co === ck; });
+      nh.forEach(function (h) {
+        var days = Math.abs((now - new Date(h.date)) / 86400000);
+        if (id && h.id === id && days <= DUP_DAYS && h.ph && h.ph !== ctx.ph)
+          N('dup', '同じ求職者（電話番号違い）が同じ案件へ' + md(h.date) + 'に送客済みです');
+      });
+      if (/^綜合キャリア/.test(ck) && same.some(function (h) { return (now - new Date(h.date)) / 86400000 <= 90; }))
+        N('dup3m', '同じ求職者が3か月以内に' + nf(f.co) + 'へ応募済みです（' + md(same[same.length - 1].date) + '）');
+      if (/^トリプルエース/.test(ck) && same.some(function (h) { return (now - new Date(h.date)) / 86400000 <= 31; }))
+        N('dupT', '同じ求職者が1か月以内に' + nf(f.co) + 'へ応募済みです（' + md(same[same.length - 1].date) + '）');
+      if (/^アルムメディカル/.test(ck) && same.length >= 3)
+        N('past3', '同じ求職者の' + nf(f.co) + 'への応募が過去' + same.length + '回あります（3回以上は除外対象）');
+    }
     return { ng: ng, warn: warn, info: info, id: id, age: age(f.birth, now) };
   }
+
+  /* 氏名の正規化（GAS側でSHA-256にして台帳と照合） */
+  function nameNorm(f) { return nf(f.name).replace(/[\s　]+/g, '').toLowerCase(); }
 
   function md(d) { var x = new Date(d); return isNaN(x) ? '' : (x.getMonth() + 1) + '/' + (x.getDate()); }
 
@@ -164,7 +193,7 @@
     return L.join('\n');
   }
 
-  var api = { _ck: coKey, parse: parse, check: check, ngText: ngText, age: age, DUP_DAYS: DUP_DAYS };
+  var api = { _ck: coKey, nameNorm: nameNorm, parse: parse, check: check, ngText: ngText, age: age, DUP_DAYS: DUP_DAYS };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   root.JCCheck = api;
 })(typeof window !== 'undefined' ? window : this);
