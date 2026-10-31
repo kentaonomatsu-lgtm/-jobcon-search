@@ -120,7 +120,19 @@
       var jg = nf(job.gn);
       if (sx && jg && /^男/.test(jg) && !/女/.test(jg) && sx === '女') N('sex', '性別条件に合いません（求人：男性のみ）');
       if (sx && jg && /^女/.test(jg) && !/男/.test(jg) && sx === '男') N('sex', '性別条件に合いません（求人：女性のみ）');
-      if (job.remain != null && job.remain !== '' && +job.remain <= 0 && job.budget) W('remain', '残枠が0の表示です。送客可否を確認してください');
+      if (nf(job.ng)) N('ng', 'この求人は使用不可です（' + nf(job.ng) + '）');
+      var rm = nf(job.remain);
+      if (/^\d+$/.test(rm) && +rm <= 0) N('remain', '残枠が0です。別の求人でご案内ください');
+      if (/土日/.test(nf(job.note))) {
+        var head = String(f.raw).split('応募フォーマット')[0], dow = new Date(now.getTime() + 9 * 3600000).getUTCDay();
+        var tgt = /明日/.test(head) ? (dow + 1) % 7 : (/本日|今日/.test(head) ? dow : -1);
+        if (tgt === 0 || tgt === 6) W('note', '備考：' + nf(job.note) + '（登録希望日が土日です）');
+      }
+      var hr = nf(job.hear);
+      if (hr && hr !== '通常通り') {
+        var miss = ['BMI', '既往', 'タトゥー', '外国籍', 'ブラック'].filter(function (kw) { return hr.indexOf(kw) >= 0 && String(f.raw).indexOf(kw) < 0; });
+        if (miss.length) W('hear', 'ヒアリング項目の確認結果が記載されていません（' + miss.join('・') + '）');
+      }
     }
 
     /* 重複・二重送客 */
