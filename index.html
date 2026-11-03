@@ -82,7 +82,18 @@ button.go:disabled{opacity:.6;cursor:default}
     }catch(e){}
     return '';
   }
-  function show(html){document.open();document.write(html);document.close();addBoothBtn();addYoyaku()}
+  /* 参照元をスプレッドシートのみにする補正(2026/11/3):
+     ページ内に埋め込まれた古いフォローコール用スナップショットから「シートに無い求人」を
+     一覧へ足し込む処理だけを無効化する。UI・他の機能は一切変更しない。
+     該当処理が見つからない場合は何もせず従来どおり表示する。 */
+  function jcSheetOnly(html){
+    try{
+      var re=/else\s*\{\s*const\s+n\s*=\s*Object\.assign\(\s*\{\s*\}\s*,\s*e\s*\)\s*;\s*n\._fcx\s*=\s*1\s*;\s*jobs\.push\(\s*n\s*\)\s*;\s*byId\.set\(\s*k\s*,\s*n\s*\)\s*;\s*\}/;
+      if(!re.test(html)){ try{console.warn('jcSheetOnly: 対象処理が見つかりません')}catch(x){} return html; }
+      return html.replace(re,function(){return 'else{/* sheet-only: シートに無い求人は追加しない */}'});
+    }catch(e){ return html; }
+  }
+  function show(html){html=jcSheetOnly(html);document.open();document.write(html);document.close();addBoothBtn();addYoyaku()}
   /* 予約アポ連携(./yoyaku.js)を、ログイン後に読み込む */
   function addYoyaku(){try{var s=document.createElement('script');s.src='./yoyaku.js?v=5';document.head.appendChild(s)}catch(e){}}
   /* ブース割当ツール(./booth/)への入口を、ログイン後のヘッダーに追加 */
