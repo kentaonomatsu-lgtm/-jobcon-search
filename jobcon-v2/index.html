@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#168a27">
+<title>JCコールナビ v2｜ジョブコン求人 架電サポート</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{--g:#168a27;--g2:#0f6b1d;--bg:#f2f7f2;--tx:#231815;--mu:#6b7280;--bd:#dfe7df;--rd:#c62828;--am:#b45309}
+html,body{background:var(--bg);color:var(--tx);font:15px/1.55 "Hiragino Sans","Yu Gothic UI","Noto Sans JP",sans-serif}
+button{font:inherit;cursor:pointer}
+[hidden]{display:none!important}
+
+/* login */
+#login{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+.lcard{width:100%;max-width:380px;background:#fff;border-radius:16px;border-top:5px solid var(--g);box-shadow:0 4px 14px rgba(0,0,0,.1);padding:26px 22px}
+.lcard h1{font-size:20px;font-style:italic;font-weight:900;margin-bottom:4px}
+.lcard h1 span{color:var(--g)}
+.lcard p.s{font-size:12px;color:var(--mu);margin-bottom:16px}
+.lcard label{display:block;font-size:13px;font-weight:800;margin-bottom:6px}
+.lcard input[type=password]{width:100%;height:46px;border:1px solid var(--bd);border-radius:10px;padding:0 12px;font-size:16px;background:#f8faf8}
+.lcard .keep{display:flex;gap:8px;align-items:center;margin:12px 0 4px;font-size:13px}
+.lcard button.go{width:100%;height:48px;margin-top:12px;border:0;border-radius:10px;background:var(--g);color:#fff;font-weight:800;font-size:16px}
+.lcard button.go:disabled{opacity:.6}
+.lerr{color:var(--rd);font-size:13px;margin-top:10px;min-height:1.2em}
+
+/* header */
+header{position:sticky;top:0;z-index:20;background:var(--g);color:#fff;padding:8px 12px calc(8px);box-shadow:0 2px 6px rgba(0,0,0,.15)}
+.h1{display:flex;align-items:center;gap:8px}
+.h1 b{font-size:17px;font-style:italic;font-weight:900;flex:1;white-space:nowrap}
+.h1 button{height:32px;padding:0 12px;border-radius:8px;border:1px solid rgba(255,255,255,.6);background:transparent;color:#fff;font-size:13px;font-weight:700}
+.stat{font-size:11px;opacity:.95;margin-top:2px}
+.stat.stale{color:#ffe08a;font-weight:700}
+.searchbar{display:flex;gap:6px;margin-top:8px}
+.searchbar select{height:40px;border-radius:8px;border:0;padding:0 6px;font-size:14px;background:#fff;color:var(--tx)}
+.searchbar input{flex:1;min-width:0;height:40px;border-radius:8px;border:0;padding:0 12px;font-size:16px;background:#fff;color:var(--tx)}
+.searchbar button{height:40px;width:40px;border-radius:8px;border:0;background:rgba(255,255,255,.2);color:#fff;font-size:18px}
+
+.wrap{max-width:860px;margin:0 auto;padding:10px 10px 80px}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
+.chip{height:34px;padding:0 12px;border-radius:17px;border:1px solid var(--bd);background:#fff;font-size:13px;font-weight:700;color:var(--tx)}
+.chip.on{background:var(--g);border-color:var(--g);color:#fff}
+.chip small{opacity:.8;margin-left:4px;font-weight:600}
+.sortlbl{font-size:12px;color:var(--mu);align-self:center}
+#banner .bn{background:#fff3e0;border:1px solid #ffcc80;color:#7a4300;border-radius:10px;padding:10px 12px;font-size:13px;margin:8px 0}
+#banner .bn.err{background:#fdecea;border-color:#f5b5b0;color:#8a1c14}
+.count{font-size:12px;color:var(--mu);margin:2px 2px 6px}
+
+/* card */
+.card{background:#fff;border:1px solid var(--bd);border-radius:12px;margin-bottom:10px;overflow:hidden}
+.strip{display:flex;justify-content:space-between;align-items:center;padding:5px 12px;font-size:12px;font-weight:800}
+.q-full{background:#e8f5e9;color:#1b5e20}.q-mid{background:#fff8e1;color:#8a5a00}.q-low{background:#fff0e0;color:#b45309}.q-out{background:#fdecea;color:var(--rd)}.q-none{background:#f1f3f1;color:var(--mu)}
+.strip b{font-size:15px}.strip small{font-weight:600}
+.tags{display:flex;flex-wrap:wrap;gap:5px;padding:9px 12px 0}
+.tg{font-size:11px;font-weight:800;border-radius:5px;padding:2px 7px;background:#eef2ee;color:#374151}
+.tg.p1{background:var(--rd);color:#fff}.tg.p2{background:#ef6c00;color:#fff}.tg.p3{background:#1565c0;color:#fff}.tg.p4{background:#9ca3af;color:#fff}
+.tg.bl{background:#fff0e0;color:#b45309;border:1px solid #f0b27a}
+.tg.fc{background:#e3f2fd;color:#0d47a1}
+.tg.outs{background:#ede7f6;color:#4527a0}
+.cbody{padding:6px 12px 10px}
+.co{font-size:12px;color:var(--mu);font-weight:700}
+.ti{font-size:15px;font-weight:800;line-height:1.4;margin:2px 0}
+.loc{font-size:13px;color:#374151}.loc small{color:var(--mu)}
+.sal{display:flex;align-items:baseline;gap:6px;margin-top:6px}
+.sal .t{font-size:11px;font-weight:800;color:#fff;background:var(--g);border-radius:4px;padding:1px 6px}
+.sal .n{font-size:22px;font-weight:900;color:var(--g2)}.sal .n small{font-size:12px;margin-left:2px}
+.pills{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}
+.pill{font-size:12px;border-radius:999px;border:1px solid var(--bd);padding:1px 9px;background:#f8faf8}
+.pill.free{background:#e8f5e9;border-color:#a5d6a7;color:#1b5e20;font-weight:700}
+.pill.bx{background:#fff8e1;border-color:#ffe082;color:#8a5a00;font-weight:700}
+.kind{font-size:12px;color:var(--mu);margin-top:5px}
+.period{font-size:12px;margin-top:5px;font-weight:700;color:#0d47a1}
+.note{margin-top:7px;border-radius:8px;padding:7px 10px;font-size:13px;white-space:pre-line}
+.note.warn{background:#fff3e0;border:1px solid #ffcc80}
+.note.memo{background:#f5f5f5;border:1px solid #e0e0e0}
+.note.ok{color:var(--mu);padding:0 2px;background:none;border:0;font-size:12px}
+.note b{font-weight:800}
+.ids{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.idb{border:1px solid var(--bd);background:#fff;border-radius:6px;padding:2px 8px;font-size:12px;color:#374151}
+.idb b{font-weight:800}
+.acts{display:flex;gap:6px;margin-top:8px}
+.acts button,.acts a{flex:1;height:38px;border-radius:9px;border:1px solid var(--g);background:#fff;color:var(--g2);font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center;text-decoration:none}
+.acts .pri{background:var(--g);color:#fff}
+#more{display:block;margin:8px auto;height:44px;padding:0 28px;border-radius:22px;border:1px solid var(--g);background:#fff;color:var(--g2);font-weight:800}
+.empty{text-align:center;color:var(--mu);padding:40px 10px}
+mark{background:#fff59d;padding:0 1px;border-radius:2px}
+
+/* modal */
+#modal{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:50;display:flex;align-items:flex-end;justify-content:center}
+.sheet{background:#fff;width:100%;max-width:720px;max-height:88vh;overflow:auto;border-radius:16px 16px 0 0;padding:16px}
+.sheet h2{font-size:16px;margin-bottom:6px}
+.sheet h4{font-size:12px;color:var(--mu);margin:12px 0 3px}
+.sheet pre{white-space:pre-wrap;word-break:break-word;font:inherit;font-size:13px}
+.sheet .close{float:right;height:32px;padding:0 12px;border:1px solid var(--bd);background:#fff;border-radius:8px}
+#toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#222;color:#fff;border-radius:20px;padding:8px 16px;font-size:13px;z-index:60;opacity:0;transition:.2s;pointer-events:none}
+#toast.on{opacity:.95}
+</style>
+</head>
+<body>
+
+<div id="login" hidden>
+  <form class="lcard" id="lform" autocomplete="on">
+    <h1>JC<span>コールナビ</span> v2</h1>
+    <p class="s">ジョブコン求人 架電サポート（求人リストは社内シートのみを参照）</p>
+    <label for="pw">パスワード</label>
+    <input id="pw" type="password" autocomplete="current-password" required>
+    <label class="keep"><input id="keep" type="checkbox" checked> このブラウザで保持する</label>
+    <button class="go" id="lgo" type="submit">ログイン</button>
+    <div class="lerr" id="lerr" role="alert"></div>
+  </form>
+</div>
+
+<div id="app" hidden>
+  <header>
+    <div class="h1"><b>JCコールナビ v2</b><button id="btnRefresh" type="button">更新</button><button id="btnLogout" type="button">ログアウト</button></div>
+    <div class="stat" id="stat"></div>
+    <div class="searchbar">
+      <select id="scope" aria-label="検索対象">
+        <option value="all">すべて</option><option value="co">社名</option><option value="id">案件ID</option>
+        <option value="no">仕事No</option><option value="gy">業種</option><option value="kw">キーワード</option>
+      </select>
+      <input id="q" type="search" placeholder="例：豊田市　組立　スタッフ東海" autocomplete="off">
+      <button id="qclear" type="button" aria-label="クリア">×</button>
+    </div>
+  </header>
+  <div class="wrap">
+    <div id="banner"></div>
+    <div class="chips" id="views"></div>
+    <div class="chips" id="sorts"></div>
+    <div class="count" id="count"></div>
+    <main id="list"></main>
+    <button id="more" type="button" hidden>さらに表示</button>
+  </div>
+</div>
+
+<div id="modal" hidden><div class="sheet" id="sheet" role="dialog" aria-modal="true"></div></div>
+<div id="toast"></div>
+
+<script>
+"use strict";
+/* ========== 設定（ここだけ書き換える） ========== */
+const CONFIG = {
+  API_URL: "https://script.google.com/macros/s/AKfycbyUOEe6s780SnTUZqXMA04hZOBdW1k7v_YDLAT755adEiM8AvwpGz8as3t6b1Afg7rY/exec",                       // ← jc-api.gs のウェブアプリURL（/exec）
+  POLL_MS: 60000,                    // 更新チェック間隔
+  STALE_MS: 5 * 60000,               // これ以上チェックできなければ警告
+  PAGE: 40,
+  OUTS_COMPANY: "トリプルエース株式会社",   // アウトソーシング採用の対象
+  OUTS_BUDGET: 1,
+  BL_NAMES: ["トリプルエース", "日本ケイテム", "ワールドインテック"]  // 社名にこれを含む求人は「BL確認必要」
+};
+const FOREIGN_SITES = [
+  {k:"ibo",all:[["イビデン"],["大野"]]},{k:"tsa",all:[["テックササキ"],["熱田"]]},{k:"tsb",all:[["テックササキ"],["大江"]]},
+  {k:"fuji",all:[["トヨタ車体"],["富士松"]]},{k:"inabe",all:[["トヨタ車体"],["いなべ","員弁"]]},
+  {k:"iba",all:[["イビデン"],["大垣"]],not:["大垣中央"]},{k:"ibb",all:[["イビデン"],["大垣中央"]]},
+  {k:"rin",all:[["リンナイ"],["暁"]]},{k:"yoshi",all:[["トヨタ車体"],["吉原"]]},{k:"sony",all:[["ソニー"],["木更津"]]},
+  {k:"sad",all:[["トヨタ紡織"],["猿投"]]},{k:"taka",all:[["トヨタ紡織"],["高岡"]]}
+];
+
+/* ========== 状態 ========== */
+const S = { pw: "", jobs: [], updatedAt: null, checkedAt: 0, lastErr: "", view: "all", sort: "rec", scope: "all", q: "", shown: CONFIG.PAGE, busy: false };
+const $ = id => document.getElementById(id);
+const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const kata = s => s.replace(/[ぁ-ゖ]/g, c => String.fromCharCode(c.charCodeAt(0) + 96));
+const norm = s => kata(String(s || "").normalize("NFKC").toLowerCase()).replace(/\s+/g, " ").trim();
+const store = {
+  get(k) { try { return localStorage.getItem(k) || sessionStorage.getItem(k) || ""; } catch (e) { return ""; } },
+  set(k, v, keep) { try { (keep ? localStorage : sessionStorage).setItem(k, v); } catch (e) {} },
+  del(k) { try { localStorage.removeItem(k); sessionStorage.removeItem(k); } catch (e) {} }
+};
+function toast(m) { const t = $("toast"); t.textContent = m; t.classList.add("on"); clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.remove("on"), 1600); }
+
+/* ========== API（参照元はこの1本だけ） ========== */
+async function api(body) {
+  if (!CONFIG.API_URL) throw new Error("API_URL が未設定です（index.html の CONFIG.API_URL）");
+  const ctl = new AbortController(), to = setTimeout(() => ctl.abort(), 25000);
+  try {
+    const r = await fetch(CONFIG.API_URL, { method: "POST", body: JSON.stringify(Object.assign({ pw: S.pw }, body)), cache: "no-store", signal: ctl.signal });
+    if (!r.ok) throw new Error("HTTP " + r.status);
+    return await r.json();
+  } finally { clearTimeout(to); }
+}
+
+/* ========== 求人の整形（1か所に集約） ========== */
+function prep(j, i) {
+  const t = norm(j.ti), joined = [j.ti, j.maker, j.co, j.cs, j.pf, j.ct, j.st, j.gy, j.sk, j.hear, j.memo].join(" ");
+  j._i = i;
+  j._f = {
+    all: norm(joined + " " + j.id + " " + j.no),
+    co: norm(j.co + " " + j.maker),
+    id: String(j.id), no: norm(j.no),
+    gy: norm(j.gy + " " + j.sk),
+    kw: norm([j.ti, j.sk, j.st, j.hear, j.memo, j.cs].join(" "))
+  };
+  const bm = t.match(/祝い金\s*([0-9]+)\s*万/);
+  j._bx = bm ? Number(bm[1]) : 0;
+  const tx = norm([j.ti, j.hear, j.memo].join(" "));
+  j._free = /寮費(が|は)?(実質|ずっと)?無料/.test(tx);
+  j._sub = !j._free && /寮費(の)?補助|家賃補助|住宅手当/.test(tx);
+  j._sf = /夜勤専属/.test(tx) ? "夜勤専属" : /日勤専属/.test(tx) ? "日勤専属" : /日勤/.test(tx) ? "日勤" : /夜勤あり|夜勤/.test(tx) ? "夜勤あり" : /3交代|3交替/.test(tx) ? "3交代" : /2交代|2交替/.test(tx) ? "2交代" : "";
+  const mk = String(j.maker || "").normalize("NFKC").replace(/\s+/g, "").toUpperCase();
+  j._foreign = FOREIGN_SITES.some(f => f.all.every(alt => alt.some(w => mk.indexOf(w.toUpperCase()) >= 0)) && !(f.not || []).some(w => mk.indexOf(w) >= 0));
+  j._outs = j.co === CONFIG.OUTS_COMPANY && Number(j.budget) === CONFIG.OUTS_BUDGET;
+  j._bl = CONFIG.BL_NAMES.some(n => String(j.co || "").indexOf(n) >= 0);
+  j._sal = j.wt === "時給" ? Math.round(j.hr * 173 / 10000 * 10) / 10 : j.wt === "日給" ? Math.round(j.dy * 21 / 10000 * 10) / 10 : (j.sl || 0);
+  return j;
+}
+
+/* ========== 絞り込み・並べ替え ========== */
+function visible() {
+  let r = S.jobs;
+  if (S.view === "outs") r = r.filter(j => j._outs);
+  else if (S.view === "foreign") r = r.filter(j => j._foreign);
+  const toks = norm(S.q).split(" ").filter(Boolean);
+  if (toks.length) {
+    const key = S.scope === "id" ? "id" : S.scope;
+    r = r.filter(j => { const f = j._f[key] || j._f.all; return toks.every(t => f.indexOf(t) >= 0); });
+  }
+  r = r.slice();
+  const pr = j => (j.pr == null ? 9 : j.pr), rm = j => (j.remain == null ? -1 : j.remain);
+  const by = {
+    rec: (a, b) => pr(a) - pr(b) || rm(b) - rm(a) || a._i - b._i,
+    sal_h: (a, b) => b._sal - a._sal || a._i - b._i,
+    sal_l: (a, b) => (a._sal || 1e9) - (b._sal || 1e9) || a._i - b._i,
+    age_h: (a, b) => (b.ag || 0) - (a.ag || 0) || a._i - b._i,
+    bonus: (a, b) => b._bx - a._bx || a._i - b._i
+  };
+  r.sort(by[S.sort] || by.rec);
+  return r;
+}
+
+/* ========== 描画 ========== */
+const SORTS = [["rec", "おすすめ"], ["sal_h", "給与が高い"], ["sal_l", "給与が低い"], ["age_h", "年齢上限が高い"], ["bonus", "祝い金順"]];
+function mark(text) {
+  const toks = norm(S.q).split(" ").filter(Boolean);
+  let h = esc(text);
+  if (!toks.length || S.scope === "id") return h;
+  const raw = String(text || "");
+  const nraw = kata(raw.normalize("NFKC").toLowerCase());
+  if (nraw.length !== raw.length) return h; // 位置がずれる文字は強調しない
+  const hit = new Array(raw.length).fill(false);
+  toks.forEach(t => { let p = 0; while ((p = nraw.indexOf(t, p)) >= 0) { for (let k = p; k < p + t.length; k++) hit[k] = true; p += t.length; } });
+  let out = "", on = false;
+  for (let k = 0; k < raw.length; k++) {
+    if (hit[k] && !on) { out += "<mark>"; on = true; }
+    if (!hit[k] && on) { out += "</mark>"; on = false; }
+    out += esc(raw[k]);
+  }
+  return out + (on ? "</mark>" : "");
+}
+function quota(j) {
+  const hasB = j.budget != null, hasR = j.remain != null;
+  if (!hasB && !hasR) return "";
+  if (!hasR) return '<div class="strip q-none"><span>送客枠</span><span><small>予算' + j.budget + "</small></span></div>";
+  const r = j.remain; let cls, lb;
+  if (r <= 0) { cls = "q-out"; lb = "枠切れ"; } else if (r <= 3) { cls = "q-low"; lb = "残りわずか"; } else if (r <= 10) { cls = "q-mid"; lb = "送客枠"; } else { cls = "q-full"; lb = "余裕あり"; }
+  return '<div class="strip ' + cls + '"><span>' + lb + "</span><span>残 <b>" + r + "</b>" + (hasB ? " <small>／予算" + j.budget + "</small>" : "") + "</span></div>";
+}
+function sal(j) {
+  if (j.wt === "時給" && j.hr > 0) return '<div class="sal"><span class="t">時給</span><span class="n">' + j.hr.toLocaleString() + "<small>円</small></span></div>";
+  if (j.wt === "月給" && j.sl > 0) return '<div class="sal"><span class="t">月収例</span><span class="n">' + String(j.sl).replace(/\.0$/, "") + "<small>万円</small></span></div>";
+  if (j.wt === "日給" && j.dy > 0) return '<div class="sal"><span class="t">日給</span><span class="n">' + j.dy.toLocaleString() + "<small>円</small></span></div>";
+  return "";
+}
+function pills(j) {
+  let p = "";
+  if (j.ag) p += '<span class="pill">〜' + j.ag + "歳</span>";
+  if (j.gn && j.gn !== "不問") p += '<span class="pill">' + esc(j.gn) + "のみ</span>";
+  if (j._free) p += '<span class="pill free">寮費無料</span>';
+  else if (j._sub) p += '<span class="pill free">寮費補助あり</span>';
+  else if (j.dorm) p += '<span class="pill">寮完備</span>';
+  if (j._bx > 0) p += '<span class="pill bx">祝い金' + j._bx + "万</span>";
+  if (j._sf) p += '<span class="pill">' + esc(j._sf) + "</span>";
+  if (j.emp) p += '<span class="pill">' + esc(j.emp) + "</span>";
+  return p;
+}
+function notes(j) {
+  let h = "";
+  if (j.hear && j.hear !== "通常通り") h += '<div class="note warn"><b>注意！ ヒアリング項目：</b>' + esc(j.hear) + "</div>";
+  else if (j.hear) h += '<div class="note ok">ヒアリング項目：通常通り</div>';
+  if (j.memo) h += '<div class="note memo"><b>備考：</b>' + esc(j.memo) + "</div>";
+  return h;
+}
+function card(j) {
+  const p = j.pr == null ? 9 : j.pr;
+  const url = /^https?:\/\//.test(j.url) ? j.url : "";
+  const map = "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent((j.pf || "") + (j.ct || ""));
+  return '<article class="card" data-id="' + esc(j.id) + '">' + quota(j)
+    + '<div class="tags"><span class="tg p' + (p > 4 ? 4 : p) + '">優先' + (j.pr == null ? "-" : j.pr) + "</span>"
+    + (j._bl ? '<span class="tg bl">BL確認必要</span>' : "")
+    + (j.period ? '<span class="tg fc">フォローコール必要</span>' : "")
+    + (j._outs ? '<span class="tg outs">アウトソーシング採用 可能</span>' : "") + "</div>"
+    + '<div class="cbody"><div class="co">' + mark(j.co) + (j.maker ? " ／ " + mark(j.maker) : "") + "</div>"
+    + '<div class="ti">' + mark(j.ti || j.sk) + "</div>"
+    + '<div class="loc">' + esc(j.pf) + " " + mark(j.ct) + (j.st ? " <small>" + esc(j.st) + "</small>" : "") + "</div>"
+    + sal(j) + '<div class="pills">' + pills(j) + "</div>"
+    + (j.gy || j.sk ? '<div class="kind">' + esc(j.gy) + (j.gy && j.sk ? " / " : "") + esc(j.sk) + "</div>" : "")
+    + (j.period ? '<div class="period">期間 ' + esc(j.period) + "</div>" : "")
+    + notes(j)
+    + '<div class="ids"><button class="idb" data-copy="' + esc(j.id) + '" type="button">案件ID <b>' + mark(j.id) + "</b></button>"
+    + (j.no ? '<button class="idb" data-copy="' + esc(j.no) + '" type="button">仕事No <b>' + mark(j.no) + "</b></button>" : "") + "</div>"
+    + '<div class="acts"><button class="pri" data-detail="' + esc(j.id) + '" type="button">詳細</button>'
+    + '<a href="' + esc(map) + '" target="_blank" rel="noopener">地図で見る</a>'
+    + (url ? '<a href="' + esc(url) + '" target="_blank" rel="noopener">求人↗</a>' : "") + "</div></div></article>";
+}
+function render() {
+  const all = S.jobs, list = visible();
+  $("views").innerHTML = [["all", "求人一覧", all.length], ["outs", "アウトソ", all.filter(j => j._outs).length], ["foreign", "外国籍OK", all.filter(j => j._foreign).length]]
+    .map(v => '<button class="chip' + (S.view === v[0] ? " on" : "") + '" data-view="' + v[0] + '" type="button">' + v[1] + "<small>" + v[2].toLocaleString() + "</small></button>").join("");
+  $("sorts").innerHTML = '<span class="sortlbl">並び順</span>' + SORTS.map(s => '<button class="chip' + (S.sort === s[0] ? " on" : "") + '" data-sort="' + s[0] + '" type="button">' + s[1] + "</button>").join("");
+  $("count").textContent = list.length.toLocaleString() + " / " + all.length.toLocaleString() + "件";
+  const part = list.slice(0, S.shown);
+  $("list").innerHTML = part.length ? part.map(card).join("") : '<div class="empty">該当する求人がありません</div>';
+  $("more").hidden = list.length <= S.shown;
+  $("more").textContent = "さらに表示（残り" + (list.length - S.shown).toLocaleString() + "件）";
+  renderStatus();
+}
+function fmt(iso) {
+  if (!iso) return "不明";
+  const d = new Date(iso); if (isNaN(d)) return "不明";
+  const p = n => String(n).padStart(2, "0");
+  return (d.getMonth() + 1) + "/" + d.getDate() + " " + p(d.getHours()) + ":" + p(d.getMinutes());
+}
+function renderStatus() {
+  const ago = S.checkedAt ? Math.max(0, Math.round((Date.now() - S.checkedAt) / 1000)) : null;
+  const stale = ago === null || ago * 1000 > CONFIG.STALE_MS;
+  const agoTxt = ago === null ? "未確認" : ago < 60 ? ago + "秒前" : Math.round(ago / 60) + "分前";
+  const st = $("stat");
+  st.className = "stat" + (stale ? " stale" : "");
+  st.textContent = "シート更新 " + fmt(S.updatedAt) + "　／　最終確認 " + agoTxt;
+  const b = [];
+  if (S.lastErr) b.push('<div class="bn err">更新の確認に失敗しました：' + esc(S.lastErr) + "<br>表示中のデータは古い可能性があります。</div>");
+  else if (stale && S.jobs.length) b.push('<div class="bn">最新の確認ができていません。「更新」を押してください。</div>');
+  if (S.dup && S.dup.length) b.push('<div class="bn">シートに案件IDの重複があります（最初の行のみ表示）：' + esc(S.dup.join("、")) + "</div>");
+  $("banner").innerHTML = b.join("");
+}
+
+/* ========== データ取得（ver → 変わった時だけ full） ========== */
+async function refresh(force) {
+  if (S.busy) return; S.busy = true;
+  try {
+    let need = !!force || !S.jobs.length;
+    if (!need) {
+      const v = await api({ mode: "ver" });
+      if (!v.ok) throw apiErr(v);
+      S.checkedAt = Date.now();
+      need = !v.updatedAt || v.updatedAt !== S.updatedAt;
+    }
+    if (need) {
+      const d = await api({ mode: "full" });
+      if (!d.ok) throw apiErr(d);
+      if (!Array.isArray(d.jobs)) throw new Error("応答の形式が不正です");
+      S.jobs = d.jobs.map(prep);          // 常に丸ごと置き換え（他ソースとの合成はしない）
+      S.updatedAt = d.updatedAt; S.dup = d.dupIds || []; S.checkedAt = Date.now();
+    }
+    S.lastErr = "";
+  } catch (e) {
+    if (e && e.code === "auth") { logout("パスワードが違うか、変更されました。"); S.busy = false; return; }
+    S.lastErr = e && e.name === "AbortError" ? "タイムアウト" : (e && e.message || String(e));
+  } finally { S.busy = false; }
+  if (!$("app").hidden) render();
+}
+function apiErr(r) {
+  const m = { auth: "パスワードが違います", server_not_configured: "サーバー側でパスワード(JC_PW)が未設定です", bad_request: "リクエスト不正", not_found: "該当なし" };
+  const e = new Error(m[r.error] || r.message || r.error || "不明なエラー"); e.code = r.error; return e;
+}
+
+/* ========== ログイン ========== */
+function showApp() { $("login").hidden = true; $("app").hidden = false; render(); }
+function logout(msg) {
+  store.del("jc2.pw"); S.pw = ""; S.jobs = []; S.updatedAt = null; S.checkedAt = 0;
+  $("app").hidden = true; $("login").hidden = false; $("lerr").textContent = msg || ""; $("pw").value = "";
+}
+$("lform").addEventListener("submit", async e => {
+  e.preventDefault();
+  const pw = $("pw").value; if (!pw) return;
+  $("lgo").disabled = true; $("lerr").textContent = "";
+  S.pw = pw;
+  try {
+    const d = await api({ mode: "full" });
+    if (!d.ok) throw apiErr(d);
+    S.jobs = d.jobs.map(prep); S.updatedAt = d.updatedAt; S.dup = d.dupIds || []; S.checkedAt = Date.now(); S.lastErr = "";
+    store.set("jc2.pw", pw, $("keep").checked);
+    showApp();
+  } catch (err) { S.pw = ""; $("lerr").textContent = err.code === "auth" ? "パスワードが違います" : (err.message || "接続できません"); }
+  finally { $("lgo").disabled = false; }
+});
+$("btnLogout").onclick = () => logout("");
+$("btnRefresh").onclick = async () => { $("btnRefresh").disabled = true; await refresh(true); $("btnRefresh").disabled = false; toast(S.lastErr ? "更新に失敗しました" : "最新を取得しました"); };
+
+/* ========== 操作 ========== */
+let qt;
+$("q").addEventListener("input", e => { clearTimeout(qt); qt = setTimeout(() => { S.q = e.target.value; S.shown = CONFIG.PAGE; render(); }, 120); });
+$("scope").onchange = e => { S.scope = e.target.value; S.shown = CONFIG.PAGE; render(); };
+$("qclear").onclick = () => { $("q").value = ""; S.q = ""; S.shown = CONFIG.PAGE; render(); };
+$("more").onclick = () => { S.shown += CONFIG.PAGE; render(); };
+document.addEventListener("click", async e => {
+  const t = e.target.closest("[data-view],[data-sort],[data-copy],[data-detail],.close");
+  if (!t) return;
+  if (t.dataset.view) { S.view = t.dataset.view; S.shown = CONFIG.PAGE; render(); }
+  else if (t.dataset.sort) { S.sort = t.dataset.sort; S.shown = CONFIG.PAGE; render(); }
+  else if (t.dataset.copy) { try { await navigator.clipboard.writeText(t.dataset.copy); toast("コピーしました：" + t.dataset.copy); } catch (x) { toast("コピーできませんでした"); } }
+  else if (t.dataset.detail) openDetail(t.dataset.detail);
+  else if (t.classList.contains("close")) closeModal();
+});
+$("modal").addEventListener("click", e => { if (e.target === $("modal")) closeModal(); });
+document.addEventListener("keydown", e => { if (e.key === "Escape") closeModal(); });
+function closeModal() { $("modal").hidden = true; }
+async function openDetail(id) {
+  const j = S.jobs.find(x => x.id === id); if (!j) return;
+  const sh = $("sheet");
+  sh.innerHTML = '<button class="close" type="button">閉じる</button><h2>' + esc(j.ti) + "</h2><div class='co'>" + esc(j.co) + "　案件ID " + esc(j.id) + "</div>"
+    + (j.hear ? "<h4>ヒアリング項目</h4><pre>" + esc(j.hear) + "</pre>" : "") + (j.memo ? "<h4>備考</h4><pre>" + esc(j.memo) + "</pre>" : "")
+    + '<div id="dtl"><h4>読み込み中…</h4></div>';
+  $("modal").hidden = false;
+  try {
+    const d = await api({ mode: "detail", id: id });
+    if (!d.ok) throw apiErr(d);
+    $("dtl").innerHTML = (d.qual ? "<h4>求める資格</h4><pre>" + esc(d.qual) + "</pre>" : "") + (d.desc ? "<h4>仕事内容</h4><pre>" + esc(d.desc) + "</pre>" : "") || "<h4>詳細テキストはありません</h4>";
+  } catch (err) { const el = $("dtl"); if (el) el.innerHTML = "<h4>詳細を取得できませんでした：" + esc(err.message) + "</h4>"; }
+}
+
+/* ========== 起動 ========== */
+function startPolling() {
+  setInterval(() => { if (document.visibilityState === "visible" && S.pw) refresh(false); }, CONFIG.POLL_MS);
+  setInterval(() => { if (!$("app").hidden) renderStatus(); }, 5000);
+  const kick = () => { if (S.pw && !$("app").hidden) refresh(false); };
+  document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") kick(); });
+  window.addEventListener("focus", kick); window.addEventListener("online", kick);
+}
+(async function boot() {
+  startPolling();
+  if (!CONFIG.API_URL) { $("login").hidden = false; $("lerr").textContent = "未設定：CONFIG.API_URL に jc-api.gs のURLを貼ってください。"; return; }
+  const saved = store.get("jc2.pw");
+  if (saved) {
+    S.pw = saved;
+    try { await refresh(true); } catch (e) {}
+    if (S.pw && S.jobs.length) { showApp(); return; }
+    if (S.pw && S.lastErr) { $("login").hidden = false; $("lerr").textContent = "接続できません：" + S.lastErr; S.pw = ""; return; }
+  }
+  $("login").hidden = false;
+})();
+</script>
+</body>
+</html>
