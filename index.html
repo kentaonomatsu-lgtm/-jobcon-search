@@ -86,7 +86,15 @@ button.go:disabled{opacity:.6;cursor:default}
      ページ内に埋め込まれた古いフォローコール用スナップショットから「シートに無い求人」を
      一覧へ足し込む処理だけを無効化する。UI・他の機能は一切変更しない。
      該当処理が見つからない場合は何もせず従来どおり表示する。 */
+  var JC_FOREIGN_OFF=true; /* 外国籍OK対象を一旦すべて無し(0件)にする。復活させる時は false にする */
   function jcSheetOnly(html){
+    if(JC_FOREIGN_OFF){
+      try{
+        var rf=/const\s+FOREIGN_SITES\s*=\s*\[[\s\S]*?\n\]\s*;/;
+        if(rf.test(html)) html=html.replace(rf,function(){return 'const FOREIGN_SITES=[];'});
+        else console.warn('jcSheetOnly: FOREIGN_SITES が見つかりません');
+      }catch(x){}
+    }
     try{
       var re=/else\s*\{\s*const\s+n\s*=\s*Object\.assign\(\s*\{\s*\}\s*,\s*e\s*\)\s*;\s*n\._fcx\s*=\s*1\s*;\s*jobs\.push\(\s*n\s*\)\s*;\s*byId\.set\(\s*k\s*,\s*n\s*\)\s*;\s*\}/;
       if(!re.test(html)){ try{console.warn('jcSheetOnly: 対象処理が見つかりません')}catch(x){} return html; }
