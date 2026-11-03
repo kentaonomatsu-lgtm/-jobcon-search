@@ -101,7 +101,19 @@ button.go:disabled{opacity:.6;cursor:default}
       return html.replace(re,function(){return 'else{/* sheet-only: シートに無い求人は追加しない */}'});
     }catch(e){ return html; }
   }
-  function show(html){html=jcSheetOnly(html);document.open();document.write(html);document.close();addBoothBtn();addYoyaku()}
+  /* 求人一覧カードのタイトルを、R列(ti)から H列「求める資格[テキスト]」(qu) に切り替える補正(2026/11/3)。
+     data.json に qu が無い求人・H列が空の求人は、従来どおり ti → sk の順で表示する。
+     対象処理が見つからない場合は何もしない。検索・コピー文・詳細は変更しない。 */
+  function jcTitleQual(html){
+    try{
+      var rt=/(c-ti\\?"\s*>'\s*\+\s*)escMark\(\s*j\.ti\s*\|\|\s*j\.sk\s*\|\|\s*""\s*\)/;
+      if(!rt.test(html)){ try{console.warn('jcTitleQual: 対象処理が見つかりません')}catch(x){} return html; }
+      return html.replace(rt,function(m,pre){
+        return pre+'escMark(String(j.qu||"").replace(/<B>/gi," ").replace(/\\s+/g," ").trim()||j.ti||j.sk||"")';
+      });
+    }catch(e){ return html; }
+  }
+  function show(html){html=jcTitleQual(jcSheetOnly(html));document.open();document.write(html);document.close();addBoothBtn();addYoyaku()}
   /* 予約アポ連携(./yoyaku.js)を、ログイン後に読み込む */
   function addYoyaku(){try{var s=document.createElement('script');s.src='./yoyaku.js?v=5';document.head.appendChild(s)}catch(e){}}
   /* ブース割当ツール(./booth/)への入口を、ログイン後のヘッダーに追加 */
