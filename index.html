@@ -131,7 +131,10 @@ button.go:disabled{opacity:.6;cursor:default}
     if(!JC_HIDE_FC) return;
     try{ var c=document.querySelector('.reg-chip'); var r=c&&c.closest('.row'); if(r) r.style.display='none'; }catch(e){}
   }
-  function show(html){html=jcHideFc(jcTitleQual(jcSheetOnly(html)));document.open();document.write(html);document.close();jcHideFcRow();addBoothBtn();addYoyaku()}
+  /* ヒアリング項目の先頭に年齢上限を付ける(2026/11/4): アプリ内 jcPatch の「j.hear=e.hear;」を差し替えるだけ。元に戻す時は JC_HEAR_AGE を false にする。 */
+  var JC_HEAR_AGE=true;
+  function jcHearAge(html){ if(!JC_HEAR_AGE) return html; try{ var re=/j\.hear\s*=\s*e\.hear\s*;/g; if(!re.test(html)){ try{console.warn('jcHearAge: 対象処理が見つかりません')}catch(x){} return html; } return html.replace(re,function(){return 'j.hear=(j.ag?"\u5e74\u9f62\uff1a\uff5e"+j.ag+"\u6b73":"")+(e.hear?((j.ag?"\u30fb":"")+e.hear):"");'}); }catch(e){ return html; } }
+  function show(html){html=jcHideFc(jcHearAge(jcTitleQual(jcSheetOnly(html))));document.open();document.write(html);document.close();jcHideFcRow();addBoothBtn();addYoyaku()}
   /* 予約アポ連携(./yoyaku.js)を、ログイン後に読み込む */
   function addYoyaku(){try{var s=document.createElement('script');s.src='./yoyaku.js?v=5';document.head.appendChild(s)}catch(e){}}
   /* ブース割当ツール(./booth/)への入口を、ログイン後のヘッダーに追加 */
