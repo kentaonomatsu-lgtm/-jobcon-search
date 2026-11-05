@@ -1,0 +1,82 @@
+(async function () {
+  'use strict';
+  var DATA = 'https://kentaonomatsu-lgtm.github.io/-jobcon-search/data.json';
+  var ONE_MONTH = /^(ut|トリプルエース|ワールドインテック|日本ケイテム)/;
+  var $ = function (s, r) { return (r || document).querySelector(s); };
+  function nf(s) { return String(s == null ? '' : s).normalize('NFKC').trim(); }
+  function coKey(s) { return nf(s).replace(/株式会社|\(株\)|㈱|有限会社/g, '').replace(/\s+/g, '').replace(/[0-9]+$/, '').toLowerCase(); }
+  function ymd(d) { return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2); }
+  function md(d) { return (d.getMonth() + 1) + '/' + d.getDate(); }
+  function day0(d) { return new Date(d.getFullYear(), d.getMonth(), d.getDate()); }
+  function addDays(d, n) { var x = day0(d); x.setDate(x.getDate() + n); return x; }
+  function addMonths(d, n) { var x = day0(d); x.setMonth(x.getMonth() + n); return x; }
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+
+  var old = document.getElementById('jc-hantei'); if (old) old.remove();
+  var box = document.createElement('div'); box.id = 'jc-hantei';
+  box.style.cssText = 'position:fixed;inset:0;z-index:2147483647;background:rgba(0,0,0,.5);font:14px/1.5 sans-serif;color:#222;overflow:auto';
+  box.innerHTML = '<div style="background:#fff;max-width:760px;margin:20px auto;padding:16px;border-radius:8px">' +
+    '<div style="display:flex;gap:8px;align-items:center"><b style="font-size:16px">送客可否判定</b>' +
+    '<input id="jch-tel" placeholder="電話番号" inputmode="numeric" style="flex:1;font-size:16px;padding:6px;border:1px solid #888;border-radius:4px">' +
+    '<button id="jch-go" style="font-size:15px;padding:6px 14px">判定</button><button id="jch-x" style="font-size:15px;padding:6px 10px">×</button></div>' +
+    '<div id="jch-out" style="margin-top:12px;color:#666">電話番号を入れて判定を押してください</div></div>';
+  document.body.appendChild(box);
+  $('#jch-x').onclick = function () { box.remove(); };
+
+  var jobs = null;
+  async function loadJobs() {
+    if (jobs) return jobs;
+    var r = await fetch(DATA, { cache: 'no-cache' }); var j = await r.json(); jobs = j.jobs || []; return jobs;
+  }
+  async function history(tel) {
+    var r = await fetch('/admnt/applicant?tel=' + encodeURIComponent(tel), { credentials: 'same-origin' });
+    if (r.status !== 200 || /login/.test(r.url)) throw new Error('管理画面にログインしてから実行してください');
+    var d = new DOMParser().parseFromString(await r.text(), 'text/html');
+    var rows = [];
+    d.querySelectorAll('table tbody tr').forEach(function (tr) {
+      var c = [].map.call(tr.children, function (td) { return td.textContent.replace(/\s+/g, ' ').trim(); });
+      if (c.length < 12 || !/^\d{4}-\d\d-\d\d/.test(c[11])) return;
+      rows.push({ co: c[6], title: c[7], st: c[8], dev: c[9], memo: c[10], at: new Date(c[11].replace(' ', 'T')) });
+    });
+    return rows;
+  }
+
+  async function run() {
+    var out = $('#jch-out'), tel = nf($('#jch-tel').value).replace(/[^0-9]/g, '');
+    if (tel.length < 10) { out.textContent = '電話番号は10〜11桁で入力してください'; return; }
+    out.textContent = '確認中…';
+    try {
+      var res = await Promise.all([history(tel), loadJobs()]);
+      var hist = res[0], J = res[1], today = day0(new Date());
+      if (!hist.length) { out.innerHTML = '<b>応募履歴なし</b>。全社 ○（3日・月ルールの制限なし）。ただし他社コールセンター分は管理画面に出ない場合があります。'; }
+      var last = hist.reduce(function (m, h) { return !m || h.at > m ? h.at : m; }, null);
+      var gapDate = last ? addDays(last, 3) : null;
+      var byCo = {}; hist.forEach(function (h) { var k = coKey(h.co); if (!byCo[k] || h.at > byCo[k].at) byCo[k] = h; });
+      var cos = {}; J.forEach(function (j) { var k = coKey(j.co); (cos[k] = cos[k] || { name: j.co, n: 0 }).n++; });
+      var list = Object.keys(cos).map(function (k) {
+        var h = byCo[k], one = ONE_MONTH.test(k), mDate = h ? (one ? addMonths(h.at, 1) : addMonths(h.at, 3)) : null;
+        var gOK = !gapDate || today >= gapDate, mOK = !mDate || today >= mDate;
+        var mark, until = null;
+        if (mOK && gOK) mark = '○';
+        else if (mOK) { mark = '△'; until = gapDate; }
+        else { mark = '✕'; until = (gapDate && gapDate > mDate) ? gapDate : mDate; }
+        return { name: cos[k].name, n: cos[k].n, mark: mark, until: until, why: h ? (md(h.at) + '応募' + (one ? '(1か月)' : '(3か月)')) : '' };
+      });
+      var rank = { '○': 0, '△': 1, '✕': 2 };
+      list.sort(function (a, b) { return rank[a.mark] - rank[b.mark] || (a.until || 0) - (b.until || 0) || b.n - a.n; });
+      var cnt = { '○': 0, '△': 0, '✕': 0 }; list.forEach(function (x) { cnt[x.mark]++; });
+      var h1 = '<div style="margin:6px 0"><b>直近応募: ' + (last ? ymd(last) + '（3日ルール明け ' + md(gapDate) + '）' : 'なし') + '</b><br>○ ' + cnt['○'] + '社 / △ ' + cnt['△'] + '社（3日待ち） / ✕ ' + cnt['✕'] + '社（月ルール）</div>';
+      var hh = '<details style="margin:6px 0"><summary>応募履歴 ' + hist.length + '件</summary>' + hist.map(function (h) {
+        return '<div style="font-size:12px">' + esc(ymd(h.at)) + ' ' + esc(h.co) + ' ' + esc(h.st) + ' ' + esc(h.dev) + '</div>'; }).join('') + '</details>';
+      var tb = '<table style="width:100%;border-collapse:collapse;font-size:13px">' + list.map(function (x) {
+        var col = x.mark === '○' ? '#0a7' : x.mark === '△' ? '#c80' : '#c33';
+        return '<tr style="border-top:1px solid #ddd"><td style="width:28px;font-weight:bold;color:' + col + '">' + x.mark + '</td><td>' + esc(x.name) + '</td><td style="text-align:right;white-space:nowrap">' +
+          (x.until ? md(x.until) + '〜 ' : '') + '<span style="color:#888">' + esc(x.why) + ' / 求人' + x.n + '</span></td></tr>';
+      }).join('') + '</table>';
+      out.innerHTML = h1 + hh + '<div style="font-size:12px;color:#888;margin:4px 0">起点は管理画面の応募日時。△=3日明けから登録可、✕=月ルール明けから</div>' + tb;
+    } catch (e) { out.innerHTML = '<span style="color:#c33">' + esc(e.message || e) + '</span>'; }
+  }
+  $('#jch-go').onclick = run;
+  $('#jch-tel').addEventListener('keydown', function (e) { if (e.key === 'Enter') run(); });
+  $('#jch-tel').focus();
+})();
