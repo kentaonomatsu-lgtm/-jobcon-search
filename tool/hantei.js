@@ -17,9 +17,9 @@
   box.style.cssText = 'position:fixed;inset:0;z-index:2147483647;background:rgba(0,0,0,.5);font:14px/1.5 sans-serif;color:#222;overflow:auto';
   box.innerHTML = '<div style="background:#fff;max-width:760px;margin:20px auto;padding:16px;border-radius:8px">' +
     '<div style="display:flex;gap:8px;align-items:center"><b style="font-size:16px">送客可否判定</b>' +
-    '<input id="jch-tel" placeholder="電話番号" inputmode="numeric" style="flex:1;font-size:16px;padding:6px;border:1px solid #888;border-radius:4px">' +
+    '<input id="jch-tel" placeholder="電話番号" inputmode="numeric" style="flex:1;min-width:0;font-size:16px;padding:6px;border:1px solid #888;border-radius:4px"><input id="jch-jn" placeholder="お仕事No" style="flex:1;min-width:0;font-size:16px;padding:6px;border:1px solid #888;border-radius:4px">' +
     '<button id="jch-go" style="font-size:15px;padding:6px 14px">判定</button><button id="jch-x" style="font-size:15px;padding:6px 10px">×</button></div>' +
-    '<div id="jch-out" style="margin-top:12px;color:#666">電話番号を入れて判定を押してください</div></div>';
+    '<div id="jch-out" style="margin-top:12px;color:#666">電話番号とお仕事Noを入れて判定を押してください</div></div>';
   document.body.appendChild(box);
   $('#jch-x').onclick = function () { box.remove(); };
 
@@ -36,7 +36,7 @@
     d.querySelectorAll('table tbody tr').forEach(function (tr) {
       var c = [].map.call(tr.children, function (td) { return td.textContent.replace(/\s+/g, ' ').trim(); });
       if (c.length < 12 || !/^\d{4}-\d\d-\d\d/.test(c[11])) return;
-      rows.push({ name: c[2], co: c[6], title: c[7], st: c[8], dev: c[9], memo: c[10], at: new Date(c[11].replace(' ', 'T')) });
+      rows.push({ jno: c[1], name: c[2], co: c[6], title: c[7], st: c[8], dev: c[9], memo: c[10], at: new Date(c[11].replace(' ', 'T')) });
     });
     return rows;
   }
@@ -83,10 +83,26 @@
         return '<tr style="border-top:1px solid #ddd"><td style="width:28px;font-weight:bold;font-size:16px;color:' + col + '">' + x.mark + '</td><td>' + esc(x.name) + '</td><td style="text-align:right;white-space:nowrap">' +
           (x.until ? '<b>' + md(x.until) + '〜</b> ' : '') + '<span style="color:#888">' + esc(x.why) + ' / 求人' + x.n + '</span></td></tr>';
       }).join('') + '</table><div style="font-size:12px;color:#888;margin:6px 0">起点は管理画面の応募日時。△=3日明けから登録可、✕=月ルール明けから</div>';
-      out.innerHTML = head + hh + tb;
+      var jq = nf($('#jch-jn').value).toUpperCase().replace(/\s+/g, ''), jobCard = '';
+      if (jq) {
+        var jm = J.filter(function (j) { return nf(j.jn).toUpperCase() === jq || String(j.id) === jq; });
+        if (!jm.length) {
+          jobCard = '<div style="border:2px solid #c33;border-radius:8px;padding:10px;margin:8px 0"><b style="color:#c33">お仕事No「' + esc(jq) + '」が求人サーチに見つかりません</b><br>募集終了か入力違いの可能性があります。番号を確認してください。</div>';
+        } else {
+          var jb = jm[0], jk = coKey(jb.co), jx = list.filter(function (x) { return coKey(x.name) === jk; })[0];
+          var big = jx.mark === '○' ? '送客OK' : jx.mark === '△' ? '送客OK 後日登録' + md(jx.until) : '送客NG ' + md(jx.until) + '以降';
+          var colr = jx.mark === '○' ? '#0a7' : jx.mark === '△' ? '#c80' : '#c33';
+          var reason = jx.mark === '○' ? '制限なし' : jx.mark === '△' ? '直近応募から3日あけるルール（' + md(gapDate) + '〜）' : (jx.why ? jx.why + 'のため' : '') + '（' + md(jx.until) + '〜）';
+          jobCard = '<div style="border:3px solid ' + colr + ';border-radius:8px;padding:12px;margin:8px 0"><div style="font-size:26px;font-weight:bold;color:' + colr + '">' + jx.mark + ' ' + big + '</div>' +
+            '<div style="font-size:14px;margin-top:4px">' + esc(reason) + '</div>' +
+            '<div style="font-size:13px;color:#555;margin-top:6px">' + esc(jb.jn) + ' / ' + esc(jb.co) + '<br>' + esc(String(jb.ti || '').split('\n')[0]).slice(0, 70) + '<br>' + esc((jb.pf || '') + (jb.ct || '')) + (jb.emp ? ' / ' + esc(jb.emp) : '') + '</div></div>';
+        }
+      }
+      out.innerHTML = jobCard + head + hh + tb;
     } catch (e) { out.innerHTML = '<span style="color:#c33">' + esc(e.message || e) + '</span>'; }
   }
   $('#jch-go').onclick = run;
   $('#jch-tel').addEventListener('keydown', function (e) { if (e.key === 'Enter') run(); });
+  $('#jch-jn').addEventListener('keydown', function (e) { if (e.key === 'Enter') run(); });
   $('#jch-tel').focus();
 })();
