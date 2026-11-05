@@ -36,7 +36,7 @@
     d.querySelectorAll('table tbody tr').forEach(function (tr) {
       var c = [].map.call(tr.children, function (td) { return td.textContent.replace(/\s+/g, ' ').trim(); });
       if (c.length < 12 || !/^\d{4}-\d\d-\d\d/.test(c[11])) return;
-      rows.push({ jno: c[1], name: c[2], co: c[6], title: c[7], st: c[8], dev: c[9], memo: c[10], at: new Date(c[11].replace(' ', 'T')) });
+      rows.push({ jno: c[1], name: c[2], age: parseInt(nf(c[4]), 10) || null, sex: /男/.test(c[5]) ? '男性' : /女/.test(c[5]) ? '女性' : '', co: c[6], title: c[7], st: c[8], dev: c[9], memo: c[10], at: new Date(c[11].replace(' ', 'T')) });
     });
     return rows;
   }
@@ -65,11 +65,11 @@
       list.sort(function (a, b) { return rank[a.mark] - rank[b.mark] || (a.until || 0) - (b.until || 0) || b.n - a.n; });
       var cnt = { '○': 0, '△': 0, '✕': 0 }; list.forEach(function (x) { cnt[x.mark]++; });
       hist.sort(function (x, y) { return y.at - x.at; });
-      var name = hist.length ? hist[0].name : '';
+      var name = hist.length ? hist[0].name : '', age = hist.length ? hist[0].age : null, sex = hist.length ? hist[0].sex : '';
       var ago = last ? Math.round((today - day0(last)) / 86400000) : 0;
       var gOKnow = !gapDate || today >= gapDate;
       var head = '<div style="border:2px solid ' + (gOKnow ? '#0a7' : '#c80') + ';border-radius:8px;padding:10px;margin:8px 0">' +
-        '<div style="font-size:20px;font-weight:bold">' + esc(name || '（履歴なし）') + '</div>' +
+        '<div style="font-size:20px;font-weight:bold">' + esc(name || '（履歴なし）') + '<span style="font-size:15px;font-weight:normal;margin-left:8px">' + (age ? age + '歳' : '') + ' ' + esc(sex) + '</span></div>' +
         '<div style="font-size:15px;margin-top:4px">最終応募日: <b>' + (last ? ymd(last) + ' ' + String(last.getHours()).padStart(2, '0') + ':' + String(last.getMinutes()).padStart(2, '0') + '（' + (ago === 0 ? '今日' : ago + '日前') + '）' : 'なし') + '</b></div>' +
         '<div style="font-size:15px">3日ルール: <b style="color:' + (gOKnow ? '#0a7' : '#c33') + '">' + (gOKnow ? '明け済み（全社OK）' : md(gapDate) + 'まで全社不可') + '</b></div>' +
         '<div style="font-size:15px">○ ' + cnt['○'] + '社 / △ ' + cnt['△'] + '社（3日待ち） / ✕ ' + cnt['✕'] + '社（月ルール）</div></div>';
@@ -91,10 +91,21 @@
         } else {
           var jb = jm[0], jk = coKey(jb.co), jx = list.filter(function (x) { return coKey(x.name) === jk; })[0];
           var big = jx.mark === '○' ? '送客OK' : jx.mark === '△' ? '送客OK 後日登録' + md(jx.until) : '送客NG ' + md(jx.until) + '以降';
-          var colr = jx.mark === '○' ? '#0a7' : jx.mark === '△' ? '#c80' : '#c33';
-          var reason = jx.mark === '○' ? '制限なし' : jx.mark === '△' ? '直近応募から3日あけるルール（' + md(gapDate) + '〜）' : (jx.why ? jx.why + 'のため' : '') + '（' + md(jx.until) + '〜）';
-          jobCard = '<div style="border:3px solid ' + colr + ';border-radius:8px;padding:12px;margin:8px 0"><div style="font-size:26px;font-weight:bold;color:' + colr + '">' + jx.mark + ' ' + big + '</div>' +
-            '<div style="font-size:14px;margin-top:4px">' + esc(reason) + '</div>' +
+          var reason = jx.mark === '○' ? '応募間隔の制限なし' : jx.mark === '△' ? '直近応募から3日あけるルール（' + md(gapDate) + '〜）' : (jx.why ? jx.why + 'のため' : '') + '（' + md(jx.until) + '〜）';
+          var cond = [], condNG = [], condUnk = false;
+          var ageOK = null, sexOK = null;
+          if (age == null) { condUnk = true; cond.push('年齢: 取得できず（要確認）'); }
+          else if (jb.ag && age > Number(jb.ag)) { ageOK = false; condNG.push('年齢上限' + jb.ag + '歳（求職者' + age + '歳）'); cond.push('✕ 年齢: 上限' + jb.ag + '歳 / 求職者' + age + '歳'); }
+          else { cond.push('○ 年齢: 上限' + (jb.ag || '不問') + '歳 / 求職者' + age + '歳'); }
+          if (!sex) { condUnk = true; cond.push('性別: 取得できず（要確認）'); }
+          else if (jb.gn && jb.gn !== '不問' && jb.gn !== sex) { condNG.push('性別条件' + jb.gn + '（求職者' + sex + '）'); cond.push('✕ 性別: 求人' + jb.gn + ' / 求職者' + sex); }
+          else { cond.push('○ 性別: 求人' + (jb.gn || '不問') + ' / 求職者' + sex); }
+          var mark = condNG.length ? '✕' : (condUnk ? '？' : jx.mark);
+          var colr = mark === '○' ? '#0a7' : mark === '△' ? '#c80' : mark === '？' ? '#c80' : '#c33';
+          var title = condNG.length ? '✕ 条件不適合（' + condNG.join('、') + '）' : mark === '？' ? '？ 年齢・性別を要確認（間隔判定: ' + big + '）' : jx.mark + ' ' + big;
+          jobCard = '<div style="border:3px solid ' + colr + ';border-radius:8px;padding:12px;margin:8px 0"><div style="font-size:24px;font-weight:bold;color:' + colr + '">' + esc(title) + '</div>' +
+            '<div style="font-size:14px;margin-top:6px"><b>応募間隔:</b> ' + jx.mark + ' ' + esc(big) + '（' + esc(reason) + '）</div>' +
+            '<div style="font-size:14px"><b>条件:</b><br>' + cond.map(esc).join('<br>') + '</div>' +
             '<div style="font-size:13px;color:#555;margin-top:6px">' + esc(jb.jn) + ' / ' + esc(jb.co) + '<br>' + esc(String(jb.ti || '').split('\n')[0]).slice(0, 70) + '<br>' + esc((jb.pf || '') + (jb.ct || '')) + (jb.emp ? ' / ' + esc(jb.emp) : '') + '</div></div>';
         }
       }
