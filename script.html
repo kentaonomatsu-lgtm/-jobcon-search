@@ -2,192 +2,489 @@
 <html lang="ja">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>ジョブコンプラス 架電スクリプト</title>
 <style>
-:root{--red:#B11F35;--ink:#1A1A1A;--sub:#666;--line:#E3E3E3;--bg:#F4F4F4;--ng:#C62828;--ok:#2E7D32;--ph:#FFE9A8}
+:root{--red:#B11F35;--ink:#1A1A1A;--sub:#666;--line:#E3E3E3;--bg:#F4F4F4;--ph:#FFE9A8;--gold:#E8A200}
 *{box-sizing:border-box}
-html{scroll-behavior:smooth;scroll-padding-top:70px}
-body{margin:0;font-family:"Hiragino Sans","Yu Gothic UI","Meiryo",sans-serif;color:var(--ink);background:var(--bg);font-size:20px;line-height:1.8}
-header{position:sticky;top:0;z-index:10;background:#1A1A1A;display:flex;gap:6px;padding:8px 14px;align-items:center;overflow-x:auto}
-header span{color:#aaa;font-size:13px;margin-right:8px;white-space:nowrap}
-header a{color:#ddd;text-decoration:none;font-size:15px;padding:6px 12px;border-radius:20px;background:#333;white-space:nowrap}
-header a.on{background:var(--red);color:#fff;font-weight:700}
-header a.key::after{content:" ★";color:#ffcf4d}
-main{max-width:900px;margin:0 auto;padding:20px 20px 120px}
-section{background:#fff;border-radius:14px;padding:22px 28px 26px;margin:0 0 22px;box-shadow:0 1px 4px rgba(0,0,0,.08)}
-section.key{border:3px solid #E8A200}
-h2{margin:0 0 4px;font-size:28px;display:flex;align-items:center;gap:12px}
-h2 .n{background:var(--red);color:#fff;border-radius:10px;padding:0 14px;font-size:22px}
-.goal{margin:0 0 14px;color:var(--sub);font-size:15px}
-.lb{display:inline-block;background:#EEE;border-radius:6px;font-size:13px;font-weight:700;padding:0 10px;margin:12px 0 2px}
-.say{border-left:8px solid var(--red);background:#FFF7F8;border-radius:6px;padding:12px 20px;margin:4px 0 8px;font-size:23px;line-height:1.75}
-.say.must{border-left-color:#E8A200;background:#FFFBEA}
+html{scroll-behavior:smooth}
+body{margin:0;font-family:"Hiragino Sans","Yu Gothic UI","Meiryo",sans-serif;color:var(--ink);background:var(--bg);font-size:19px;line-height:1.75}
+button{font-family:inherit;cursor:pointer}
+
+/* ---- 上部バー ---- */
+.top{position:sticky;top:0;z-index:20;background:#1A1A1A;color:#fff;padding:8px 12px 10px}
+.modes{display:flex;gap:6px;margin-bottom:8px}
+.modes a{flex:1;text-align:center;text-decoration:none;background:#333;color:#ccc;border-radius:8px;padding:6px 4px;font-size:15px}
+.modes a.on{background:#fff;color:#1A1A1A;font-weight:800}
+.steps{display:flex;gap:6px}
+.steps a{flex:1;text-align:center;text-decoration:none;border-radius:10px;background:#333;color:#ddd;padding:4px 2px 5px;line-height:1.25;font-size:12px;min-width:0}
+.steps a b{display:block;font-size:20px}
+.steps a.on{background:var(--red);color:#fff}
+.steps a.key b::after{content:"★";color:#ffcf4d;font-size:12px;margin-left:2px}
+
+/* ---- 本文 ---- */
+main{max-width:820px;margin:0 auto;padding:14px 14px 80px}
+.panel,.step{display:block}
+html{scroll-padding-top:120px}
+.step,.panel{margin:0 0 30px}
+.sub{display:inline-block;background:#EEE;border-radius:6px;font-size:14px;font-weight:800;padding:0 12px;margin:10px 0 4px}
+.sec{margin:26px 0 8px;font-size:22px;border-left:8px solid #1A1A1A;padding-left:12px}
+.head{display:flex;align-items:baseline;gap:10px;margin:6px 0 2px}
+.head .n{background:var(--red);color:#fff;border-radius:10px;padding:0 14px;font-size:24px;font-weight:800}
+.head h1{margin:0;font-size:28px;line-height:1.3}
+.goal{margin:0 0 12px;color:var(--sub);font-size:15px}
+.card{background:#fff;border-radius:14px;padding:14px 18px 16px;margin:0 0 14px;box-shadow:0 1px 4px rgba(0,0,0,.08)}
+.card.key{border:3px solid var(--gold)}
+.card>h3{margin:0 0 8px;font-size:15px;color:var(--sub);font-weight:700;letter-spacing:.02em}
+.card>h3 .t{display:inline-block;background:var(--ink);color:#fff;border-radius:5px;padding:0 9px;font-size:13px;margin-right:8px}
+.card>h3 .t.must{background:var(--gold)}
+
+/* 言う */
+.say{border-left:8px solid var(--red);background:#FFF7F8;border-radius:6px;padding:12px 18px;margin:6px 0;font-size:24px;line-height:1.7}
+.say.must{border-left-color:var(--gold);background:#FFFBEA}
+.say small{display:block;font-size:15px;color:var(--sub);line-height:1.5;margin-top:2px}
 .ph{background:var(--ph);border-radius:4px;padding:0 3px}
-.br{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px}
-.card{border:1px solid var(--line);border-radius:10px;padding:10px 16px;font-size:18px;line-height:1.7;background:#FAFAFA}
-.card b{display:flex;align-items:center;gap:8px;font-size:18px;margin-bottom:2px}
-.card b i{font-style:normal;background:var(--red);color:#fff;width:26px;height:26px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:14px}
-.card em{display:inline-block;font-style:normal;font-size:13px;font-weight:700;background:#1A1A1A;color:#fff;border-radius:5px;padding:0 9px;margin-top:2px}
-.card em.end{background:#888}
-.wide{grid-column:1/3}
-.six{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:6px 0 10px}
-.six div{background:#FFF1D6;border-radius:8px;padding:6px 12px;font-size:17px;font-weight:700}
-.ng,.ok,.note{border-radius:8px;padding:8px 16px;margin:8px 0;font-size:16px;line-height:1.7}
-.ng{background:#FDECEC;color:#8E1B1B}
-.ng::before{content:"✕ ";font-weight:800}
-.ok{background:#EAF6EB;color:#1B5E20}
-.ok::before{content:"○ ";font-weight:800}
+
+/* 行：ラベル＋本文 */
+.row{display:grid;grid-template-columns:96px 1fr;gap:10px;align-items:start;padding:10px 0;border-top:1px solid var(--line)}
+.row:first-of-type{border-top:0}
+.row .k{background:#EEE;border-radius:8px;text-align:center;font-weight:800;font-size:15px;padding:4px 2px;line-height:1.3}
+.row .v{font-size:21px;line-height:1.65}
+.row .go{display:inline-block;background:var(--ink);color:#fff;border-radius:5px;font-size:13px;font-weight:700;padding:0 9px;margin-top:2px}
+.row .go.end{background:#888}
+
+/* 確認チェック（タップ） */
+.chk{list-style:none;margin:4px 0 0;padding:0}
+.chk li{margin:0 0 6px}
+.chk label{display:flex;gap:12px;align-items:flex-start;padding:10px 14px;border:2px solid var(--line);border-radius:10px;cursor:pointer;background:#FAFAFA;font-size:21px;line-height:1.55}
+.chk input{width:28px;height:28px;margin-top:2px;flex:none;accent-color:var(--red)}
+.chk label.done{background:#EAF6EB;border-color:#A5D6A7}
+.chk small{display:block;font-size:14px;color:var(--sub);line-height:1.4}
+
+/* 判定・NG・OK */
+.ng,.ok,.note{border-radius:8px;padding:8px 14px;margin:8px 0;font-size:16px;line-height:1.65}
+.ng{background:#FDECEC;color:#8E1B1B}.ng::before{content:"✕ ";font-weight:800}
+.ok{background:#EAF6EB;color:#1B5E20}.ok::before{content:"○ ";font-weight:800}
 .note{background:#F2F2F2;color:#555}
-ul{margin:2px 0 0;padding-left:22px}
-.tabs{display:flex;gap:6px;margin:4px 0 6px;flex-wrap:wrap}
-.tabs button{border:2px solid var(--line);background:#fff;border-radius:8px;padding:5px 14px;font-size:15px;cursor:pointer;font-family:inherit}
+.stop{background:#B11F35;color:#fff;border-radius:10px;padding:10px 16px;margin:8px 0;font-size:19px;font-weight:700;line-height:1.55}
+.stop span{font-weight:400;font-size:15px;display:block;opacity:.95}
+.go-on{background:#2E7D32;color:#fff;border-radius:10px;padding:10px 16px;margin:8px 0;font-size:19px;font-weight:700}
+
+/* 6点 */
+.six{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:2px 0 8px}
+.six div{background:#FFF1D6;border-radius:8px;padding:6px 10px;font-size:16px;font-weight:800}
+
+/* 対比表 */
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:4px 0 8px}
+.pair>div{border-radius:8px;padding:8px 12px;font-size:16px;line-height:1.55}
+.pair .o{background:#EAF6EB;color:#1B5E20}.pair .x{background:#FDECEC;color:#8E1B1B}
+.pair .o::before{content:"○ 言う　";font-weight:800}.pair .x::before{content:"✕ 言わない　";font-weight:800}
+.pair .lab{grid-column:1/3;font-weight:800;font-size:15px;color:var(--sub);padding:6px 2px 0;background:none}
+
+/* NG返事チップ */
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 8px}
+.chips span{background:#FDECEC;color:#8E1B1B;border-radius:16px;padding:3px 12px;font-size:16px;font-weight:700}
+
+/* 補足（折りたたみ） */
+details{margin:8px 0}
+summary{cursor:pointer;font-size:15px;font-weight:700;color:var(--sub);padding:6px 0}
+details[open] summary{color:var(--ink)}
+
+/* タブ */
+.tabs{display:flex;gap:6px;margin:2px 0 8px;flex-wrap:wrap}
+.tabs button{border:2px solid var(--line);background:#fff;border-radius:8px;padding:5px 14px;font-size:15px}
 .tabs button.on{background:var(--red);border-color:var(--red);color:#fff;font-weight:700}
-.pane{display:none}.pane.on{display:block}
+.pane{display:block}
+
+/* 7か条 */
+.rules{counter-reset:r;list-style:none;margin:0;padding:0}
+.rules li{counter-increment:r;position:relative;padding:12px 14px 12px 58px;margin:0 0 10px;background:#FFFBEA;border:1px solid #F0D890;border-radius:10px;font-size:19px;line-height:1.6}
+.rules li::before{content:counter(r);position:absolute;left:12px;top:12px;width:32px;height:32px;border-radius:50%;background:var(--gold);color:#fff;font-weight:800;display:flex;align-items:center;justify-content:center;font-size:17px}
+.rules li b{display:block;font-size:21px}
+.rules li span{font-size:16px;color:#444}
+
+/* 事例 */
+.case{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:0 0 8px}
+.case .x,.case .o{border-radius:8px;padding:8px 12px;font-size:16px;line-height:1.55}
+.case .x{background:#FDECEC;color:#8E1B1B}.case .x::before{content:"✕ ";font-weight:800}
+.case .o{background:#EAF6EB;color:#1B5E20}.case .o::before{content:"○ ";font-weight:800}
+
+.reset{display:block;width:100%;margin-top:10px;border:2px solid var(--line);background:#fff;border-radius:10px;padding:10px;font-size:16px;font-weight:700}
+.prog{font-weight:800;font-size:16px;margin:8px 0 0}
+.prog.all{color:#2E7D32}
+
+@media(max-width:640px){
+  body{font-size:18px}
+  main{padding:10px 10px 130px}
+  .head h1{font-size:24px}
+  .say{font-size:21px;padding:10px 14px}
+  .row{grid-template-columns:1fr;gap:4px}
+  .row .k{text-align:left;padding:2px 10px;width:max-content}
+  .row .v{font-size:19px}
+  .pair,.case{grid-template-columns:1fr}
+  .pair .lab{grid-column:auto}
+  .six{grid-template-columns:1fr 1fr}
+  .steps a{font-size:10px}
+}
 </style>
 </head>
 <body>
-<header id="nav">
-  <span>架電スクリプト</span>
-  <a href="#s1">1 状況確認</a>
-  <a href="#s2">2 条件</a>
-  <a href="#s3">3 求人案内</a>
-  <a href="#s4">4 応募条件</a>
-  <a href="#s5" class="key">5 YES取り</a>
-  <a href="#s6">6 住所・時間帯</a>
-  <a href="#s7" class="key">7 締め</a>
-</header>
+
+<div class="top">
+  <div class="modes" id="modes"><a href="#s1">通話の流れ</a><a href="#p-rules">7か条</a><a href="#p-cases">除外の実例</a></div>
+  <div class="steps" id="steps">
+    <a href="#s1"><b>1</b>状況</a>
+    <a href="#s2" class="key"><b>2</b>資格</a>
+    <a href="#s3"><b>3</b>求人</a>
+    <a href="#s4"><b>4</b>就業時期</a>
+    <a href="#s5" class="key"><b>5</b>YES取り</a>
+    <a href="#s6"><b>6</b>住所</a>
+    <a href="#s7" class="key"><b>7</b>締め</a>
+  </div>
+</div>
 
 <main>
+<div class="panel" id="p-call">
 
-<section id="s1">
-  <h2><span class="n">1</span>状況確認</h2>
+<!-- STEP 1 -->
+<div class="step" id="s1">
+  <div class="head"><span class="n">1</span><h1>状況確認</h1></div>
   <p class="goal">フルネームで本人確認 → 今も探しているか聞く</p>
-
-  <div class="tabs" data-t="o">
-    <button class="on" data-p="a">会員登録者</button>
-    <button data-p="b">新規応募者</button>
-    <button data-p="c">1か月以上前の登録者</button>
+  <div class="card">
+    <h3><span class="t">言う</span>あいさつ</h3>
+        <span class="sub">会員登録者</span><div class="say" data-t="o" data-p="a">お世話になっております。ジョブコンプラス サポートセンターの〇〇です。<br>ご登録いただいた方に、サポートのご連絡をしています。<br>△△様、今もお仕事を探していますか？</div>
+    <span class="sub">新規応募者</span><div class="say" data-t="o" data-p="b">お世話になっております。ジョブコンプラス サポートセンターの〇〇です。ご登録いただいた方に、状況確認とサポートのご連絡をしています。△△様、今もお仕事を探していますか？</div>
+    <span class="sub">1か月以上前の登録者</span><div class="say" data-t="o" data-p="c">お世話になっております。ジョブコンプラス サポートセンターの〇〇です。以前ご登録いただいた方に、状況確認とサポートのご連絡をしています。△△様、今はお仕事を探していますか？</div>
   </div>
-  <div class="pane on" data-t="o" data-p="a"><div class="say">お世話になっております。ジョブコンプラス サポートセンターの〇〇です。<br>ご登録いただいた方に、サポートのご連絡をしています。<br>△△様、今もお仕事を探していますか？</div></div>
-  <div class="pane" data-t="o" data-p="b"><div class="say">お世話になっております。ジョブコンプラス サポートセンターの〇〇です。<br>ご登録いただいた方に、状況確認とサポートのご連絡をしています。<br>△△様、今もお仕事を探していますか？</div></div>
-  <div class="pane" data-t="o" data-p="c"><div class="say">お世話になっております。ジョブコンプラス サポートセンターの〇〇です。<br>以前ご登録いただいた方に、状況確認とサポートのご連絡をしています。<br>△△様、今はお仕事を探していますか？</div></div>
-
-  <span class="lb">返事で分かれる</span>
-  <div class="br">
-    <div class="card"><b><i>A</i>まだ探している</b>
-      「今、希望に近い求人がいくつかあります。一番大事にしたい条件はありますか？（職種・勤務地など）」<br><em>→ 2へ</em></div>
-    <div class="card"><b><i>B</i>働いているが探したい</b>
-      「お忙しい中ありがとうございます。今のお仕事で、こうなったらいいなというご希望はありますか？情報収集だけでも大丈夫です。」<br><em>→ 2へ</em></div>
-    <div class="card"><b><i>C</i>選考結果待ち</b>
-      「応援しています！結果はいつ頃ですか？ご縁がなかった時にすぐ次をご案内できるよう、その頃にまたご連絡してもいいですか？」<br><em class="end">時期を聞いて再架電を設定 → 終話</em></div>
-    <div class="card"><b><i>D</i>もう決まった</b>
-      「おめでとうございます！いつから働かれますか？」<br>（確認後）「安心しました。またお探しの時はいつでもご連絡ください。ありがとうございました。」<br><em class="end">就業日を確認 → 終話</em></div>
-    <div class="card wide"><b><i>E</i>迷っている</b>
-      「迷っているのは、どんな点ですか？『ここが良ければ決めたい』『ここが少し気になる』など、整理をお手伝いします。」<br><em>→ 2へ</em></div>
+  <div class="card">
+    <h3><span class="t">分岐</span>返事で分かれる</h3>
+    <div class="row"><div class="k">A<br>探している</div><div class="v">「今、希望に近い求人がいくつかあります。一番大事にしたい条件はありますか？（職種・勤務地など）」<br><span class="go">→ STEP 2へ</span></div></div>
+    <div class="row"><div class="k">B<br>働いているが探したい</div><div class="v">「お忙しい中ありがとうございます。今のお仕事で、こうなったらいいなというご希望はありますか？情報収集だけでも大丈夫です。」<br><span class="go">→ STEP 2へ</span></div></div>
+    <div class="row"><div class="k">C<br>選考結果待ち</div><div class="v">「応援しています！結果はいつ頃ですか？ご縁がなかった時にすぐ次をご案内できるよう、その頃にまたご連絡してもいいですか？」<br><span class="go end">時期を聞いて再架電を設定 → 終話</span></div></div>
+    <div class="row"><div class="k">D<br>もう決まった</div><div class="v">「おめでとうございます！いつから働かれますか？」<br>（確認後）「安心しました。またお探しの時はいつでもご連絡ください。ありがとうございました。」<br><span class="go end">就業日を確認 → 終話</span></div></div>
+    <div class="row"><div class="k">E<br>迷っている</div><div class="v">「迷っているのは、どんな点ですか？『ここが良ければ決めたい』『ここが少し気になる』など、整理をお手伝いします。」<br><span class="go">→ STEP 2へ</span></div></div>
+    <div class="note">「時間がない」→ 断り対応へ。C・Dは STEP 2 に進まず、ここで完了。</div>
   </div>
-  <div class="note">「時間がない」→ 断り対応へ。C・DはSTEP 2に進まず、ここで完了。</div>
-</section>
+  <div class="ng">「早急に企業に伝えておきます」など、企業側の対応を約束しない。急ぎの希望（内定の返事期限など）を聞いたら、STEP 6 の要望メモに記載する。</div>
+</div>
 
-<section id="s2">
-  <h2><span class="n">2</span>条件を聞く</h2>
-  <p class="goal">4つだけ聞く。聞いたらすぐ求人案内へ</p>
-  <span class="lb">年齢</span>
-  <div class="say">年齢は〇〇歳で合っていますか？</div>
-  <span class="lb">エリア・寮</span>
-  <div class="say">通えるエリアはどこですか？寮に入るのは大丈夫ですか？</div>
-  <span class="lb">仕事内容</span>
-  <div class="say">体はきついけど高収入がいいですか？それとも軽作業で楽な方がいいですか？</div>
-  <span class="lb">月収</span>
-  <div class="say">月収は最低いくら欲しいですか？</div>
-  <div class="ng">希望エリアと全く違う求人は出さない（例：山形希望に三重を出す）</div>
-</section>
+<!-- STEP 2 -->
+<div class="step" id="s2">
+  <div class="head"><span class="n">2</span><h1>条件・応募資格</h1></div>
+  <p class="goal">希望を4つだけ聞く → 応募できるか確認する。確認が取れてから求人案内へ</p>
 
-<section id="s3">
-  <h2><span class="n">3</span>求人を案内する</h2>
-  <p class="goal">6点を全部言う。会社名は必ず言う</p>
-  <div class="six">
-    <div>① 雇用形態</div><div>② 月収例</div><div>③ 勤務地</div>
-    <div>④ 業務内容</div><div>⑤ 求人会社名</div><div>⑥ 詳細と魅力</div>
+  <div class="card">
+    <h3><span class="t">聞く</span>① 希望条件（4つだけ）</h3>
+    <div class="row"><div class="k">年齢</div><div class="v">年齢は<span class="ph">〇〇</span>歳で合っていますか？</div></div>
+    <div class="row"><div class="k">エリア・寮</div><div class="v">通えるエリアはどこですか？寮に入るのは大丈夫ですか？</div></div>
+    <div class="row"><div class="k">仕事内容</div><div class="v">体はきついけど高収入がいいですか？それとも軽作業で楽な方がいいですか？</div></div>
+    <div class="row"><div class="k">月収</div><div class="v">月収は最低いくら欲しいですか？<small style="display:block;font-size:14px;color:#666;line-height:1.4">総支給か手取りかも聞く</small></div></div>
+    <div class="ng">希望エリアと全く違う求人は出さない（例：山形希望に三重を出す）。</div>
+    <details open>
+      <summary>寮・月収の注意（開く）</summary>
+      <div class="note">寮の設備（ペット可・個室・ウィークリーマンション等）の希望は、原稿とデマンド一覧に書いてある内容だけで答える。書いていないことは「ない」ものとして、別の求人を探す。<br>月収の希望が月収例より高い時は、STEP 3 で月収例を先に伝えて、合うかを確認する。</div>
+    </details>
   </div>
-  <div class="say">△△様に合う求人をご案内します。<br>雇用形態は<span class="ph">【〇〇】</span>、月収例は〇〇円、勤務地は〇〇県〇〇市、仕事は〇〇（ピッキング・軽作業など）です。<br>求人会社は<span class="ph">◻◻</span>です。<br>1日の流れは〇〇で、扱うものは〇〇、職場は〇〇です。<br>〇〇（寮あり・未経験OK・土日休み・日払いなど）が魅力のお仕事です。</div>
-  <div class="ng">「担当者から説明します」で済ませない。6点を全部言ってから次へ。</div>
-</section>
 
-<section id="s4">
-  <h2><span class="n">4</span>応募条件</h2>
-  <p class="goal">就業時期を聞く（全員に必ず）</p>
-  <span class="lb">就業時期（必須）</span>
-  <div class="say must">気に入っていただけたら、1ヶ月以内に働き始められますか？</div>
-  <div class="ng">就業時期を聞かずに5へ進まない。</div>
-</section>
+  <div class="card key">
+    <h3><span class="t must">必須</span>② 応募資格の確認（YES取りの前に全員へ）</h3>
+    <div class="say must">お仕事に関わる大切な点を、応募される方みなさんに確認させていただいています。</div>
+    <p class="note" style="margin:6px 0 8px">聞いたらタップしてチェック。【　】は案件の原稿の「ヒアリング項目」に差し替える（案件ごとに違う）。</p>
+    <ul class="chk" data-reset="g">
+      <li><label><input type="checkbox"><span>喫煙のご習慣はありますか？<small>全面禁煙の案件のみ</small></span></label></li>
+      <li><label><input type="checkbox"><span>身長・体重を教えてください。（BMI条件の確認のためです）<small>BMI計算シートで計算する。暗算しない</small></span></label></li>
+      <li><label><input type="checkbox"><span>今、通院されている病院や、治療中のものはありますか？<small>通院と、仕事の制限（就業制限）がないかまで聞く</small></span></label></li>
+      <li><label><input type="checkbox"><span><span class="ph">【腰痛】</span>はありますか？　<span class="ph">【膝痛】</span>はありますか？　<span class="ph">【てんかん】</span>は？　<span class="ph">【アトピー】</span>は？　<span class="ph">【金属アレルギー】</span>は？<small>既往歴は項目を1つずつ区切って読む。「通院」だけで終わらない</small></span></label></li>
+      <li><label><input type="checkbox"><span>過去に<span class="ph">【トヨタ関連】</span>の就業経験はありますか？<small>原稿に就業歴の条件がある案件のみ</small></span></label></li>
+      <li><label><input type="checkbox"><span>ご希望の条件で、譲れないものはありますか？</span></label></li>
+    </ul>
+    <div class="stop">1つでも該当 / 答えてもらえない / 聞けていない → 登録しない<span>通院中・入院予定・精神科に通院中・腰痛・膝痛（足が悪い・歩くと痛むを含む）・てんかん・アトピー・金属アレルギー。案件の原稿が最優先</span></div>
+    <div class="say">申し訳ありません、こちらのお仕事は、条件上、ご案内が難しい案件です。ほかに合う求人を探しますね。</div>
+    <div class="go-on">該当なしと本人が回答 → STEP 3 へ</div>
+    <div class="ng">「仕事に支障なさそう」とCCが判断して誘導する。迷ったら登録せず、SVに確認。</div>
+    <div class="ng">「腰痛」を「腹痛」と聞き間違える（実際に除外）。画面の文字を見て読み、「腰（こし）の痛み」と言い換える。</div>
+    <div class="ng">通話中に「あとで確認します」と言った項目を、確認しないまま終話・登録する（実際に除外）。言った項目は、終話前に必ず確認する。</div>
+    <div class="note">登録後の再ヒアリング・再誘導は請求対象にならない。この通話で完結させる。</div>
+  </div>
+</div>
 
-<section id="s5" class="key">
-  <h2><span class="n">5</span>YES取り（最重要）</h2>
-  <p class="goal">「応募」「選考」の言葉でYESをもらう</p>
-  <div class="say must">このあと私が応募登録をして、求人のURLをメールでお送りします。<br>そのあと求人会社の担当から、面談・選考のご案内のお電話をします。電話でもオンラインでも大丈夫です。<br>この流れで、<b>応募を進めてもよろしいですか？</b></div>
-  <div class="ng">こう言わない（YESにならない）
-    <ul><li>「お話だけ聞いてもらう形でいいですか？」</li>
-    <li>「担当者から説明を聞くだけでいいですか？」</li>
-    <li>「面談だけ進めていいですか？」</li></ul></div>
-  <div class="ok">使う言葉は「応募」「選考」「登録」</div>
+<!-- STEP 3 -->
+<div class="step" id="s3">
+  <div class="head"><span class="n">3</span><h1>求人を案内する</h1></div>
+  <p class="goal">6点を全部言う。会社名は必ず言う。数字は原稿の値だけ</p>
+  <div class="card">
+    <h3><span class="t">言う</span>6点</h3>
+    <div class="six"><div>① 雇用形態</div><div>② 月収例</div><div>③ 勤務地</div><div>④ 業務内容</div><div>⑤ 求人会社名</div><div>⑥ 詳細と魅力</div></div>
+    <div class="say">
+      <span class="ph">△△</span>様に合う求人をご案内します。<br>
+      雇用形態は<span class="ph">【〇〇】</span>、月収例は<span class="ph">〇〇円</span>、勤務地は<span class="ph">〇〇県〇〇市</span>、仕事は<span class="ph">〇〇</span>（ピッキング・軽作業など）です。<br>
+      求人会社は<span class="ph">◻◻</span>です。<br>
+      1日の流れは<span class="ph">〇〇</span>で、扱うものは<span class="ph">〇〇</span>、職場は<span class="ph">〇〇</span>です。<br>
+      <span class="ph">〇〇</span>（寮あり・未経験OK・土日休み・日払いなど）が魅力のお仕事です。
+    </div>
+    <div class="ng">「担当者から説明します」「企業に直接聞いてください」で済ませない。</div>
+  </div>
+  <div class="card key">
+    <h3><span class="t must">必須</span>原稿の注意事項は全部読む</h3>
+    <div class="say must">
+      <span class="ph">【全面禁煙】</span>の職場です。<br>
+      <span class="ph">【トヨタ期間工】</span>の案件になりますので、過去の就業歴によっては入社できない場合があることをご認識ください。<br>
+      選考状況によっては<span class="ph">【4週間】</span>ほどお時間をいただく場合がございますが、問題ございませんか？
+    </div>
+    <div class="note">上は指摘があった案件の例。案件ごとに原稿の「注意事項」「選考期間」に差し替える。原稿は更新されるので、架電の直前に最新版を開く（古い手当を案内して除外された例あり）。</div>
+  </div>
+  <div class="card">
+    <h3><span class="t">言い方</span>金額・条件はこの言い方だけ</h3>
+    <div class="pair">
+      <div class="o">「月収例は<span class="ph">【原稿の金額】</span>です」</div>
+      <div class="x">「月収〇万円くらい」「総支給で〇万円」「補助込みで〇万円」</div>
+      <div class="o">「賞与は<span class="ph">【〇か月目】</span>に<span class="ph">【原稿の金額】</span>です」</div>
+      <div class="x">「半年に一度〇万円」など、原稿と違う言い方・金額</div>
+      <div class="o">「年収例は<span class="ph">【原稿の金額】</span>です」</div>
+      <div class="x">年収の見込み・3年目の年収</div>
+      <div class="o">寮は、原稿の費用・種類をそのまま読む</div>
+      <div class="x">「補助があります」と濁す</div>
+      <div class="o">原稿にないことは「記載がないので、お約束できません」</div>
+      <div class="x">昇給・入社祝い金・食費補助・正社員登用を言う</div>
+    </div>
+    <div class="note">希望が「総支給で〇万円」で月収例より高い時は、ここで差を先に伝える。「総支給は月によって変わります」と案内し、月収例で納得できるか確認する。納得できなければ別の求人へ。</div>
+  </div>
+</div>
 
-  <span class="lb">NOの時</span>
-  <div class="say">そうですか。気になる点はどこですか？</div>
-  <div class="note">理由を聞く → 3に戻って、合う別の求人を出す。</div>
-</section>
+<!-- STEP 4 -->
+<div class="step" id="s4">
+  <div class="head"><span class="n">4</span><h1>就業時期・相違確認</h1></div>
+  <p class="goal">就業時期は全員に必ず聞く。思っていたことと違う点がないか確認する</p>
+  <div class="card key">
+    <h3><span class="t must">必須</span>この2つを聞く</h3>
+    <ul class="chk" data-reset="g">
+      <li><label><input type="checkbox"><span>気に入っていただけたら、1ヶ月以内に働き始められますか？<small>就業時期を聞かずに STEP 5 へ進まない</small></span></label></li>
+      <li><label><input type="checkbox"><span>ここまでのご説明で、思っていたことと違うところはありませんか？</span></label></li>
+    </ul>
+    <div class="ng">「ちょっと…」「うーん」と返ってきたのに進める。</div>
+    <div class="ng">求職者が「要望と違う」と言っているのに、強引に応募登録へ進める（実際に除外）。</div>
+    <div class="ok">違う点が出たら、その点を聞いて、合う別の求人を案内する（STEP 3 へ戻る）。</div>
+  </div>
+</div>
 
-<section id="s6">
-  <h2><span class="n">6</span>YESの後に聞く</h2>
+<!-- STEP 5 -->
+<div class="step" id="s5">
+  <div class="head"><span class="n">5</span><h1>YES取り（最重要）</h1></div>
+  <p class="goal">復唱して納得を確認してから、「応募」「選考」の言葉でYESをもらう</p>
+
+  <div class="card key">
+    <h3><span class="t must">① 復唱</span>「はい」だけで合意とみなさない</h3>
+    <div class="say must">念のため、ここまでの内容を確認させてください。<br>勤務地は<span class="ph">〇〇県〇〇市</span>、月収例は<span class="ph">〇〇円</span>、<span class="ph">【寮あり／寮なし】</span>のお仕事です。<br>この内容で、思っていたものと違うところはありませんか？</div>
+    <div class="note">勤務地の不一致で、応募後に離脱する人が増えている。勤務地は必ず復唱する。</div>
+  </div>
+
+  <div class="card key">
+    <h3><span class="t must">② YES</span>応募・選考の言葉で取る</h3>
+    <div class="say">このあと私が応募登録をして、求人のURLをメールでお送りします。<br>そのあと求人会社の担当から、面談・選考のご案内のお電話をします。電話でもオンラインでも大丈夫です。<br>この流れで、応募を進めてもよろしいですか？</div>
+    <div class="ng">言わない：「お話だけ聞いてもらう形でいいですか？」「担当者から説明を聞くだけでいいですか？」「面談だけ進めていいですか？」<br>使う言葉は「応募」「選考」「登録」。</div>
+  </div>
+
+  <div class="card">
+    <h3><span class="t">判定</span>これはYESではない → 登録しない</h3>
+    <div class="chips">
+      <span>「考えます」「検討します」「うーん」「とりあえず」</span>
+      <span>別の話を始める</span>
+      <span>話の途中で電話が切れた</span>
+      <span>断ろうとしている・「やめたい」</span>
+    </div>
+    <div class="say">ご検討のうえ、ご連絡ください。ありがとうございました。<small>曖昧な時は登録せず、この言葉で終話。リマインドだけ送って登録してもYESにならない</small></div>
+    <div class="go-on">「はい」＋応募・選考の内容を理解している → YES。次へ</div>
+    <details open>
+      <summary>NOの時／フォローコール・日程のルール（開く）</summary>
+      <div class="say" style="font-size:20px">そうですか。気になる点はどこですか？<small>理由を聞く → STEP 3 に戻って、合う別の求人を出す。強引に進めない</small></div>
+      <div class="ng">前回YESが取れていないのに、フォローコールで合意を取り直さず登録する。</div>
+      <div class="ng">フォローコールで通話していない（不通）のに登録する。</div>
+      <div class="ng">仮登録で「木曜に電話します」と言ったのに、別の日に応募登録する。</div>
+      <div class="ng">「一応他でも働いている」「他も探したい」と言う人を、確認せず仮登録・応募登録する。他の就業・選考状況を聞き、応募の意思が固まるまで登録しない。</div>
+      <div class="ok">合意は通話で取る。不通の時は登録しない。日付を言ったら、その日を守る。</div>
+    </details>
+  </div>
+</div>
+
+<!-- STEP 6 -->
+<div class="step" id="s6">
+  <div class="head"><span class="n">6</span><h1>YESの後に聞く</h1></div>
   <p class="goal">YESをもらった後だけ聞く。YES前は聞かない</p>
-  <span class="lb">住所（全員）</span>
-  <div class="say">応募の方みなさんに伺っています。〇〇県〇〇市から先の住所を教えてください。</div>
-  <span class="lb">復唱</span>
-  <div class="say">〇〇県〇〇市〇〇町〇丁目〇番〇号 〇〇マンション〇〇号室、で合っていますか？</div>
-  <div class="note">答えられない時は、都道府県・市区町村まででOK。</div>
-  <span class="lb">連絡時間帯（必須）</span>
-  <div class="say must">電話に出やすい時間帯はありますか？</div>
-  <div class="ng">時間帯を聞かずに終話しない。</div>
-</section>
+  <div class="card">
+    <h3><span class="t">聞く</span>住所と連絡時間帯</h3>
+    <ul class="chk" data-reset="g">
+      <li><label><input type="checkbox"><span>応募の方みなさんに伺っています。<span class="ph">〇〇県〇〇市</span>から先の住所を教えてください。<small>答えられない時は、都道府県・市区町村まででOK</small></span></label></li>
+      <li><label><input type="checkbox"><span>復唱：<span class="ph">〇〇県〇〇市〇〇町〇丁目〇番〇号 〇〇マンション〇〇号室</span>、で合っていますか？</span></label></li>
+      <li><label><input type="checkbox"><span>電話に出やすい時間帯はありますか？<small>必須。聞かずに終話しない</small></span></label></li>
+    </ul>
+  </div>
+  <div class="card key">
+    <h3><span class="t must">必須</span>要望メモ</h3>
+    <div class="say must">応募登録の<span class="ph">【希望連絡時間帯】</span>の下のフリースペースに、求職者の要望・通話で伝えたことを記載する。</div>
+    <ul class="chk" data-reset="g">
+      <li><label><input type="checkbox"><span>返事の期限・急ぎの希望（例：「明日の午前中までに内定の返事が必要」）</span></label></li>
+      <li><label><input type="checkbox"><span>求職者の質問で、企業に確認したいこと</span></label></li>
+      <li><label><input type="checkbox"><span>通話で「確認して連絡する」と伝えたこと</span></label></li>
+    </ul>
+    <div class="ng">「企業に伝えておきます」と約束して、記載も共有もしない（「聞いていないならもういいです」と終了した例）。</div>
+    <div class="ok">伝えるのは「お申し込みの際に、企業へお伝えします」まで。企業が対応するかどうかは約束しない。</div>
+  </div>
+</div>
 
-<section id="s7" class="key">
-  <h2><span class="n">7</span>最後の締め</h2>
-  <p class="goal">会社名・電話番号・メールの3点を必ず言う</p>
-  <div class="say must">このあと<span class="ph">〇〇社</span>から、通話終了後<b>最短30分以内、遅くとも2〜3日以内</b>にお電話があります。出られなかった時は、折り返しをお願いします。</div>
-  <div class="say">今回は<span class="ph">（派遣会社）</span>のお仕事に応募する形で、こちらで手続きを進めます。<br>折り返しの電話番号は<span class="ph">〇〇〇〇-〇〇〇-〇〇〇</span>です。<br>今から応募登録をします。30分以内に登録完了のメールが届くので、確認してください。</div>
-  <div class="note"><b>社内ルール</b><br>① 通常の選考に進む方 → 通話終了から最短30分以内・遅くとも2〜3日以内に、担当企業が直接電話<br>② 即NGの該当者（ブラックリスト等）→ 電話せず、メールでお断り。電話連絡の案内はしない</div>
-  <div class="note">土日をまたぐ時は要確認。企業の稼働時間によって2〜3日以内の連絡になることがあるので、【電話番号】ページで確認してから案内する。</div>
-  <div class="ng">会社名・電話番号を言わずに終話しない。</div>
-</section>
+<!-- STEP 7 -->
+<div class="step" id="s7">
+  <div class="head"><span class="n">7</span><h1>登録・締め</h1></div>
+  <p class="goal">全部チェックが入ってから応募登録。会社名・電話番号・メールの3点を言って終話</p>
+  <div class="card key">
+    <h3><span class="t must">登録前</span>1つでも外れたら登録しない</h3>
+    <ul class="chk" id="final" data-reset="g">
+      <li><label><input type="checkbox"><span>通院と既往歴を、原稿の項目ごとに聞いた。該当なし</span></label></li>
+      <li><label><input type="checkbox"><span>喫煙・BMI・就業歴など、原稿のヒアリング項目を全部聞いた</span></label></li>
+      <li><label><input type="checkbox"><span>求人会社名と6点を言った。原稿は最新版</span></label></li>
+      <li><label><input type="checkbox"><span>金額は「月収例」で、原稿の数字だけ言った。原稿にないことは言っていない</span></label></li>
+      <li><label><input type="checkbox"><span>勤務地・月収例・寮を復唱して、違う点がないことを確認した</span></label></li>
+      <li><label><input type="checkbox"><span>「応募」「選考」で、はっきりYESをもらった</span></label></li>
+      <li><label><input type="checkbox"><span>住所と、電話に出やすい時間帯を聞いた</span></label></li>
+      <li><label><input type="checkbox"><span>要望・急ぎの希望を、フリースペースに記載した</span></label></li>
+      <li><label><input type="checkbox"><span>通話中に「確認します」と言った項目を、全部確認した</span></label></li>
+    </ul>
+    <div class="prog" id="pg">0 / 8</div>
+  </div>
+  <div class="card">
+    <h3><span class="t">言う</span>締め</h3>
+    <div class="say">このあと<span class="ph">〇〇</span>社から、通話終了後最短30分以内、遅くとも2〜3日以内にお電話があります。出られなかった時は、折り返しをお願いします。</div>
+    <div class="say">今回は（派遣会社）のお仕事に応募する形で、こちらで手続きを進めます。折り返しの電話番号は<span class="ph">〇〇〇〇-〇〇〇-〇〇〇</span>です。</div>
+    <div class="say">今から応募登録をします。30分以内に登録完了のメールが届くので、確認してください。</div>
+    <div class="ng">会社名・電話番号を言わずに終話しない。</div>
+    <div class="note">土日をまたぐ時は要確認。企業の稼働時間によって2〜3日以内の連絡になることがあるので、【電話番号】ページで確認してから案内する。</div>
+  </div>
+  <div class="card">
+    <h3><span class="t">社内ルール</span></h3>
+    <div class="row"><div class="k">通常</div><div class="v" style="font-size:18px">選考に進む方 → 通話終了から最短30分以内・遅くとも2〜3日以内に、担当企業が直接電話</div></div>
+    <div class="row"><div class="k">即NG</div><div class="v" style="font-size:18px">該当者（ブラックリスト等）→ 電話せず、メールでお断り。電話連絡の案内はしない</div></div>
+    <div class="row"><div class="k">外国籍</div><div class="v" style="font-size:18px">11月分：管理に繋がり、紹介になった場合に請求対象</div></div>
+  </div>
+  <button class="reset" id="resetAll" type="button">次の通話へ（チェックをリセットして先頭に戻る）</button>
+</div>
 
+</div>
+
+<!-- =================== 7か条 =================== -->
+<div class="panel" id="p-rules">
+  <div class="head"><h1>除外ゼロの7か条</h1></div>
+  <p class="goal">クライアントの除外指摘をもとにした、通話前の確認事項（改訂 2026/11/12）。数字・項目は必ず案件ごとの原稿の値を使う</p>
+  <ol class="rules">
+    <li><b>通院・既往歴は、項目を1つずつ読み上げて聞く</b><span>「通院はありますか？」だけで終わらない。原稿のヒアリング項目（腰痛・膝痛・てんかん・アトピー・金属アレルギーなど）を1語ずつ読む。</span></li>
+    <li><b>数字は原稿の値だけ。月収は「月収例」と言う</b><span>「総支給」「手取り」「補助込み」「〇万円くらい」に言い換えない。</span></li>
+    <li><b>原稿にないことは言わない。約束しない</b><span>昇給・入社祝い金・食費補助・正社員登用・年収の見込みなど。分からない時は「原稿に記載がないので、お約束できません」。</span></li>
+    <li><b>求人説明を省かない</b><span>「企業に直接聞いてください」で済ませない。喫煙・寮・勤務地・就業歴の注意点は、応募の前に先に伝える。原稿は架電の直前に最新版を開く。</span></li>
+    <li><b>YESは「応募」「選考」の言葉で取る</b><span>「考えます」「検討します」「うーん」、話が途中、別の話、電話が切れた、断ろうとしている、はYESではない。登録しない。</span></li>
+    <li><b>「はい」だけで合意とみなさない</b><span>勤務地・月収例・寮を復唱し、理解・納得しているかまで確認してからYESを取る。</span></li>
+    <li><b>可否の判断はCCがしない</b><span>既往歴・条件に該当しそうな時、「支障ないだろう」と自己判断しない。迷ったら登録せず、SVに確認。登録後の再誘導・再ヒアリングは請求対象にならない。</span></li>
+  </ol>
+</div>
+
+<!-- =================== 通話の流れ =================== -->
+<!-- =================== 実例 =================== -->
+<div class="panel" id="p-cases">
+  <div class="head"><h1>除外された実例</h1></div>
+  <p class="goal">クライアントから指摘があった内容と、正しい言い方（個人名は載せていません）</p>
+  
+  <div class="pane" data-t="c" data-p="a"><h2 class="sec">既往歴・通院</h2>
+    <div class="case"><div class="x">通院のみ聞いて、既往歴（腰痛・膝痛・てんかん・アトピー）を聞いていない（最多）</div><div class="o">通院のあと、項目を1つずつ読み上げる</div></div>
+    <div class="case"><div class="x">既往歴（通院・就業制限）の確認をしていない／聞き方が違う</div><div class="o">通院と就業制限を聞き、既往歴は原稿の項目を1つずつ読む</div></div>
+    <div class="case"><div class="x">既往歴の確認が一切ない</div><div class="o">確認が取れるまで登録しない</div></div>
+    <div class="case"><div class="x">「腰痛」を「腹痛」と聞いている</div><div class="o">画面の文字を読む。「腰（こし）の痛み」と言い換える</div></div>
+    <div class="case"><div class="x">足が悪い＝膝痛に該当するのに、確認せず誘導</div><div class="o">症状を聞き、SVに確認する</div></div>
+    <div class="case"><div class="x">足に持病があるが仕事に支障ないとCCが判断／腰が痛いが誘導</div><div class="o">CCは判断しない。該当しそうなら登録しない</div></div>
+    <div class="case"><div class="x">精神科に通院中／「明日から入院する」／通院ありなのに誘導</div><div class="o">登録しない。別の求人へ</div></div>
+  </div>
+
+  <div class="pane" data-t="c" data-p="b"><h2 class="sec">金額・条件</h2>
+    <div class="case"><div class="x">「月収32万円ほど」「月収例35万円」と案内。原稿は別の金額</div><div class="o">原稿の「月収例」をそのまま読む</div></div>
+    <div class="case"><div class="x">月収を「30万円」と案内。補助手当を含む金額の可能性</div><div class="o">補助込みの金額を月収として言わない</div></div>
+    <div class="case"><div class="x">総支給26万円と案内して応募。原稿の月収例は23.9万円</div><div class="o">総支給希望には、月収例を先に伝えて納得してもらう</div></div>
+    <div class="case"><div class="x">賞与（半年に一度50万円）・年収530万円など、原稿と違う金額</div><div class="o">賞与・年収は、原稿の月数・金額だけ</div></div>
+    <div class="case"><div class="x">「毎年昇給」「入社祝い金Max20万円」「食費補助2万円」「最初から正社員」「3年目の年収」（原稿にない・削除済み）</div><div class="o">言わない。「記載がないので、お約束できません」</div></div>
+    <div class="case"><div class="x">寮は無料かと聞かれ「補助がある」とだけ答え、ウィークリーマンションだと伝えていない</div><div class="o">原稿の寮の費用・種類をそのまま伝える</div></div>
+  </div>
+
+  <div class="pane" data-t="c" data-p="c"><h2 class="sec">YES・合意</h2>
+    <div class="case"><div class="x">選考に進むYESが取れていないのに、登録のリマインドだけ実施</div><div class="o">YESがなければ登録しない</div></div>
+    <div class="case"><div class="x">「考えます」と言われたのに誘導</div><div class="o">「ご検討のうえ、ご連絡ください」で終話</div></div>
+    <div class="case"><div class="x">求職者が別の話をしてYES未取得のまま終話。フォローコールでも合意を取っていない</div><div class="o">フォローコールでも、応募・選考のYESを取り直す</div></div>
+    <div class="case"><div class="x">求職者は断ろうとしていた。話の途中で電話を切られたのに送客</div><div class="o">話が終わっていない時は登録しない</div></div>
+    <div class="case"><div class="x">「はい」だけで進めて、勤務地の不一致で離脱</div><div class="o">勤務地・月収例・寮を復唱して納得を確認</div></div>
+    <div class="case"><div class="x">求職者が「要望と違う」「やめたい」と言っているのに、強引に応募登録</div><div class="o">違う点を聞いて別の求人へ。強引に進めない</div></div>
+    <div class="case"><div class="x">「一応他で働いている」と言う人を、確認せず仮登録</div><div class="o">他の就業・選考状況を聞き、意思が固まるまで登録しない</div></div>
+    <div class="case"><div class="x">フォローコールで通話していないのに登録。仮登録で「木曜に電話」と言ったのに火曜に登録</div><div class="o">通話で合意を取る。日付の約束を守る</div></div>
+  </div>
+
+  <div class="pane" data-t="c" data-p="d"><h2 class="sec">説明・案件詳細</h2>
+    <div class="case"><div class="x">「たばこ吸えますか？」に「はい」と回答。原稿は全面禁煙</div><div class="o">喫煙・寮・勤務地は原稿を見て答える。覚えで答えない</div></div>
+    <div class="case"><div class="x">「企業に直接質問してください」と言い、案件詳細なしで応募させた</div><div class="o">6点の説明をしてから応募へ</div></div>
+    <div class="case"><div class="x">ペット可の寮を希望する方を、デマンド一覧の確認なしに案内</div><div class="o">寮の条件はデマンド一覧で確認してから案内</div></div>
+    <div class="case"><div class="x">トヨタ関係の就業歴があり入れないと本人が言っているのに誘導（トヨタ期間工の案件）</div><div class="o">就業歴の注意事項を先に伝えて確認</div></div>
+    <div class="case"><div class="x">「今日中に返事が必要」に「企業に伝えておきます」と答え、共有しなかった</div><div class="o">フリースペースに記載。約束は「お伝えします」まで</div></div>
+    <div class="case"><div class="x">「以前確認します」と言っていた項目を、確認していない</div><div class="o">言った項目は、終話前に必ず確認する</div></div>
+    <div class="case"><div class="x">条件を少し良く聞こえる言い方で伝えて応募に誘導</div><div class="o">原稿どおりに、良い点も注意点も同じ温度で伝える</div></div>
+  </div>
+</div>
 </main>
+
 
 <script>
 (function(){
-  // 差し込み箇所をハイライト
-  document.querySelectorAll('.say, .card').forEach(function(el){
-    el.innerHTML=el.innerHTML.replace(/(?<!class="ph">)(〇{2,}|△△|◻◻)/g,'<span class="ph">$1</span>');
-  });
-  // タブ（冒頭文のみ）
-  document.querySelectorAll('.tabs').forEach(function(t){
-    t.querySelectorAll('button').forEach(function(b){
-      b.addEventListener('click',function(){
-        t.querySelectorAll('button').forEach(function(x){x.classList.remove('on')});
-        b.classList.add('on');
-        document.querySelectorAll('.pane[data-t="'+t.dataset.t+'"]').forEach(function(p){
-          p.classList.toggle('on',p.dataset.p===b.dataset.p);
-        });
-      });
+  // 差し込み箇所のハイライト
+  var re=/【[^】]*】|〇{2,}|△{2,}|◻{2,}/g;
+  document.querySelectorAll('.say, .row .v, .case .x, .case .o, .pair>div, .chk label').forEach(function(root){
+    var w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT,null),nodes=[],n;
+    while((n=w.nextNode())){
+      if(n.parentNode.closest('.ph'))continue;
+      re.lastIndex=0;
+      if(re.test(n.nodeValue))nodes.push(n);
+    }
+    nodes.forEach(function(t){
+      var f=document.createDocumentFragment(),s=t.nodeValue,last=0,m;
+      re.lastIndex=0;
+      while((m=re.exec(s))){
+        if(m.index>last)f.appendChild(document.createTextNode(s.slice(last,m.index)));
+        var sp=document.createElement('span');sp.className='ph';sp.textContent=m[0];f.appendChild(sp);
+        last=m.index+m[0].length;
+      }
+      if(last<s.length)f.appendChild(document.createTextNode(s.slice(last)));
+      t.parentNode.replaceChild(f,t);
     });
   });
-  // スクロール位置に合わせてメニュー強調
-  var links=document.querySelectorAll('#nav a'), secs=document.querySelectorAll('section');
+
+  // スクロール位置に合わせて、上のバーを光らせる
+  var sl=[].slice.call(document.querySelectorAll('#steps a')),ml=[].slice.call(document.querySelectorAll('#modes a'));
+  var ss=sl.map(function(a){return document.querySelector(a.getAttribute('href'))});
+  var rules=document.getElementById('p-rules'),cases=document.getElementById('p-cases');
+  function top(el){return el.getBoundingClientRect().top+window.scrollY}
   function spy(){
-    var y=window.scrollY+120, cur=secs[0].id;
-    secs.forEach(function(s){if(s.offsetTop<=y)cur=s.id});
-    links.forEach(function(a){a.classList.toggle('on',a.getAttribute('href')==='#'+cur)});
+    var y=window.scrollY+140,cur=-1;
+    ss.forEach(function(s,i){if(top(s)<=y)cur=i});
+    sl.forEach(function(a,i){a.classList.toggle('on',i===cur)});
+    var m=top(cases)<=y?2:(top(rules)<=y?1:0);
+    ml.forEach(function(a,i){a.classList.toggle('on',i===m)});
   }
-  window.addEventListener('scroll',spy);spy();
+  window.addEventListener('scroll',spy,{passive:true});spy();
+
+  // チェック（タップで緑・任意）
+  function upd(){
+    document.querySelectorAll('.chk input').forEach(function(i){i.parentNode.classList.toggle('done',i.checked)});
+    var f=[].slice.call(document.querySelectorAll('#final input')),c=f.filter(function(i){return i.checked}).length;
+    var pg=document.getElementById('pg');
+    pg.textContent=c+' / '+f.length+(c===f.length?'　登録してOK':'');
+    pg.className='prog'+(c===f.length?' all':'');
+  }
+  document.querySelectorAll('.chk input').forEach(function(i){i.addEventListener('change',upd)});
+  document.getElementById('resetAll').addEventListener('click',function(){
+    document.querySelectorAll('.chk input').forEach(function(i){i.checked=false});
+    upd();window.scrollTo({top:top(document.getElementById('s1'))-120,behavior:'smooth'});
+  });
+  upd();
 })();
 </script>
 </body>
