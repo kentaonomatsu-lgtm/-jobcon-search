@@ -32,7 +32,7 @@
       if (old) old.remove();
       var zero = v.r <= 0, b = document.createElement('div');
       b.className = 'sl-badge ' + (zero ? 'sl-zero' : 'sl-ok');
-      b.textContent = zero ? '残枠0（別の求人で案内）' : '残枠 ' + v.r + (v.u ? '（管理画面' + v.b + '−報告' + v.u + '）' : '');
+      b.textContent = zero ? '残枠0（別の求人で案内）' : (v.r <= 3 ? '残り' + v.r + '（残りわずか）' : '残枠 ' + v.r) + (v.u ? '（管理画面' + v.b + '−報告' + v.u + '）' : '');
       if (v.c != null && v.t >= v.c) b.textContent += '／本日上限到達';
       b.setAttribute('data-sig', sig);
       var anchor = c.querySelector('.strip') || c.querySelector('.c-body');
