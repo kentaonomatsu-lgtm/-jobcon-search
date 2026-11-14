@@ -134,9 +134,10 @@ button.go:disabled{opacity:.6;cursor:default}
   /* ヒアリング項目の先頭に年齢上限を付ける(2026/11/4): アプリ内 jcPatch の「j.hear=e.hear;」を差し替えるだけ。元に戻す時は JC_HEAR_AGE を false にする。 */
   var JC_HEAR_AGE=true;
   function jcHearAge(html){ if(!JC_HEAR_AGE) return html; try{ var re=/j\.hear\s*=\s*e\.hear\s*;/g; if(!re.test(html)){ try{console.warn('jcHearAge: 対象処理が見つかりません')}catch(x){} return html; } return html.replace(re,function(){return 'j.hear=(j.ag?"\u5e74\u9f62\uff1a\uff5e"+j.ag+"\u6b73":"")+(e.hear?((j.ag?"\u30fb":"")+e.hear):"");'}); }catch(e){ return html; } }
-  function show(html){html=jcHideFc(jcHearAge(jcTitleQual(jcSheetOnly(html))));document.open();document.write(html);document.close();jcHideFcRow();addBoothBtn();addYoyaku();addTokai();addFocus()}
+  function show(html){html=jcHideFc(jcHearAge(jcTitleQual(jcSheetOnly(html))));document.open();document.write(html);document.close();jcHideFcRow();addBoothBtn();addYoyaku();addSlots();addTokai();addFocus()}
   /* 予約アポ連携(./yoyaku.js)を、ログイン後に読み込む */
   function addYoyaku(){try{var s=document.createElement('script');s.src='./yoyaku.js?v=5';document.head.appendChild(s)}catch(e){}}
+  function addSlots(){try{var s=document.createElement('script');s.src='./slots.js?v=1';document.head.appendChild(s)}catch(e){}}
   /* スタッフ東海トークスクリプト(./tokai-script.js)を、ログイン後に読み込む(2026/11/5)。サイドバー「ツール」欄とヘッダーにボタンを追加するだけ。 */
   function addTokai(){try{var s=document.createElement('script');s.src='./tokai-script.js?v=1';document.head.appendChild(s)}catch(e){}}
   /* 要注力案件のポップアップ(./focus-popup.js)を、ログイン後に読み込む(2026/11/6)。対象案件は focus-popup.js の FOCUS_JOBS を編集する。 */
