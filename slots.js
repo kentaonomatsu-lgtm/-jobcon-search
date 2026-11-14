@@ -8,7 +8,7 @@
   'use strict';
   if (window.__slotsLoaded) return;
   window.__slotsLoaded = true;
-  var ENDPOINT = 'ここに残枠同期GASのウェブアプリURLを入れる';
+  var ENDPOINT = 'https://script.google.com/macros/s/AKfycbzxIznPtNktwcHEzC8Leq7ophpyV2veI63qFhWNanjnAI7JJ5A9Jg1Fj1qabsCnAeI0fA/exec?fmt=slots';
   var REFRESH_MS = 60 * 1000;
   var data = null;
 
