@@ -197,8 +197,14 @@ get(k,d){try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catc
 set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}},
 del(k){try{localStorage.removeItem(k)}catch(e){}}
 };
+const sstore={
+get(k,d){try{const v=sessionStorage.getItem(k);return v==null?d:JSON.parse(v)}catch(e){return d}},
+set(k,v){try{sessionStorage.setItem(k,JSON.stringify(v))}catch(e){}},
+del(k){try{sessionStorage.removeItem(k)}catch(e){}}
+};
+try{localStorage.removeItem("lnv.auth")}catch(e){}
 const S={
-auth:store.get("lnv.auth",null),
+auth:sstore.get("lnv.auth",null),
 tab:store.get("lnv.tab","booth"),
 target:store.get("lnv.target","staff"),
 filter:"all",q:"",edit:false,
@@ -486,17 +492,17 @@ $("#lGo").disabled=true;
 try{
 const token=await login(id,pw,p.dbName,p.tenantUlId);
 S.auth={token,dbName:p.dbName,tenantUlId:p.tenantUlId,loginId:id};
-store.set("lnv.auth",S.auth);store.set("lnv.url",$("#lUrl").value);
+sstore.set("lnv.auth",S.auth);store.set("lnv.url",$("#lUrl").value);
 await refresh();
 }catch(x){err.textContent=x.message;err.hidden=false}
 finally{$("#lGo").disabled=false}
 });
 function doLogout(expired){
-S.auth=null;store.del("lnv.auth");S.edit=false;S.sel.clear();render();
+S.auth=null;sstore.del("lnv.auth");S.edit=false;S.sel.clear();render();
 if(expired){const err=$("#lErr");err.textContent="ログインの有効期限が切れました。もう一度ログインしてください。";err.hidden=false}
 }
 $("#lUrl").value=store.get("lnv.url",`${BASE}/${DEF.dbName}/${DEF.tenantUlId}/admin/login`);
-const last=store.get("lnv.auth",null);
+const last=sstore.get("lnv.auth",null);
 $("#lId").value=(last&&last.loginId)||DEF.loginId;
 renderAdm();render();
 if(S.auth)refresh();
