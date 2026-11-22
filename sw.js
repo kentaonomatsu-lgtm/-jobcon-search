@@ -5,7 +5,7 @@
  * ここでの実際のネットワーク確認も最短1分間隔で回る（自動反映・ボタン不要）。
  * HTMLはネット優先（更新を即反映）、オフライン時のみキャッシュを使用。
  */
-const CACHE_NAME = "jcsearch-v5";
+const CACHE_NAME = "jcsearch-v6";
 const DATA_JSON_PATH = "./data.json";
 const DATA_MAX_AGE_MS = 60 * 1000; // 1分
 
@@ -13,7 +13,7 @@ const DATA_MAX_AGE_MS = 60 * 1000; // 1分
 self.addEventListener("install", e => {
   e.waitUntil(
     caches.open(CACHE_NAME)
-      .then(c => c.addAll(["./", "./index.html", "./script.html", "./jc-common.js", "./data.json"]))
+      .then(c => c.addAll(["./", "./index.html", "./script.html", "./data.json"]))
       .then(() => self.skipWaiting())
   );
 });
